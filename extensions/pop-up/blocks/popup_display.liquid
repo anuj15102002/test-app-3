@@ -1,0 +1,458 @@
+<div id="custom-popup-overlay" style="display: none;">
+  <div id="custom-popup" class="custom-popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <span class="popup-icon"></span>
+        <h3 class="popup-title"></h3>
+        <button class="popup-close" onclick="closePopup()">&times;</button>
+      </div>
+      <p class="popup-description"></p>
+      <div class="popup-form">
+        <!-- Content will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+#custom-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.custom-popup {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: popupSlideIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.popup-content {
+  padding: 24px;
+  text-align: center;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.popup-icon {
+  font-size: 24px;
+}
+
+.popup-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.popup-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.popup-close:hover {
+  background: #e0e0e0;
+}
+
+.popup-description {
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.popup-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.popup-button {
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s ease;
+}
+
+.popup-button:hover {
+  opacity: 0.9;
+}
+
+.spinning-wheel {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 6px solid #333;
+  margin: 0 auto 20px;
+  position: relative;
+  transition: transform 0.5s ease-out;
+}
+
+.spinning-wheel.spinning {
+  animation: spin 2s ease-out;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(1440deg); }
+}
+
+.wheel-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #333;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 16px solid #333;
+}
+
+@media (max-width: 480px) {
+  .custom-popup {
+    max-width: 350px;
+    margin: 20px;
+    width: calc(100vw - 40px);
+  }
+  
+  .popup-content {
+    padding: 20px;
+  }
+  
+  .popup-title {
+    font-size: 18px;
+  }
+  
+  .spinning-wheel {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .popup-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+@media (max-width: 320px) {
+  .custom-popup {
+    margin: 10px;
+    width: calc(100vw - 20px);
+  }
+  
+  .popup-content {
+    padding: 16px;
+  }
+  
+  .spinning-wheel {
+    width: 120px;
+    height: 120px;
+  }
+}
+</style>
+
+<script>
+(() => {
+  // Prevent duplicate loading
+  if (window.__popupAlreadyLoaded) return;
+  window.__popupAlreadyLoaded = true;
+
+  let popupConfig = null;
+  let popupShown = false;
+  let exitIntentTriggered = false;
+
+  // Utils
+  const getShopDomain = () => window.Shopify?.shop || window.location.hostname;
+
+  const fetchPopupConfig = async () => {
+    const shopDomain = getShopDomain();
+    const metaAppUrl = document.querySelector('meta[name="shopify-app-url"]')?.content;
+    
+    // Determine if we're in development mode
+    const isDevelopment = window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.port;
+    
+    // Build endpoints list based on environment
+    let endpoints = [];
+    
+    if (isDevelopment) {
+      // In development, try local endpoints first
+      endpoints = [
+        `/api/public/popup-config?shop=${shopDomain}`,
+        `http://localhost:38975/api/public/popup-config?shop=${shopDomain}`,
+      ];
+    } else if (metaAppUrl) {
+      // In production with meta tag, use the app URL
+      endpoints = [
+        `${metaAppUrl}/api/public/popup-config?shop=${shopDomain}`,
+      ];
+    } else {
+      // Fallback to relative URLs
+      endpoints = [
+        `/api/public/popup-config?shop=${shopDomain}`,
+        `/apps/api/public/popup-config?shop=${shopDomain}`,
+      ];
+    }
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log('Fetching popup config from:', endpoint);
+        const res = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          console.log('Popup config received:', json);
+          return json.config;
+        } else {
+          console.warn('Failed to fetch from endpoint:', endpoint, 'Status:', res.status);
+        }
+      } catch (err) {
+        console.warn('Fetch failed for endpoint:', endpoint, err);
+      }
+    }
+
+    // Fallback config
+    return {
+      type: 'wheel',
+      title: 'Spin to Win!',
+      description: 'Try your luck and win a discount!',
+      buttonText: 'Spin Now!',
+      segments: [
+        { label: '5% Off', color: '#ff6b6b' },
+        { label: '10% Off', color: '#4ecdc4' },
+        { label: '15% Off', color: '#45b7d1' },
+        { label: '20% Off', color: '#96ceb4' },
+        { label: 'Free Shipping', color: '#feca57' },
+        { label: 'Try Again', color: '#ff9ff3' }
+      ],
+      backgroundColor: '#fff',
+      textColor: '#000',
+      buttonColor: '#007ace',
+      placeholder: 'Enter your email',
+      discountCode: 'SAVE10',
+      borderRadius: 10,
+      showCloseButton: true,
+      displayDelay: 3000,
+      frequency: 'once',
+      isActive: true,
+      exitIntent: false
+    };
+  };
+
+  const shouldShowPopup = (config) => {
+    const now = Date.now();
+    const shownFlag = localStorage.getItem('popup-shown');
+    const lastShown = parseInt(localStorage.getItem('popup-last-shown'), 10);
+    switch (config.frequency) {
+      case 'once':
+        return !shownFlag;
+      case 'daily':
+        return !lastShown || now - lastShown > 86400000;
+      case 'weekly':
+        return !lastShown || now - lastShown > 604800000;
+      case 'always':
+        return true;
+      default:
+        return !shownFlag;
+    }
+  };
+
+  const showPopup = (config) => {
+    if (popupShown || !shouldShowPopup(config)) return;
+
+    const overlay = document.getElementById('custom-popup-overlay');
+    const popup = document.getElementById('custom-popup');
+    const icon = popup.querySelector('.popup-icon');
+    const title = popup.querySelector('.popup-title');
+    const desc = popup.querySelector('.popup-description');
+    const form = popup.querySelector('.popup-form');
+    const closeBtn = popup.querySelector('.popup-close');
+
+    overlay.style.display = 'flex';
+    popup.style.backgroundColor = config.backgroundColor;
+    popup.style.color = config.textColor;
+    popup.style.borderRadius = `${config.borderRadius || 8}px`;
+    title.textContent = config.title;
+    desc.textContent = config.description;
+    title.style.color = config.textColor;
+    desc.style.color = config.textColor;
+    closeBtn.style.display = config.showCloseButton === false ? 'none' : 'flex';
+
+    if (config.type === 'email') {
+      icon.textContent = '📧';
+      form.innerHTML = `
+        <input type="email" class="popup-input" id="popup-email" placeholder="${config.placeholder}" />
+        <button class="popup-button" onclick="(${handleEmailSubmit.toString()})()" style="background-color: ${config.buttonColor}; color: white;">
+          ${config.buttonText}
+        </button>
+      `;
+    } else if (config.type === 'wheel') {
+      icon.textContent = '🎡';
+      const segments = config.segments || [];
+      const angle = 360 / segments.length;
+      const gradient = segments.map((s, i) => `${s.color} ${i * angle}deg ${(i + 1) * angle}deg`).join(', ');
+      form.innerHTML = `
+        <div class="spinning-wheel" id="spinning-wheel" style="background: conic-gradient(${gradient})">
+          <div class="wheel-pointer"></div>
+          <div class="wheel-center"></div>
+        </div>
+        <button class="popup-button" onclick="(${handleWheelSpin.toString()})()" style="background-color: ${config.buttonColor}; color: white;">
+          ${config.buttonText}
+        </button>
+      `;
+    }
+
+    // Set localStorage
+    popupShown = true;
+    const now = Date.now().toString();
+    if (config.frequency === 'once') {
+      localStorage.setItem('popup-shown', 'true');
+    } else {
+      localStorage.setItem('popup-last-shown', now);
+    }
+  };
+
+  const closePopup = () => {
+    document.getElementById('custom-popup-overlay').style.display = 'none';
+  };
+
+  // Embedded function: email handler
+  function handleEmailSubmit() {
+    const email = document.getElementById('popup-email')?.value;
+    if (email?.includes('@')) {
+      alert(`Thank you! Use code ${popupConfig.discountCode} at checkout.`);
+      closePopup();
+    } else {
+      alert('Please enter a valid email address.');
+    }
+  }
+
+  // Embedded function: wheel handler
+  function handleWheelSpin() {
+    const wheel = document.getElementById('spinning-wheel');
+    wheel.classList.add('spinning');
+    setTimeout(() => {
+      wheel.classList.remove('spinning');
+      const segments = popupConfig.segments || [];
+      const prize = segments[Math.floor(Math.random() * segments.length)];
+      alert(`🎉 You won: ${prize.label}`);
+      closePopup();
+    }, 2000);
+  }
+
+  // Init
+  document.addEventListener('DOMContentLoaded', async () => {
+    popupConfig = await fetchPopupConfig();
+    if (!popupConfig?.isActive) return;
+
+    if (popupConfig.exitIntent) {
+      document.addEventListener('mouseout', (e) => {
+        if (e.clientY <= 0 && !exitIntentTriggered) {
+          exitIntentTriggered = true;
+          showPopup(popupConfig);
+        }
+      });
+    } else {
+      setTimeout(() => showPopup(popupConfig), popupConfig.displayDelay || 3000);
+    }
+  });
+
+  // Click outside to close
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'custom-popup-overlay') closePopup();
+  });
+
+  // Unload cleanup
+  window.addEventListener('beforeunload', () => {
+    popupConfig = null;
+    popupShown = false;
+  });
+})();
+</script>
+
+
+{% schema %}
+{
+  "name": "Popup Display",
+  "target": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_popup",
+      "label": "Enable Popup",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
