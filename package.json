@@ -4,6 +4,8 @@
   "scripts": {
     "build": "remix vite:build",
     "dev": "shopify app dev",
+    "dev:tunnel": "node dev-with-tunnel.js",
+    "update-tunnel": "node update-tunnel-url.js",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
@@ -34,6 +36,7 @@
     "@shopify/polaris-icons": "^9.3.1",
     "@shopify/shopify-app-remix": "^3.7.0",
     "@shopify/shopify-app-session-storage-prisma": "^6.0.0",
+    "dotenv": "^17.2.0",
     "isbot": "^5.1.0",
     "prisma": "^6.2.1",
     "react": "^18.2.0",

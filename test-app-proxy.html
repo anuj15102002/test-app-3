@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Proxy Test</title>
+</head>
+<body>
+    <h1>App Proxy Configuration Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Simulate Shopify environment
+        window.Shopify = { shop: 'test-shop.myshopify.com' };
+        
+        const testEndpoints = async () => {
+            const results = document.getElementById('results');
+            const shopDomain = 'test-shop.myshopify.com';
+            
+            // Test App Proxy URL (production)
+            const appProxyUrl = `/apps/popup-api/popup-config?shop=${shopDomain}`;
+            
+            // Test direct app URL (development)
+            const directUrl = `https://stolen-hz-survey-atomic.trycloudflare.com/api/public/popup-config?shop=${shopDomain}`;
+            
+            results.innerHTML = `
+                <h2>Test Results:</h2>
+                <h3>App Proxy URL (Production):</h3>
+                <p><strong>URL:</strong> ${appProxyUrl}</p>
+                <p><strong>Status:</strong> <span id="proxy-status">Testing...</span></p>
+                
+                <h3>Direct App URL (Development):</h3>
+                <p><strong>URL:</strong> ${directUrl}</p>
+                <p><strong>Status:</strong> <span id="direct-status">Testing...</span></p>
+                
+                <h3>Instructions:</h3>
+                <ol>
+                    <li><strong>Set up App Proxy in Partner Dashboard:</strong>
+                        <ul>
+                            <li>Subpath: <code>popup-api</code></li>
+                            <li>Subpath prefix: <code>apps</code></li>
+                            <li>Proxy URL: <code>https://stolen-hz-survey-atomic.trycloudflare.com/api/public</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Update your tunnel URL:</strong> When you restart your app, update the Proxy URL in Partner Dashboard</li>
+                    <li><strong>Test:</strong> The App Proxy URL should work in production Shopify stores</li>
+                </ol>
+            `;
+            
+            // Test App Proxy (will fail in local test but shows the concept)
+            try {
+                const proxyResponse = await fetch(appProxyUrl);
+                document.getElementById('proxy-status').textContent = 
+                    proxyResponse.ok ? 'Success ✅' : `Failed (${proxyResponse.status}) - Expected in local test`;
+            } catch (error) {
+                document.getElementById('proxy-status').textContent = 'Failed ❌ - Expected in local test';
+            }
+            
+            // Test Direct URL
+            try {
+                const directResponse = await fetch(directUrl);
+                document.getElementById('direct-status').textContent = 
+                    directResponse.ok ? 'Success ✅' : `Failed (${directResponse.status})`;
+            } catch (error) {
+                document.getElementById('direct-status').textContent = 'Failed ❌ - CORS or network error';
+            }
+        };
+        
+        // Run tests when page loads
+        window.addEventListener('DOMContentLoaded', testEndpoints);
+    </script>
+</body>
+</html>

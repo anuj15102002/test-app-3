@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Tag Test</title>
+</head>
+<body>
+    <h1>Meta Tag Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Test meta tag detection
+        const testMetaTag = () => {
+            const results = document.getElementById('results');
+            
+            // Try to find the meta tag
+            const metaAppUrl = document.querySelector('meta[name="shopify-app-url"]')?.content;
+            
+            results.innerHTML = `
+                <h2>Meta Tag Test Results:</h2>
+                <p><strong>Meta tag found:</strong> ${metaAppUrl ? 'Yes' : 'No'}</p>
+                <p><strong>Meta tag content:</strong> "${metaAppUrl || 'Not found'}"</p>
+                <p><strong>Is empty:</strong> ${!metaAppUrl || metaAppUrl.trim() === '' ? 'Yes' : 'No'}</p>
+                
+                <h3>Current Environment:</h3>
+                <p><strong>Current origin:</strong> ${window.location.origin}</p>
+                <p><strong>Is localhost:</strong> ${window.location.hostname === 'localhost' ? 'Yes' : 'No'}</p>
+                
+                <h3>Expected Behavior:</h3>
+                <ul>
+                    <li>If meta tag exists and not empty: Use meta tag URL</li>
+                    <li>If localhost: Use http://localhost:38975</li>
+                    <li>Otherwise: Use current origin</li>
+                </ul>
+                
+                <h3>Instructions:</h3>
+                <ol>
+                    <li>Start your Shopify app: <code>npm run dev</code></li>
+                    <li>Visit your app in browser</li>
+                    <li>Check if meta tag appears in page source</li>
+                    <li>The meta tag should contain your current tunnel URL</li>
+                </ol>
+            `;
+        };
+        
+        // Run test when page loads
+        window.addEventListener('DOMContentLoaded', testMetaTag);
+    </script>
+</body>
+</html>

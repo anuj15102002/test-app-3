@@ -98,7 +98,6 @@ export const loader = async ({ request }) => {
 
 // Handle preflight requests for CORS
 export const options = () => {
-  
   return new Response(null, {
     status: 200,
     headers: {

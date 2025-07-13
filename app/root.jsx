@@ -7,9 +7,20 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 
-export const loader = async () => {
+export const loader = async ({ request }) => {
+  // Get the app URL from environment or use the current request origin
+  let appUrl = process.env.SHOPIFY_APP_URL || process.env.APPLICATION_URL;
+  
+  // If no environment variable is set, use the current request origin
+  if (!appUrl) {
+    const url = new URL(request.url);
+    appUrl = `${url.protocol}//${url.host}`;
+  }
+  
+  console.log('App URL being set in meta tag:', appUrl);
+  
   return {
-    shopifyAppUrl: process.env.SHOPIFY_APP_URL || "",
+    shopifyAppUrl: appUrl,
   };
 };
 

@@ -1,14 +1,26 @@
 <div id="custom-popup-overlay" style="display: none;">
   <div id="custom-popup" class="custom-popup">
     <div class="popup-content">
-      <div class="popup-header">
-        <span class="popup-icon"></span>
-        <h3 class="popup-title"></h3>
-        <button class="popup-close" onclick="closePopup()">&times;</button>
+      <div class="wheel-section">
+        <div class="popup-wheel-container">
+          <!-- Wheel will be inserted here -->
+        </div>
       </div>
-      <p class="popup-description"></p>
-      <div class="popup-form">
-        <!-- Content will be dynamically inserted here -->
+      <div class="form-section">
+        <button class="popup-close" onclick="closePopup()">&times;</button>
+        <div class="form-title">GET YOUR CHANCE TO WIN</div>
+        <div class="form-subtitle">AMAZING DISCOUNTS!</div>
+        <p class="form-description">Enter your email below and spin the wheel to see if you're our next lucky winner!</p>
+        <div class="popup-form">
+          <!-- Form content will be dynamically inserted here -->
+        </div>
+        <div class="house-rules">
+          <h4>The House rules:</h4>
+          <ul>
+            <li>Winnings through cheating will not be processed.</li>
+            <li>Only one spin allowed</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -30,15 +42,17 @@
 }
 
 .custom-popup {
-  background: white;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  max-width: 400px;
+  max-width: 600px;
   width: 90%;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
   position: relative;
   animation: popupSlideIn 0.3s ease-out;
+  display: flex;
+  align-items: center;
 }
 
 @keyframes fadeIn {
@@ -58,8 +72,99 @@
 }
 
 .popup-content {
-  padding: 24px;
+  padding: 0;
   text-align: center;
+  display: flex;
+  width: 100%;
+  min-height: 400px;
+}
+
+.wheel-section {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0;
+  overflow: hidden;
+}
+
+.form-section {
+  flex: 1;
+  padding: 40px 30px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.form-subtitle {
+  font-size: 16px;
+  margin-bottom: 25px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
+.email-input {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.spin-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.spin-button:hover {
+  background: linear-gradient(135deg, #ee5a52 0%, #dc4c41 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 90, 82, 0.4);
+}
+
+.house-rules {
+  margin-top: 20px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: left;
+}
+
+.house-rules h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.house-rules ul {
+  margin: 0;
+  padding-left: 15px;
+  list-style-type: disc;
+}
+
+.house-rules li {
+  margin-bottom: 4px;
+  line-height: 1.3;
 }
 
 .popup-header {
@@ -83,9 +188,9 @@
 
 .popup-close {
   position: absolute;
-  top: -10px;
-  right: -10px;
-  background: #f0f0f0;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 50%;
   width: 30px;
@@ -96,10 +201,18 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
+  color: white;
 }
 
 .popup-close:hover {
-  background: #e0e0e0;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.form-description {
+  font-size: 14px;
+  margin-bottom: 25px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
 }
 
 .popup-description {
@@ -133,22 +246,14 @@
 }
 
 .spinning-wheel {
-  width: 180px;
-  height: 180px;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
-  border: 6px solid #333;
-  margin: 0 auto 20px;
+  border: 8px solid white;
   position: relative;
   transition: transform 0.5s ease-out;
-}
-
-.spinning-wheel.spinning {
-  animation: spin 2s ease-out;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(1440deg); }
+  transform: translateX(-50%) rotate(0deg);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .wheel-center {
@@ -157,37 +262,82 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: 2px solid #333;
+  border: 4px solid #1e3c72;
+  z-index: 5;
 }
 
 .wheel-pointer {
   position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
   width: 0;
   height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 16px solid #333;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 20px solid white;
+  z-index: 10;
+}
+
+.wheel-segment-label {
+  font-family: Arial, sans-serif;
+  user-select: none;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .custom-popup {
+    max-width: 90vw;
+    margin: 20px;
+    flex-direction: column;
+  }
+  
+  .popup-content {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .wheel-section {
+    order: 2;
+    padding: 20px 0;
+  }
+  
+  .form-section {
+    order: 1;
+    padding: 30px 20px 20px;
+  }
+  
+  .spinning-wheel {
+    width: 200px;
+    height: 200px;
+    transform: none;
+    margin: 0 auto;
+  }
+  
+  .form-title {
+    font-size: 20px;
+  }
+  
+  .form-subtitle {
+    font-size: 14px;
+  }
+  
+  .email-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
 
 @media (max-width: 480px) {
   .custom-popup {
-    max-width: 350px;
-    margin: 20px;
-    width: calc(100vw - 40px);
+    max-width: 95vw;
+    margin: 10px;
   }
   
-  .popup-content {
-    padding: 20px;
-  }
-  
-  .popup-title {
-    font-size: 18px;
+  .form-section {
+    padding: 20px 15px 15px;
   }
   
   .spinning-wheel {
@@ -195,25 +345,105 @@
     height: 150px;
   }
   
-  .popup-input {
-    font-size: 16px; /* Prevents zoom on iOS */
+  .form-title {
+    font-size: 18px;
+  }
+  
+  .house-rules {
+    font-size: 11px;
   }
 }
 
-@media (max-width: 320px) {
-  .custom-popup {
-    margin: 10px;
-    width: calc(100vw - 20px);
-  }
-  
-  .popup-content {
-    padding: 16px;
-  }
-  
-  .spinning-wheel {
-    width: 120px;
-    height: 120px;
-  }
+/* Discount code styles */
+.discount-display {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.discount-success {
+  font-size: 18px;
+  font-weight: 600;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+.discount-code-container {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px dashed #28a745;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.discount-code-container:hover {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.discount-code-text {
+  font-size: 28px;
+  font-weight: bold;
+  color: #28a745;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  user-select: all;
+  font-family: 'Courier New', monospace;
+}
+
+.discount-code-hint {
+  font-size: 14px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.copy-button {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.copy-button:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.copy-button.copied {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  animation: pulse 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.close-button {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-1px);
 }
 </style>
 
@@ -226,45 +456,101 @@
   let popupConfig = null;
   let popupShown = false;
   let exitIntentTriggered = false;
+  let sessionId = null;
+
+  // Generate session ID for tracking
+  sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+  console.log(popupConfig);
 
   // Utils
   const getShopDomain = () => window.Shopify?.shop || window.location.hostname;
 
+  // Analytics tracking function
+  const trackEvent = async (eventType, data = {}) => {
+    try {
+      const shopDomain = getShopDomain();
+      const metaAppUrl = document.querySelector('meta[name="shopify-app-url"]')?.content;
+      
+      let endpoint;
+      if (metaAppUrl && metaAppUrl.trim() !== '') {
+        endpoint = `${metaAppUrl}/api/public/analytics`;
+      } else {
+        endpoint = `https://suzuki-accessing-acre-maintenance.trycloudflare.com/api/public/analytics`;
+      }
+      
+      const formData = new FormData();
+      formData.append('shop', shopDomain);
+      formData.append('eventType', eventType);
+      formData.append('sessionId', sessionId);
+      
+      // Add optional data
+      if (data.email) formData.append('email', data.email);
+      if (data.discountCode) formData.append('discountCode', data.discountCode);
+      if (data.prizeLabel) formData.append('prizeLabel', data.prizeLabel);
+      if (data.metadata) formData.append('metadata', JSON.stringify(data.metadata));
+      
+      console.log(`Tracking event: ${eventType}`, data);
+      
+      await fetch(`${endpoint}?shop=${encodeURIComponent(shopDomain)}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      });
+    } catch (error) {
+      console.warn('Failed to track analytics event:', error);
+    }
+  };
+
   const fetchPopupConfig = async () => {
+    console.log('Starting popup config fetch...');
+    
     const shopDomain = getShopDomain();
+    console.log('Shop domain:', shopDomain);
+
+    // Get app URL from meta tag (set by your app)
     const metaAppUrl = document.querySelector('meta[name="shopify-app-url"]')?.content;
-    
-    // Determine if we're in development mode
-    const isDevelopment = window.location.hostname === 'localhost' ||
-                         window.location.hostname === '127.0.0.1' ||
-                         window.location.port;
-    
-    // Build endpoints list based on environment
+    console.log('Meta app URL:', metaAppUrl);
+
+    // Build endpoints list - try meta URL first, then fallbacks
     let endpoints = [];
     
-    if (isDevelopment) {
-      // In development, try local endpoints first
-      endpoints = [
-        `/api/public/popup-config?shop=${shopDomain}`,
-        `http://localhost:38975/api/public/popup-config?shop=${shopDomain}`,
-      ];
-    } else if (metaAppUrl) {
-      // In production with meta tag, use the app URL
+    if (metaAppUrl && metaAppUrl.trim() !== '') {
+      // Use the app URL from meta tag (works for both dev and prod)
       endpoints = [
         `${metaAppUrl}/api/public/popup-config?shop=${shopDomain}`,
       ];
     } else {
-      // Fallback to relative URLs
-      endpoints = [
-        `/api/public/popup-config?shop=${shopDomain}`,
-        `/apps/api/public/popup-config?shop=${shopDomain}`,
-      ];
+      // Fallback: try to detect current environment
+      const currentOrigin = window.location.origin;
+      const isLocalhost = window.location.hostname === 'localhost';
+      
+      if (isLocalhost) {
+        // Local development
+        endpoints = [
+          `http://localhost:38975/api/public/popup-config?shop=${shopDomain}`,
+          `/api/public/popup-config?shop=${shopDomain}`,
+        ];
+      } else {
+        // Try current origin (might be the tunnel URL)
+        console.log(currentOrigin + "currentOrigin");
+        endpoints = [
+          `${currentOrigin}/api/public/popup-config?shop=${shopDomain}`,
+          `/api/public/popup-config?shop=${shopDomain}`,
+        ];
+      }
     }
+
+    
+    
+    console.log('Endpoints to try:', endpoints);
 
     for (const endpoint of endpoints) {
       try {
         console.log('Fetching popup config from:', endpoint);
-        const res = await fetch(endpoint, {
+        const res = await fetch(`https://albums-sucking-aims-rw.trycloudflare.com/api/public/popup-config?shop=${shopDomain}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -272,7 +558,10 @@
         });
         if (res.ok) {
           const json = await res.json();
+
           console.log('Popup config received:', json);
+          console.log('Popup config received:', json.config);
+
           return json.config;
         } else {
           console.warn('Failed to fetch from endpoint:', endpoint, 'Status:', res.status);
@@ -281,6 +570,8 @@
         console.warn('Fetch failed for endpoint:', endpoint, err);
       }
     }
+
+    console.log(endpoint + "endpoint");
 
     // Fallback config
     return {
@@ -333,42 +624,149 @@
 
     const overlay = document.getElementById('custom-popup-overlay');
     const popup = document.getElementById('custom-popup');
-    const icon = popup.querySelector('.popup-icon');
-    const title = popup.querySelector('.popup-title');
-    const desc = popup.querySelector('.popup-description');
+    const wheelContainer = popup.querySelector('.popup-wheel-container');
     const form = popup.querySelector('.popup-form');
     const closeBtn = popup.querySelector('.popup-close');
 
     overlay.style.display = 'flex';
-    popup.style.backgroundColor = config.backgroundColor;
-    popup.style.color = config.textColor;
-    popup.style.borderRadius = `${config.borderRadius || 8}px`;
-    title.textContent = config.title;
-    desc.textContent = config.description;
-    title.style.color = config.textColor;
-    desc.style.color = config.textColor;
     closeBtn.style.display = config.showCloseButton === false ? 'none' : 'flex';
 
+    // Track popup view
+    trackEvent('view', {
+      metadata: {
+        popupType: config.type,
+        displayDelay: config.displayDelay,
+        frequency: config.frequency,
+        exitIntent: config.exitIntent
+      }
+    });
+
     if (config.type === 'email') {
-      icon.textContent = '📧';
-      form.innerHTML = `
-        <input type="email" class="popup-input" id="popup-email" placeholder="${config.placeholder}" />
-        <button class="popup-button" onclick="(${handleEmailSubmit.toString()})()" style="background-color: ${config.buttonColor}; color: white;">
-          ${config.buttonText}
-        </button>
+      // Show traditional email popup layout
+      popup.style.background = config.backgroundColor || '#ffffff';
+      popup.style.color = config.textColor || '#000000';
+      popup.style.borderRadius = `${config.borderRadius || 8}px`;
+      popup.style.maxWidth = '400px';
+      popup.style.display = 'block';
+      
+      // Hide wheel section for email popup
+      const wheelSection = popup.querySelector('.wheel-section');
+      const formSection = popup.querySelector('.form-section');
+      wheelSection.style.display = 'none';
+      formSection.style.flex = 'none';
+      formSection.style.width = '100%';
+      formSection.style.padding = '24px';
+      formSection.style.color = config.textColor || '#000000';
+      
+      // Update form section content for email popup
+      formSection.innerHTML = `
+        <button class="popup-close" onclick="closePopup()" style="color: ${config.textColor || '#000000'};">&times;</button>
+        <div style="text-align: center;">
+          <div style="font-size: 24px; margin-bottom: 10px; color: ${config.textColor || '#000000'};">📧</div>
+          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 15px 0; color: ${config.textColor || '#000000'};">
+            ${config.title}
+          </h3>
+          <p style="margin-bottom: 20px; line-height: 1.5; color: ${config.textColor || '#000000'};">
+            ${config.description}
+          </p>
+          <input type="email" id="popup-email" placeholder="${config.placeholder}" style="
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px;
+            margin-bottom: 15px; font-size: 14px; box-sizing: border-box;
+          " />
+          <button onclick="handleEmailSubmit()" style="
+            width: 100%; padding: 12px 24px; border: none; border-radius: 6px;
+            font-weight: 600; cursor: pointer; font-size: 14px;
+            background-color: ${config.buttonColor || '#007ace'}; color: white;
+          ">
+            ${config.buttonText}
+          </button>
+        </div>
       `;
-    } else if (config.type === 'wheel') {
-      icon.textContent = '🎡';
-      const segments = config.segments || [];
+    } else {
+      // Show wheel-email combo layout
+      popup.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+      popup.style.maxWidth = '600px';
+      popup.style.display = 'flex';
+      
+      // Show wheel section for wheel-email popup
+      const wheelSection = popup.querySelector('.wheel-section');
+      const formSection = popup.querySelector('.form-section');
+      wheelSection.style.display = 'flex';
+      formSection.style.flex = '1';
+      formSection.style.width = 'auto';
+      formSection.style.padding = '40px 30px';
+      formSection.style.color = 'white';
+      
+      // Reset form section content for wheel-email popup
+      formSection.innerHTML = `
+        <button class="popup-close" onclick="closePopup()">&times;</button>
+        <div class="form-title">GET YOUR CHANCE TO WIN</div>
+        <div class="form-subtitle">AMAZING DISCOUNTS!</div>
+        <p class="form-description">Enter your email below and spin the wheel to see if you're our next lucky winner!</p>
+        <div class="popup-form">
+          <!-- Form content will be dynamically inserted here -->
+        </div>
+        <div class="house-rules">
+          <h4>The House rules:</h4>
+          <ul>
+            <li>Winnings through cheating will not be processed.</li>
+            <li>Only one spin allowed</li>
+          </ul>
+        </div>
+      `;
+      
+      const segments = config.segments || [
+        { label: '5% DISCOUNT', color: '#ff6b6b', value: '5' },
+        { label: 'NO PRIZE', color: '#1e3c72', value: null },
+        { label: 'UNLUCKY', color: '#4ecdc4', value: null },
+        { label: '10% Off', color: '#96ceb4', value: '10' },
+        { label: 'NO PRIZE', color: '#ff6b6b', value: null },
+        { label: 'Free Shipping', color: '#feca57', value: 'shipping' }
+      ];
+      
       const angle = 360 / segments.length;
       const gradient = segments.map((s, i) => `${s.color} ${i * angle}deg ${(i + 1) * angle}deg`).join(', ');
-      form.innerHTML = `
-        <div class="spinning-wheel" id="spinning-wheel" style="background: conic-gradient(${gradient})">
+      
+      // Create segment labels
+      const segmentLabels = segments.map((segment, index) => {
+        const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
+        const radius = 110; // Distance from center for larger wheel
+        const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
+        const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
+        
+        return `
+          <div class="wheel-segment-label" style="
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${segmentAngle}deg);
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            pointer-events: none;
+            white-space: nowrap;
+          ">
+            ${segment.label}
+          </div>
+        `;
+      }).join('');
+      
+      // Create the wheel
+      wheelContainer.innerHTML = `
+        <div class="spinning-wheel" id="spinning-wheel" style="background: conic-gradient(${gradient}); position: relative;">
           <div class="wheel-pointer"></div>
           <div class="wheel-center"></div>
+          ${segmentLabels}
         </div>
-        <button class="popup-button" onclick="(${handleWheelSpin.toString()})()" style="background-color: ${config.buttonColor}; color: white;">
-          ${config.buttonText}
+      `;
+      
+      // Create the form
+      const formElement = formSection.querySelector('.popup-form');
+      formElement.innerHTML = `
+        <input type="email" class="email-input" id="popup-email" placeholder="Your email" />
+        <button class="spin-button" onclick="handleEmailAndSpin()">
+          TRY YOUR LUCK
         </button>
       `;
     }
@@ -383,19 +781,530 @@
     }
   };
 
-  const closePopup = () => {
+  // Make closePopup globally accessible
+  window.closePopup = () => {
     document.getElementById('custom-popup-overlay').style.display = 'none';
+    // Track popup close
+    trackEvent('close');
   };
 
-  // Embedded function: email handler
-  function handleEmailSubmit() {
-    const email = document.getElementById('popup-email')?.value;
-    if (email?.includes('@')) {
-      alert(`Thank you! Use code ${popupConfig.discountCode} at checkout.`);
-      closePopup();
-    } else {
-      alert('Please enter a valid email address.');
+  // Generate real Shopify discount code
+  async function generateShopifyDiscount(email, discountValue, discountType = 'percentage') {
+    try {
+      console.log('Generating discount code for:', email, discountValue, discountType);
+      
+      const shopDomain = getShopDomain();
+      const metaAppUrl = document.querySelector('meta[name="shopify-app-url"]')?.content;
+      
+      // Build endpoint URL
+      let endpoint;
+      if (metaAppUrl && metaAppUrl.trim() !== '') {
+        endpoint = `${metaAppUrl}/api/public/generate-discount`;
+      } else {
+        // Fallback endpoints
+        const isLocalhost = window.location.hostname === 'localhost';
+        if (isLocalhost) {
+          endpoint = `https://albums-sucking-aims-rw.trycloudflare.com/api/public/generate-discount`;
+        } else {
+          endpoint = `https://albums-sucking-aims-rw.trycloudflare.com/api/public/generate-discount`;
+        }
+      }
+      
+      console.log('Using endpoint:', endpoint);
+      
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('discountValue', discountValue);
+      formData.append('discountType', discountType);
+      formData.append('shop', shopDomain);
+      
+      console.log('Sending request to generate discount...');
+      
+      const response = await fetch(`${endpoint}?shop=${encodeURIComponent(shopDomain)}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', errorText);
+        throw new Error(`Failed to generate discount code: ${response.status} - ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('API Response:', data);
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to generate discount code');
+      }
+      
+      console.log('Generated discount code:', data.discountCode);
+      console.log('Shopify created:', data.shopifyCreated);
+      
+      // Return the full response data for better handling
+      return {
+        code: data.discountCode,
+        shopifyCreated: data.shopifyCreated,
+        instructions: data.instructions,
+        note: data.note
+      };
+      
+    } catch (error) {
+      console.error('Error in generateShopifyDiscount:', error);
+      throw error;
     }
+  }
+
+  // New combined email and spin handler
+  async function handleEmailAndSpin() {
+    const email = document.getElementById('popup-email')?.value;
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    
+    // Track email entered
+    trackEvent('email_entered', { email: email });
+    
+    // Get segments
+    const segments = popupConfig.segments || [
+      { label: '5% DISCOUNT', color: '#ff6b6b', value: '5' },
+      { label: 'NO PRIZE', color: '#1e3c72', value: null },
+      { label: 'UNLUCKY', color: '#4ecdc4', value: null },
+      { label: '10% Off', color: '#96ceb4', value: '10' },
+      { label: 'NO PRIZE', color: '#ff6b6b', value: null },
+      { label: 'Free Shipping', color: '#feca57', value: 'shipping' }
+    ];
+    
+    // Randomly select a prize FIRST
+    const prizeIndex = Math.floor(Math.random() * segments.length);
+    const prize = segments[prizeIndex];
+    
+    // Track spin event
+    trackEvent('spin', {
+      email: email,
+      prizeLabel: prize.label,
+      metadata: { prizeIndex: prizeIndex, totalSegments: segments.length }
+    });
+    
+    // Calculate the angle where the wheel should stop to land on the selected prize
+    const segmentAngle = 360 / segments.length;
+    const targetAngle = (prizeIndex * segmentAngle) + (segmentAngle / 2);
+    
+    // Add multiple full rotations for visual effect (3-5 full spins)
+    const fullRotations = 3 + Math.random() * 2; // 3-5 rotations
+    const finalRotation = (fullRotations * 360) + (360 - targetAngle); // Subtract because wheel spins clockwise but pointer is on right
+    
+    // Start spinning the wheel
+    const wheel = document.getElementById('spinning-wheel');
+    const button = document.querySelector('.spin-button');
+    
+    // Disable button during spin
+    button.disabled = true;
+    button.textContent = 'SPINNING...';
+    
+    // Apply the calculated rotation with smooth animation
+    wheel.style.transition = 'transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+    wheel.style.transform = `translateX(-50%) rotate(${finalRotation}deg)`;
+    
+    setTimeout(async () => {
+      // Reset transition for future spins
+      wheel.style.transition = 'transform 0.5s ease-out';
+      
+      console.log(`Wheel landed on: ${prize.label} (index: ${prizeIndex})`);
+      
+      // Check if it's a winning segment (has discount code or contains discount-related words)
+      const isWinner = prize.value ||
+                      prize.label.toLowerCase().includes('discount') ||
+                      prize.label.toLowerCase().includes('off') ||
+                      prize.label.toLowerCase().includes('shipping');
+      
+      if (isWinner) {
+        try {
+          // Generate real Shopify discount code based on prize
+          let discountResult;
+          if (prize.value === 'shipping') {
+            discountResult = await generateShopifyDiscount(email, '100', 'shipping');
+          } else {
+            discountResult = await generateShopifyDiscount(email, prize.value || '5', 'percentage');
+          }
+          
+          // Track win event
+          trackEvent('win', {
+            email: email,
+            discountCode: discountResult.code,
+            prizeLabel: prize.label,
+            metadata: {
+              discountType: prize.value === 'shipping' ? 'shipping' : 'percentage',
+              discountValue: prize.value === 'shipping' ? '100' : (prize.value || '5'),
+              shopifyCreated: discountResult.shopifyCreated
+            }
+          });
+          
+          showWinnerDisplay(prize.label, discountResult.code, discountResult);
+        } catch (error) {
+          console.error('Error generating discount code:', error);
+          // Track error as lose event
+          trackEvent('lose', {
+            email: email,
+            prizeLabel: 'Error generating discount',
+            metadata: { error: error.message }
+          });
+          showTryAgainDisplay('Error generating discount');
+        }
+      } else {
+        // Track lose event
+        trackEvent('lose', {
+          email: email,
+          prizeLabel: prize.label
+        });
+        showTryAgainDisplay(prize.label);
+      }
+    }, 3000); // 3 second spin
+  }
+
+  // Make handleEmailAndSpin globally accessible
+  window.handleEmailAndSpin = handleEmailAndSpin;
+
+  // Email handler for email popup type
+  async function handleEmailSubmit() {
+    const email = document.getElementById('popup-email')?.value;
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    
+    // Track email entered for email popup
+    trackEvent('email_entered', { email: email });
+    
+    // Show loading state
+    const formSection = document.querySelector('.form-section');
+    formSection.innerHTML = `
+      <button class="popup-close" onclick="closePopup()" style="color: ${popupConfig.textColor || '#000000'};">&times;</button>
+      <div style="text-align: center; padding: 40px;">
+        <div style="font-size: 24px; margin-bottom: 15px;">⏳</div>
+        <h3 style="color: ${popupConfig.textColor || '#000000'};">Generating your discount code...</h3>
+        <p style="color: ${popupConfig.textColor || '#000000'};">Please wait a moment</p>
+      </div>
+    `;
+    
+    try {
+      // Generate real Shopify discount code
+      const discountResult = await generateShopifyDiscount(email, '10', 'percentage');
+      
+      // Track win event for email popup
+      trackEvent('win', {
+        email: email,
+        discountCode: discountResult.code,
+        prizeLabel: '10% Discount',
+        metadata: {
+          popupType: 'email',
+          discountType: 'percentage',
+          discountValue: '10',
+          shopifyCreated: discountResult.shopifyCreated
+        }
+      });
+      
+      // Don't show manual instructions - just show the code
+      let instructionsHtml = '';
+      
+      formSection.innerHTML = `
+        <button class="popup-close" onclick="closePopup()" style="color: ${popupConfig.textColor || '#000000'};">&times;</button>
+        <div style="text-align: center; padding: 20px;">
+          <div style="font-size: 24px; margin-bottom: 15px;">🎉</div>
+          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 15px 0; color: ${popupConfig.textColor || '#000000'};">
+            Thank You!
+          </h3>
+          <p style="margin-bottom: 20px; color: ${popupConfig.textColor || '#000000'};">
+            Here's your exclusive 10% discount code:
+          </p>
+          <div onclick="copyDiscountCode()" style="
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px dashed #28a745;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          ">
+            <div id="discount-code" style="
+              font-size: 28px;
+              font-weight: bold;
+              color: #28a745;
+              margin-bottom: 8px;
+              letter-spacing: 2px;
+              font-family: 'Courier New', monospace;
+            ">
+              ${discountResult.code}
+            </div>
+            <div style="font-size: 14px; color: #6c757d; font-style: italic;">
+              Click to copy to clipboard
+            </div>
+          </div>
+          <button id="copy-btn" onclick="copyDiscountCode()" style="
+            width: 100%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-size: 14px;
+          ">
+            📋 Copy Code
+          </button>
+          ${instructionsHtml}
+          <button onclick="window.closePopup()" style="
+            width: 100%;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+          ">
+            Close
+          </button>
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error generating discount code:', error);
+      formSection.innerHTML = `
+        <button class="popup-close" onclick="closePopup()" style="color: ${popupConfig.textColor || '#000000'};">&times;</button>
+        <div style="text-align: center; padding: 20px;">
+          <div style="font-size: 24px; margin-bottom: 15px;">❌</div>
+          <h3 style="color: ${popupConfig.textColor || '#000000'};">Oops! Something went wrong</h3>
+          <p style="color: ${popupConfig.textColor || '#000000'};">Please try again later or contact support.</p>
+          <button onclick="window.closePopup()" style="
+            width: 100%;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+          ">
+            Close
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // Make handleEmailSubmit globally accessible
+  window.handleEmailSubmit = handleEmailSubmit;
+
+  // Show winner display
+  function showWinnerDisplay(prizeLabel, discountCode, discountResult = {}) {
+    const formSection = document.querySelector('.form-section');
+    
+    // Don't show manual instructions - just show the code
+    let instructionsHtml = '';
+    
+    formSection.innerHTML = `
+      <button class="popup-close" onclick="closePopup()">&times;</button>
+      <div class="form-title">🎉 CONGRATULATIONS!</div>
+      <div class="form-subtitle">YOU WON ${prizeLabel}!</div>
+      <div style="margin-top: 20px;">
+        <div style="color: white; font-size: 16px; font-weight: 600; margin-bottom: 15px; text-align: center;">
+          Here's your discount code:
+        </div>
+        <div class="discount-code-container" onclick="copyDiscountCode()" style="background: white; border: 2px dashed #28a745; border-radius: 12px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s ease;">
+          <div class="discount-code-text" id="discount-code" style="font-size: 28px; font-weight: bold; color: #28a745; margin-bottom: 8px; letter-spacing: 2px; font-family: 'Courier New', monospace; text-align: center;">
+            ${discountCode}
+          </div>
+          <div style="font-size: 14px; color: #6c757d; font-style: italic; text-align: center;">
+            Click to copy to clipboard
+          </div>
+        </div>
+        <button class="copy-button" id="copy-btn" onclick="copyDiscountCode()" style="width: 100%; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 10px; font-size: 14px;">
+          📋 Copy Code
+        </button>
+        ${instructionsHtml}
+        <button class="close-button" onclick="window.closePopup()" style="width: 100%; background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); border: none; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; margin-top: ${instructionsHtml ? '10px' : '0'};">
+          Close
+        </button>
+      </div>
+    `;
+  }
+
+  // Show try again display
+  function showTryAgainDisplay(prizeLabel) {
+    const formSection = document.querySelector('.form-section');
+    
+    formSection.innerHTML = `
+      <button class="popup-close" onclick="closePopup()">&times;</button>
+      <div class="form-title">😔 ${prizeLabel}</div>
+      <div class="form-subtitle">Better luck next time!</div>
+      <div style="text-align: center; padding: 20px;">
+        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
+          Don't worry! Keep shopping and you might get another chance to win amazing discounts.
+        </p>
+        <button class="close-button" onclick="window.closePopup()">
+          Continue Shopping
+        </button>
+      </div>
+    `;
+  }
+
+  // Show discount code with copy functionality (legacy)
+  function showDiscountCode() {
+    const form = document.querySelector('.popup-form');
+    const discountCode = popupConfig.discountCode || 'SAVE10';
+    
+    form.innerHTML = `
+      <div class="discount-display">
+        <div class="discount-success">
+          🎉 Thank you! Here's your discount:
+        </div>
+        <div class="discount-code-container" onclick="copyDiscountCode()">
+          <div class="discount-code-text" id="discount-code">
+            ${discountCode}
+          </div>
+          <div class="discount-code-hint">
+            Click to copy to clipboard
+          </div>
+        </div>
+        <button class="copy-button" id="copy-btn" onclick="copyDiscountCode()">
+          📋 Copy Code
+        </button>
+        <br>
+        <button class="close-button" onclick="window.closePopup()">
+          Close
+        </button>
+      </div>
+    `;
+  }
+
+  // Make showDiscountCode globally accessible
+  window.showDiscountCode = showDiscountCode;
+
+  // Copy discount code to clipboard
+  function copyDiscountCode() {
+    // Get the discount code from the displayed element
+    const discountCodeElement = document.getElementById('discount-code');
+    const discountCode = discountCodeElement ? discountCodeElement.textContent.trim() : (popupConfig.discountCode || 'SAVE10');
+    
+    // Track copy event
+    trackEvent('copy_code', {
+      discountCode: discountCode
+    });
+    
+    // Try modern clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(discountCode).then(() => {
+        showCopySuccess();
+      }).catch(() => {
+        fallbackCopyTextToClipboard(discountCode);
+      });
+    } else {
+      // Fallback for older browsers
+      fallbackCopyTextToClipboard(discountCode);
+    }
+  }
+
+  // Make copyDiscountCode globally accessible
+  window.copyDiscountCode = copyDiscountCode;
+
+  // Fallback copy method
+  function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      showCopySuccess();
+    } catch (err) {
+      alert(`Copy failed. Your discount code is: ${text}`);
+    }
+    
+    document.body.removeChild(textArea);
+  }
+
+  // Show copy success message
+  function showCopySuccess() {
+    const button = document.getElementById('copy-btn');
+    if (button) {
+      const originalText = button.innerHTML;
+      button.innerHTML = '✅ Copied!';
+      button.classList.add('copied');
+      
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('copied');
+      }, 2000);
+    }
+    
+    // Also show a brief notification
+    showNotification('Discount code copied to clipboard!');
+  }
+
+  // Show notification message
+  function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 10001;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      animation: slideInRight 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    
+    // Add animation keyframes if not already added
+    if (!document.querySelector('#notification-styles')) {
+      const style = document.createElement('style');
+      style.id = 'notification-styles';
+      style.textContent = `
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(100%); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOutRight 0.3s ease-out';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
   }
 
   // Embedded function: wheel handler
@@ -407,7 +1316,7 @@
       const segments = popupConfig.segments || [];
       const prize = segments[Math.floor(Math.random() * segments.length)];
       alert(`🎉 You won: ${prize.label}`);
-      closePopup();
+      window.closePopup();
     }, 2000);
   }
 
@@ -430,7 +1339,7 @@
 
   // Click outside to close
   document.addEventListener('click', (e) => {
-    if (e.target.id === 'custom-popup-overlay') closePopup();
+    if (e.target.id === 'custom-popup-overlay') window.closePopup();
   });
 
   // Unload cleanup

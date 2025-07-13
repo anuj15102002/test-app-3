@@ -57,3 +57,44 @@ model PopupConfig {
 
   @@unique([shop])
 }
+
+model DiscountCode {
+  id              String   @id @default(cuid())
+  shop            String
+  email           String
+  code            String   @unique
+  discountType    String   // "percentage" or "fixed_amount"
+  discountValue   String
+  priceRuleId     String?  // Shopify Price Rule ID
+  discountCodeId  String?  // Shopify Discount Code ID
+  isActive        Boolean  @default(true)
+  usageCount      Int      @default(0)
+  usageLimit      Int      @default(1)
+  startsAt        DateTime @default(now())
+  endsAt          DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([shop])
+  @@index([email])
+  @@index([code])
+}
+
+model PopupAnalytics {
+  id              String   @id @default(cuid())
+  shop            String
+  eventType       String   // "view", "email_entered", "spin", "win", "lose", "close", "copy_code"
+  email           String?  // Only for email_entered, win events
+  discountCode    String?  // Only for win events
+  prizeLabel      String?  // What prize was won/lost
+  userAgent       String?  // Browser info
+  ipAddress       String?  // User IP (hashed for privacy)
+  sessionId       String?  // Track user sessions
+  timestamp       DateTime @default(now())
+  metadata        String?  // JSON string for additional data
+
+  @@index([shop])
+  @@index([eventType])
+  @@index([timestamp])
+  @@index([shop, eventType])
+}

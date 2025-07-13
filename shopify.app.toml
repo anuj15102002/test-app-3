@@ -3,7 +3,7 @@
 client_id = "0249c9ec8c24958292aa21be203e2b38"
 name = "testAPp"
 handle = "testapp-4139"
-application_url = "https://awesome-tale-taxation-aid.trycloudflare.com"
+application_url = "https://scores-barriers-crucial-lap.trycloudflare.com"
 embedded = true
 
 [build]
@@ -23,10 +23,11 @@ api_version = "2025-07"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,read_themes,write_themes"
+scopes = "write_products,write_customers,write_discounts,write_price_rules,read_themes,write_themes,write_app_proxy"
 
 [auth]
-redirect_urls = ["https://awesome-tale-taxation-aid.trycloudflare.com/auth/callback", "https://awesome-tale-taxation-aid.trycloudflare.com/auth/shopify/callback", "https://awesome-tale-taxation-aid.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://scores-barriers-crucial-lap.trycloudflare.com/auth/callback", "https://scores-barriers-crucial-lap.trycloudflare.com/auth/shopify/callback", "https://scores-barriers-crucial-lap.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false
+
