@@ -354,6 +354,27 @@
   }
 }
 
+/* Email popup specific styles */
+.custom-popup.email-popup {
+  max-width: 400px !important;
+  display: block !important;
+}
+
+.custom-popup.email-popup .popup-content {
+  display: block !important;
+  min-height: auto !important;
+}
+
+.custom-popup.email-popup .wheel-section {
+  display: none !important;
+}
+
+.custom-popup.email-popup .form-section {
+  flex: none !important;
+  width: 100% !important;
+  padding: 24px !important;
+}
+
 /* Discount code styles */
 .discount-display {
   text-align: center;
@@ -457,7 +478,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
-  let applicationUrl = '';
+  let applicationUrl = 'https://revisions-atlanta-infants-mozambique.trycloudflare.com';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -581,12 +602,12 @@
       description: 'Try your luck and win a discount!',
       buttonText: 'Spin Now!',
       segments: [
-        { label: '5% Off', color: '#ff6b6b' },
-        { label: '10% Off', color: '#4ecdc4' },
-        { label: '15% Off', color: '#45b7d1' },
-        { label: '20% Off', color: '#96ceb4' },
-        { label: 'Free Shipping', color: '#feca57' },
-        { label: 'Try Again', color: '#ff9ff3' }
+        { label: '5% OFF', color: '#ff6b6b', value: '5' },
+        { label: '10% OFF', color: '#4ecdc4', value: '10' },
+        { label: '15% OFF', color: '#45b7d1', value: '15' },
+        { label: '20% OFF', color: '#96ceb4', value: '20' },
+        { label: 'FREE SHIPPING', color: '#feca57', value: 'shipping' },
+        { label: 'TRY AGAIN', color: '#1e3c72', value: null }
       ],
       backgroundColor: '#fff',
       textColor: '#000',
@@ -644,20 +665,21 @@
 
     if (config.type === 'email') {
       // Show traditional email popup layout
+      popup.classList.add('email-popup');
       popup.style.background = config.backgroundColor || '#ffffff';
       popup.style.color = config.textColor || '#000000';
       popup.style.borderRadius = `${config.borderRadius || 8}px`;
-      popup.style.maxWidth = '400px';
-      popup.style.display = 'block';
       
       // Hide wheel section for email popup
       const wheelSection = popup.querySelector('.wheel-section');
       const formSection = popup.querySelector('.form-section');
+      const popupContent = popup.querySelector('.popup-content');
+      
       wheelSection.style.display = 'none';
-      formSection.style.flex = 'none';
-      formSection.style.width = '100%';
-      formSection.style.padding = '24px';
       formSection.style.color = config.textColor || '#000000';
+      
+      // Ensure popup content doesn't use flex layout for email popup
+      popupContent.style.display = 'block';
       
       // Update form section content for email popup
       formSection.innerHTML = `
@@ -685,6 +707,7 @@
       `;
     } else {
       // Show wheel-email combo layout
+      popup.classList.remove('email-popup');
       popup.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
       popup.style.maxWidth = '600px';
       popup.style.display = 'flex';
@@ -692,18 +715,23 @@
       // Show wheel section for wheel-email popup
       const wheelSection = popup.querySelector('.wheel-section');
       const formSection = popup.querySelector('.form-section');
+      const popupContent = popup.querySelector('.popup-content');
+      
       wheelSection.style.display = 'flex';
       formSection.style.flex = '1';
       formSection.style.width = 'auto';
       formSection.style.padding = '40px 30px';
       formSection.style.color = 'white';
       
+      // Ensure popup content uses flex layout for wheel-email popup
+      popupContent.style.display = 'flex';
+      
       // Reset form section content for wheel-email popup
       formSection.innerHTML = `
         <button class="popup-close" onclick="closePopup()">&times;</button>
-        <div class="form-title">GET YOUR CHANCE TO WIN</div>
-        <div class="form-subtitle">AMAZING DISCOUNTS!</div>
-        <p class="form-description">Enter your email below and spin the wheel to see if you're our next lucky winner!</p>
+        <div class="form-title">${config.title || 'GET YOUR CHANCE TO WIN'}</div>
+        <div class="form-subtitle">${config.subtitle || 'AMAZING DISCOUNTS!'}</div>
+        <p class="form-description">${config.description || 'Enter your email below and spin the wheel to see if you are our next lucky winner!'}</p>
         <div class="popup-form">
           <!-- Form content will be dynamically inserted here -->
         </div>
@@ -717,21 +745,21 @@
       `;
       
       const segments = config.segments || [
-        { label: '5% DISCOUNT', color: '#ff6b6b', value: '5' },
-        { label: 'NO PRIZE', color: '#1e3c72', value: null },
-        { label: 'UNLUCKY', color: '#4ecdc4', value: null },
-        { label: '10% Off', color: '#96ceb4', value: '10' },
-        { label: 'NO PRIZE', color: '#ff6b6b', value: null },
-        { label: 'Free Shipping', color: '#feca57', value: 'shipping' }
+        { label: '5% OFF', color: '#ff6b6b', value: '5' },
+        { label: '10% OFF', color: '#4ecdc4', value: '10' },
+        { label: '15% OFF', color: '#45b7d1', value: '15' },
+        { label: '20% OFF', color: '#96ceb4', value: '20' },
+        { label: 'FREE SHIPPING', color: '#feca57', value: 'shipping' },
+        { label: 'TRY AGAIN', color: '#1e3c72', value: null }
       ];
       
       const angle = 360 / segments.length;
       const gradient = segments.map((s, i) => `${s.color} ${i * angle}deg ${(i + 1) * angle}deg`).join(', ');
       
-      // Create segment labels
+      // Create segment labels with horizontal text positioned within wheel
       const segmentLabels = segments.map((segment, index) => {
         const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
-        const radius = 110; // Distance from center for larger wheel
+        const radius = 80; // Reduced radius to keep text within wheel boundaries
         const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
         const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
         
@@ -740,13 +768,20 @@
             position: absolute;
             left: 50%;
             top: 50%;
-            transform: translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${segmentAngle}deg);
-            font-size: 14px;
+            transform: translate(-50%, -50%) translate(${x}px, ${y}px);
+            font-size: 11px;
             font-weight: bold;
             color: white;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             pointer-events: none;
-            white-space: nowrap;
+            text-align: center;
+            line-height: 1.1;
+            max-width: 60px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 20px;
           ">
             ${segment.label}
           </div>
@@ -765,9 +800,9 @@
       // Create the form
       const formElement = formSection.querySelector('.popup-form');
       formElement.innerHTML = `
-        <input type="email" class="email-input" id="popup-email" placeholder="Your email" />
+        <input type="email" class="email-input" id="popup-email" placeholder="${config.placeholder || 'Your email'}" />
         <button class="spin-button" onclick="handleEmailAndSpin()">
-          TRY YOUR LUCK
+          ${config.buttonText || 'TRY YOUR LUCK'}
         </button>
       `;
     }
@@ -874,12 +909,12 @@
     
     // Get segments
     const segments = popupConfig.segments || [
-      { label: '5% DISCOUNT', color: '#ff6b6b', value: '5' },
-      { label: 'NO PRIZE', color: '#1e3c72', value: null },
-      { label: 'UNLUCKY', color: '#4ecdc4', value: null },
-      { label: '10% Off', color: '#96ceb4', value: '10' },
-      { label: 'NO PRIZE', color: '#ff6b6b', value: null },
-      { label: 'Free Shipping', color: '#feca57', value: 'shipping' }
+      { label: '5% OFF', color: '#ff6b6b', code: 'SAVE5' },
+      { label: '10% OFF', color: '#4ecdc4', code: 'SAVE10' },
+      { label: '15% OFF', color: '#45b7d1', code: 'SAVE15' },
+      { label: '20% OFF', color: '#96ceb4', code: 'SAVE20' },
+      { label: 'FREE SHIPPING', color: '#feca57', code: 'FREESHIP' },
+      { label: 'TRY AGAIN', color: '#1e3c72', code: null }
     ];
     
     // Randomly select a prize FIRST
@@ -919,45 +954,25 @@
       
       console.log(`Wheel landed on: ${prize.label} (index: ${prizeIndex})`);
       
-      // Check if it's a winning segment (has discount code or contains discount-related words)
-      const isWinner = prize.value ||
-                      prize.label.toLowerCase().includes('discount') ||
-                      prize.label.toLowerCase().includes('off') ||
-                      prize.label.toLowerCase().includes('shipping');
+      // Check if it's a winning segment (has a discount code)
+      const isWinner = prize.code && prize.code !== null;
       
       if (isWinner) {
-        try {
-          // Generate real Shopify discount code based on prize
-          let discountResult;
-          if (prize.value === 'shipping') {
-            discountResult = await generateShopifyDiscount(email, '100', 'shipping');
-          } else {
-            discountResult = await generateShopifyDiscount(email, prize.value || '5', 'percentage');
+        // Use the pre-configured discount code from the segment
+        const discountCode = prize.code;
+        
+        // Track win event
+        trackEvent('win', {
+          email: email,
+          discountCode: discountCode,
+          prizeLabel: prize.label,
+          metadata: {
+            preconfigured: true,
+            segmentIndex: prizeIndex
           }
-          
-          // Track win event
-          trackEvent('win', {
-            email: email,
-            discountCode: discountResult.code,
-            prizeLabel: prize.label,
-            metadata: {
-              discountType: prize.value === 'shipping' ? 'shipping' : 'percentage',
-              discountValue: prize.value === 'shipping' ? '100' : (prize.value || '5'),
-              shopifyCreated: discountResult.shopifyCreated
-            }
-          });
-          
-          showWinnerDisplay(prize.label, discountResult.code, discountResult);
-        } catch (error) {
-          console.error('Error generating discount code:', error);
-          // Track error as lose event
-          trackEvent('lose', {
-            email: email,
-            prizeLabel: 'Error generating discount',
-            metadata: { error: error.message }
-          });
-          showTryAgainDisplay('Error generating discount');
-        }
+        });
+        
+        showWinnerDisplay(prize.label, discountCode);
       } else {
         // Track lose event
         trackEvent('lose', {
@@ -983,145 +998,145 @@
     // Track email entered for email popup
     trackEvent('email_entered', { email: email });
     
-    // Show loading state
+    // Use the pre-configured discount code from admin settings
+    const discountCode = popupConfig.discountCode || 'WELCOME10';
+    
+    // Track win event for email popup
+    trackEvent('win', {
+      email: email,
+      discountCode: discountCode,
+      prizeLabel: 'Email Discount',
+      metadata: {
+        popupType: 'email',
+        preconfigured: true
+      }
+    });
+    
+    // Show the pre-configured discount code with personalized message
     const formSection = document.querySelector('.form-section');
+    
+    // Create personalized success messages
+    let thankYouMessage = "Thank You!";
+    let successMessage = "Here's your exclusive discount code:";
+    
+    // Customize based on popup title or discount type
+    if (popupConfig.title && popupConfig.title.toLowerCase().includes('newsletter')) {
+      thankYouMessage = "Welcome to our Newsletter!";
+      successMessage = "Here's your subscriber discount:";
+    } else if (popupConfig.title && popupConfig.title.toLowerCase().includes('first order')) {
+      thankYouMessage = "Welcome New Customer!";
+      successMessage = "Here's your first order discount:";
+    } else if (discountCode.toLowerCase().includes('welcome')) {
+      thankYouMessage = "Welcome!";
+      successMessage = "Here's your welcome discount:";
+    } else if (discountCode.toLowerCase().includes('save')) {
+      thankYouMessage = "You're Saving Money!";
+      successMessage = "Here's your savings code:";
+    }
+    
     formSection.innerHTML = `
       <button class="popup-close" onclick="closePopup()" style="color: ${popupConfig.textColor || '#000000'};">&times;</button>
-      <div style="text-align: center; padding: 40px;">
-        <div style="font-size: 24px; margin-bottom: 15px;">⏳</div>
-        <h3 style="color: ${popupConfig.textColor || '#000000'};">Generating your discount code...</h3>
-        <p style="color: ${popupConfig.textColor || '#000000'};">Please wait a moment</p>
+      <div style="text-align: center; padding: 20px;">
+        <div style="font-size: 24px; margin-bottom: 15px;">🎉</div>
+        <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 15px 0; color: ${popupConfig.textColor || '#000000'};">
+          ${thankYouMessage}
+        </h3>
+        <p style="margin-bottom: 20px; color: ${popupConfig.textColor || '#000000'};">
+          ${successMessage}
+        </p>
+        <div onclick="copyDiscountCode()" style="
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          border: 2px dashed #28a745;
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 15px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        ">
+          <div id="discount-code" style="
+            font-size: 28px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+          ">
+            ${discountCode}
+          </div>
+          <div style="font-size: 14px; color: #6c757d; font-style: italic;">
+            Click to copy to clipboard
+          </div>
+        </div>
+        <button id="copy-btn" onclick="copyDiscountCode()" style="
+          width: 100%;
+          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+          border: none;
+          color: white;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          margin-bottom: 10px;
+          font-size: 14px;
+        ">
+          📋 Copy Code
+        </button>
+        <button onclick="window.closePopup()" style="
+          width: 100%;
+          background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+          border: none;
+          color: white;
+          padding: 10px 20px;
+          border-radius: 6px;
+          font-weight: 500;
+          cursor: pointer;
+          font-size: 14px;
+          margin-top: 10px;
+        ">
+          Close
+        </button>
       </div>
     `;
-    
-    try {
-      // Generate real Shopify discount code
-      const discountResult = await generateShopifyDiscount(email, '10', 'percentage');
-      
-      // Track win event for email popup
-      trackEvent('win', {
-        email: email,
-        discountCode: discountResult.code,
-        prizeLabel: '10% Discount',
-        metadata: {
-          popupType: 'email',
-          discountType: 'percentage',
-          discountValue: '10',
-          shopifyCreated: discountResult.shopifyCreated
-        }
-      });
-      
-      // Don't show manual instructions - just show the code
-      let instructionsHtml = '';
-      
-      formSection.innerHTML = `
-        <button class="popup-close" onclick="closePopup()" style="color: ${popupConfig.textColor || '#000000'};">&times;</button>
-        <div style="text-align: center; padding: 20px;">
-          <div style="font-size: 24px; margin-bottom: 15px;">🎉</div>
-          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 15px 0; color: ${popupConfig.textColor || '#000000'};">
-            Thank You!
-          </h3>
-          <p style="margin-bottom: 20px; color: ${popupConfig.textColor || '#000000'};">
-            Here's your exclusive 10% discount code:
-          </p>
-          <div onclick="copyDiscountCode()" style="
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 2px dashed #28a745;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-          ">
-            <div id="discount-code" style="
-              font-size: 28px;
-              font-weight: bold;
-              color: #28a745;
-              margin-bottom: 8px;
-              letter-spacing: 2px;
-              font-family: 'Courier New', monospace;
-            ">
-              ${discountResult.code}
-            </div>
-            <div style="font-size: 14px; color: #6c757d; font-style: italic;">
-              Click to copy to clipboard
-            </div>
-          </div>
-          <button id="copy-btn" onclick="copyDiscountCode()" style="
-            width: 100%;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border: none;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 10px;
-            font-size: 14px;
-          ">
-            📋 Copy Code
-          </button>
-          ${instructionsHtml}
-          <button onclick="window.closePopup()" style="
-            width: 100%;
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-          ">
-            Close
-          </button>
-        </div>
-      `;
-    } catch (error) {
-      console.error('Error generating discount code:', error);
-      formSection.innerHTML = `
-        <button class="popup-close" onclick="closePopup()" style="color: ${popupConfig.textColor || '#000000'};">&times;</button>
-        <div style="text-align: center; padding: 20px;">
-          <div style="font-size: 24px; margin-bottom: 15px;">❌</div>
-          <h3 style="color: ${popupConfig.textColor || '#000000'};">Oops! Something went wrong</h3>
-          <p style="color: ${popupConfig.textColor || '#000000'};">Please try again later or contact support.</p>
-          <button onclick="window.closePopup()" style="
-            width: 100%;
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 15px;
-          ">
-            Close
-          </button>
-        </div>
-      `;
-    }
   }
 
   // Make handleEmailSubmit globally accessible
   window.handleEmailSubmit = handleEmailSubmit;
 
   // Show winner display
-  function showWinnerDisplay(prizeLabel, discountCode, discountResult = {}) {
+  function showWinnerDisplay(prizeLabel, discountCode) {
     const formSection = document.querySelector('.form-section');
     
-    // Don't show manual instructions - just show the code
-    let instructionsHtml = '';
+    // Create consistent winning messages that match the wheel segment exactly
+    let congratsMessage = "🎉 CONGRATULATIONS!";
+    let winMessage = `YOU WON ${prizeLabel}!`;
+    let enjoyMessage = "Enjoy your discount!";
+    let codeMessage = "Use this discount code:";
+    
+    // Customize messages based on the exact prize label from the wheel
+    if (prizeLabel.toLowerCase().includes('free shipping')) {
+      enjoyMessage = "Enjoy free shipping on your order!";
+      codeMessage = "Use this code at checkout:";
+    } else if (prizeLabel.toLowerCase().includes('discount') || prizeLabel.toLowerCase().includes('%')) {
+      // Extract the discount amount from the label for consistent messaging
+      const discountMatch = prizeLabel.match(/(\d+%|\d+\s*%)/i);
+      if (discountMatch) {
+        enjoyMessage = `Enjoy ${discountMatch[0]} off your purchase!`;
+      } else {
+        enjoyMessage = `Enjoy your ${prizeLabel.toLowerCase()}!`;
+      }
+      codeMessage = "Use this discount code:";
+    }
     
     formSection.innerHTML = `
       <button class="popup-close" onclick="closePopup()">&times;</button>
-      <div class="form-title">🎉 CONGRATULATIONS!</div>
-      <div class="form-subtitle">YOU WON ${prizeLabel}!</div>
+      <div class="form-title">${congratsMessage}</div>
+      <div class="form-subtitle">${winMessage}</div>
       <div style="margin-top: 20px;">
         <div style="color: white; font-size: 16px; font-weight: 600; margin-bottom: 15px; text-align: center;">
-          Here's your discount code:
+          ${enjoyMessage}
+        </div>
+        <div style="color: white; font-size: 14px; margin-bottom: 15px; text-align: center;">
+          ${codeMessage}
         </div>
         <div class="discount-code-container" onclick="copyDiscountCode()" style="background: white; border: 2px dashed #28a745; border-radius: 12px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s ease;">
           <div class="discount-code-text" id="discount-code" style="font-size: 28px; font-weight: bold; color: #28a745; margin-bottom: 8px; letter-spacing: 2px; font-family: 'Courier New', monospace; text-align: center;">
@@ -1134,8 +1149,7 @@
         <button class="copy-button" id="copy-btn" onclick="copyDiscountCode()" style="width: 100%; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 10px; font-size: 14px;">
           📋 Copy Code
         </button>
-        ${instructionsHtml}
-        <button class="close-button" onclick="window.closePopup()" style="width: 100%; background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); border: none; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; margin-top: ${instructionsHtml ? '10px' : '0'};">
+        <button class="close-button" onclick="window.closePopup()" style="width: 100%; background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); border: none; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px;">
           Close
         </button>
       </div>
@@ -1146,16 +1160,41 @@
   function showTryAgainDisplay(prizeLabel) {
     const formSection = document.querySelector('.form-section');
     
+    // Create personalized losing messages based on the prize label
+    let titleMessage = `😔 ${prizeLabel}`;
+    let subtitleMessage = "Better luck next time!";
+    let encouragementMessage = "Don't worry! Keep shopping and you might get another chance to win amazing discounts.";
+    let buttonText = "Continue Shopping";
+    
+    // Customize messages based on prize label
+    if (prizeLabel.toLowerCase().includes('try again')) {
+      titleMessage = "🎯 TRY AGAIN";
+      subtitleMessage = "So close!";
+      encouragementMessage = "You were so close to winning! Keep browsing our amazing products and try again soon.";
+    } else if (prizeLabel.toLowerCase().includes('next time')) {
+      titleMessage = "⏰ NEXT TIME";
+      subtitleMessage = "Your luck is coming!";
+      encouragementMessage = "Great things come to those who wait. Continue shopping and your discount is waiting!";
+    } else if (prizeLabel.toLowerCase().includes('unlucky')) {
+      titleMessage = "🍀 UNLUCKY";
+      subtitleMessage = "But not for long!";
+      encouragementMessage = "Sometimes luck takes a moment to find you. Keep exploring our products!";
+    } else if (prizeLabel.toLowerCase().includes('no prize')) {
+      titleMessage = "🎁 NO PRIZE";
+      subtitleMessage = "This time!";
+      encouragementMessage = "No prize this round, but our amazing products are always a win. Keep shopping!";
+    }
+    
     formSection.innerHTML = `
       <button class="popup-close" onclick="closePopup()">&times;</button>
-      <div class="form-title">😔 ${prizeLabel}</div>
-      <div class="form-subtitle">Better luck next time!</div>
+      <div class="form-title">${titleMessage}</div>
+      <div class="form-subtitle">${subtitleMessage}</div>
       <div style="text-align: center; padding: 20px;">
         <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
-          Don't worry! Keep shopping and you might get another chance to win amazing discounts.
+          ${encouragementMessage}
         </p>
         <button class="close-button" onclick="window.closePopup()">
-          Continue Shopping
+          ${buttonText}
         </button>
       </div>
     `;

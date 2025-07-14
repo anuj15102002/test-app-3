@@ -148,35 +148,12 @@ export const action = async ({ request }) => {
 
 export default function PopupCustomizer() {
   const fetcher = useFetcher();
-  const discountCodesFetcher = useFetcher();
-  const analyticsFetcher = useFetcher();
   const shopify = useAppBridge();
   const loaderData = useLoaderData();
   const existingConfig = loaderData?.existingConfig || null;
   
   // Initialize popup type from existing config or default to wheel-email
   const [popupType, setPopupType] = useState(existingConfig?.type || "wheel-email");
-  const [analyticsTimeRange, setAnalyticsTimeRange] = useState("24h");
-  
-  // Load discount codes and analytics on component mount
-  useEffect(() => {
-    discountCodesFetcher.load("/api/admin/discount-codes");
-    analyticsFetcher.load(`/api/admin/analytics?timeRange=${analyticsTimeRange}`);
-  }, []);
-
-  // Reload analytics when time range changes
-  useEffect(() => {
-    analyticsFetcher.load(`/api/admin/analytics?timeRange=${analyticsTimeRange}`);
-  }, [analyticsTimeRange]);
-
-  // Auto-refresh analytics every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      analyticsFetcher.load(`/api/admin/analytics?timeRange=${analyticsTimeRange}`);
-    }, 30000);
-    
-    return () => clearInterval(interval);
-  }, [analyticsTimeRange]);
   
   // Email popup configuration
   const [emailConfig, setEmailConfig] = useState(() => {
@@ -268,6 +245,532 @@ export default function PopupCustomizer() {
   });
 
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+
+  const handleShowPreview = useCallback(() => {
+    setIsPreviewMode(!isPreviewMode);
+    
+    if (!isPreviewMode) {
+      // Show the popup overlay
+      setTimeout(() => {
+        const config = popupType === "email" ? emailConfig : wheelEmailConfig;
+        showPopupOverlay(config);
+      }, 100);
+    } else {
+      // Hide the popup overlay
+      hidePopupOverlay();
+    }
+  }, [isPreviewMode, popupType, emailConfig, wheelEmailConfig]);
+
+  const showPopupOverlay = (config) => {
+    // Create popup overlay if it doesn't exist
+    let overlay = document.getElementById('admin-popup-preview-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'admin-popup-preview-overlay';
+      document.body.appendChild(overlay);
+    }
+
+    overlay.innerHTML = `
+      <div id="custom-popup-overlay" style="display: flex;">
+        <div id="custom-popup" class="custom-popup">
+          <div class="popup-content">
+            <div class="wheel-section">
+              <div class="popup-wheel-container">
+                <!-- Wheel will be inserted here -->
+              </div>
+            </div>
+            <div class="form-section">
+              <button class="popup-close" onclick="window.hideAdminPopupPreview()">&times;</button>
+              <div class="form-title">GET YOUR CHANCE TO WIN</div>
+              <div class="form-subtitle">AMAZING DISCOUNTS!</div>
+              <p class="form-description">Enter your email below and spin the wheel to see if you're our next lucky winner!</p>
+              <div class="popup-form">
+                <!-- Form content will be dynamically inserted here -->
+              </div>
+              <div class="house-rules">
+                <h4>The House rules:</h4>
+                <ul>
+                  <li>Winnings through cheating will not be processed.</li>
+                  <li>Only one spin allowed</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        #admin-popup-preview-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10000;
+        }
+
+        #custom-popup-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        .custom-popup {
+          background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+          border-radius: 12px;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+          max-width: 600px;
+          width: 90%;
+          max-height: 90vh;
+          overflow: hidden;
+          position: relative;
+          animation: popupSlideIn 0.3s ease-out;
+          display: flex;
+          align-items: center;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes popupSlideIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
+        .popup-content {
+          padding: 0;
+          text-align: center;
+          display: flex;
+          width: 100%;
+          min-height: 400px;
+        }
+
+        .wheel-section {
+          flex: 1;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          padding-right: 0;
+          overflow: hidden;
+        }
+
+        .form-section {
+          flex: 1;
+          padding: 40px 30px;
+          color: white;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .form-title {
+          font-size: 24px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          color: white;
+        }
+
+        .form-subtitle {
+          font-size: 16px;
+          margin-bottom: 25px;
+          color: rgba(255, 255, 255, 0.9);
+          line-height: 1.4;
+        }
+
+        .email-input {
+          width: 100%;
+          padding: 15px;
+          border: none;
+          border-radius: 8px;
+          margin-bottom: 15px;
+          font-size: 16px;
+          box-sizing: border-box;
+        }
+
+        .spin-button {
+          width: 100%;
+          padding: 15px;
+          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+          border: none;
+          border-radius: 8px;
+          color: white;
+          font-size: 16px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .spin-button:hover {
+          background: linear-gradient(135deg, #ee5a52 0%, #dc4c41 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(238, 90, 82, 0.4);
+        }
+
+        .house-rules {
+          margin-top: 20px;
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.7);
+          text-align: left;
+        }
+
+        .house-rules h4 {
+          margin: 0 0 8px 0;
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .house-rules ul {
+          margin: 0;
+          padding-left: 15px;
+          list-style-type: disc;
+        }
+
+        .house-rules li {
+          margin-bottom: 4px;
+          line-height: 1.3;
+        }
+
+        .popup-close {
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
+          font-size: 18px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s ease;
+          color: white;
+        }
+
+        .popup-close:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-description {
+          font-size: 14px;
+          margin-bottom: 25px;
+          color: rgba(255, 255, 255, 0.8);
+          line-height: 1.4;
+        }
+
+        .spinning-wheel {
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          border: 8px solid white;
+          position: relative;
+          transition: transform 0.5s ease-out;
+          transform: translateX(-50%) rotate(0deg);
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .wheel-center {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 4px solid #1e3c72;
+          z-index: 5;
+        }
+
+        .wheel-pointer {
+          position: absolute;
+          top: 50%;
+          right: -12px;
+          transform: translateY(-50%);
+          width: 0;
+          height: 0;
+          border-top: 12px solid transparent;
+          border-bottom: 12px solid transparent;
+          border-left: 20px solid white;
+          z-index: 10;
+        }
+
+        .wheel-segment-label {
+          font-family: Arial, sans-serif;
+          user-select: none;
+          z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+          .custom-popup {
+            max-width: 90vw;
+            margin: 20px;
+            flex-direction: column;
+          }
+          
+          .popup-content {
+            flex-direction: column;
+            min-height: auto;
+          }
+          
+          .wheel-section {
+            order: 2;
+            padding: 20px 0;
+          }
+          
+          .form-section {
+            order: 1;
+            padding: 30px 20px 20px;
+          }
+          
+          .spinning-wheel {
+            width: 200px;
+            height: 200px;
+            transform: none;
+            margin: 0 auto;
+          }
+          
+          .form-title {
+            font-size: 20px;
+          }
+          
+          .form-subtitle {
+            font-size: 14px;
+          }
+          
+          .email-input {
+            font-size: 16px;
+          }
+        }
+      </style>
+    `;
+
+    // Configure the popup based on type
+    const popup = overlay.querySelector('#custom-popup');
+    const wheelContainer = overlay.querySelector('.popup-wheel-container');
+    const formSection = overlay.querySelector('.form-section');
+
+    if (popupType === 'email') {
+      // Email popup configuration
+      popup.style.background = config.backgroundColor || '#ffffff';
+      popup.style.maxWidth = '400px';
+      popup.style.display = 'block';
+      
+      const wheelSection = overlay.querySelector('.wheel-section');
+      wheelSection.style.display = 'none';
+      formSection.style.flex = 'none';
+      formSection.style.width = '100%';
+      formSection.style.padding = '24px';
+      formSection.style.color = config.textColor || '#000000';
+      
+      formSection.innerHTML = `
+        <button class="popup-close" onclick="window.hideAdminPopupPreview()" style="color: ${config.textColor || '#000000'};">&times;</button>
+        <div style="text-align: center;">
+          <div style="font-size: 24px; margin-bottom: 10px; color: ${config.textColor || '#000000'};">📧</div>
+          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 15px 0; color: ${config.textColor || '#000000'};">
+            ${config.title}
+          </h3>
+          <p style="margin-bottom: 20px; line-height: 1.5; color: ${config.textColor || '#000000'};">
+            ${config.description}
+          </p>
+          <input type="email" id="popup-email" placeholder="${config.placeholder}" style="
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px;
+            margin-bottom: 15px; font-size: 14px; box-sizing: border-box;
+          " />
+          <button onclick="window.handlePreviewEmailSubmit()" style="
+            width: 100%; padding: 12px 24px; border: none; border-radius: 6px;
+            font-weight: 600; cursor: pointer; font-size: 14px;
+            background-color: ${config.buttonColor || '#007ace'}; color: white;
+          ">
+            ${config.buttonText}
+          </button>
+        </div>
+      `;
+    } else {
+      // Wheel-email combo configuration
+      popup.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+      popup.style.maxWidth = '600px';
+      popup.style.display = 'flex';
+      
+      const wheelSection = overlay.querySelector('.wheel-section');
+      wheelSection.style.display = 'flex';
+      formSection.style.flex = '1';
+      formSection.style.width = 'auto';
+      formSection.style.padding = '40px 30px';
+      formSection.style.color = 'white';
+      
+      formSection.innerHTML = `
+        <button class="popup-close" onclick="window.hideAdminPopupPreview()">&times;</button>
+        <div class="form-title">${config.title || 'GET YOUR CHANCE TO WIN'}</div>
+        <div class="form-subtitle">${config.subtitle || 'AMAZING DISCOUNTS!'}</div>
+        <p class="form-description">${config.description || 'Enter your email below and spin the wheel to see if you are our next lucky winner!'}</p>
+        <div class="popup-form">
+          <input type="email" class="email-input" id="popup-email" placeholder="${config.placeholder || 'Your email'}" />
+          <button class="spin-button" onclick="window.handlePreviewEmailAndSpin()">
+            ${config.buttonText || 'TRY YOUR LUCK'}
+          </button>
+        </div>
+        <div class="house-rules">
+          <h4>The House rules:</h4>
+          <ul>
+            <li>Winnings through cheating will not be processed.</li>
+            <li>Only one spin allowed</li>
+          </ul>
+        </div>
+      `;
+      
+      // Create wheel
+      const segments = config.segments || [
+        { label: '5% OFF', color: '#ff6b6b', value: '5' },
+        { label: '10% OFF', color: '#4ecdc4', value: '10' },
+        { label: '15% OFF', color: '#45b7d1', value: '15' },
+        { label: '20% OFF', color: '#96ceb4', value: '20' },
+        { label: 'FREE SHIPPING', color: '#feca57', value: 'shipping' },
+        { label: 'TRY AGAIN', color: '#1e3c72', value: null }
+      ];
+      
+      const angle = 360 / segments.length;
+      const gradient = segments.map((s, i) => `${s.color} ${i * angle}deg ${(i + 1) * angle}deg`).join(', ');
+      
+      const segmentLabels = segments.map((segment, index) => {
+        const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
+        const radius = 80; // Reduced radius to keep text within wheel boundaries
+        const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
+        const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
+        
+        return `
+          <div class="wheel-segment-label" style="
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) translate(${x}px, ${y}px);
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            pointer-events: none;
+            text-align: center;
+            line-height: 1.1;
+            max-width: 60px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 20px;
+          ">
+            ${segment.label}
+          </div>
+        `;
+      }).join('');
+      
+      wheelContainer.innerHTML = `
+        <div class="spinning-wheel" id="spinning-wheel" style="background: conic-gradient(${gradient}); position: relative;">
+          <div class="wheel-pointer"></div>
+          <div class="wheel-center"></div>
+          ${segmentLabels}
+        </div>
+      `;
+    }
+
+    // Add global functions for preview
+    window.hideAdminPopupPreview = () => {
+      const overlay = document.getElementById('admin-popup-preview-overlay');
+      if (overlay) {
+        overlay.remove();
+      }
+      setIsPreviewMode(false);
+    };
+
+    window.handlePreviewEmailSubmit = () => {
+      const email = overlay.querySelector('#popup-email')?.value;
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+      alert('🎉 Preview Mode: Email submitted successfully!\n\nIn live mode, this would generate a real discount code.');
+      window.hideAdminPopupPreview();
+    };
+
+    window.handlePreviewEmailAndSpin = () => {
+      const email = overlay.querySelector('#popup-email')?.value;
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+      
+      const segments = config.segments || [
+        { label: '5% OFF', color: '#ff6b6b', value: '5' },
+        { label: '10% OFF', color: '#4ecdc4', value: '10' },
+        { label: '15% OFF', color: '#45b7d1', value: '15' },
+        { label: '20% OFF', color: '#96ceb4', value: '20' },
+        { label: 'FREE SHIPPING', color: '#feca57', value: 'shipping' },
+        { label: 'TRY AGAIN', color: '#1e3c72', value: null }
+      ];
+      
+      const prizeIndex = Math.floor(Math.random() * segments.length);
+      const prize = segments[prizeIndex];
+      
+      const wheel = overlay.querySelector('#spinning-wheel');
+      const button = overlay.querySelector('.spin-button');
+      
+      button.disabled = true;
+      button.textContent = 'SPINNING...';
+      
+      const segmentAngle = 360 / segments.length;
+      const targetAngle = (prizeIndex * segmentAngle) + (segmentAngle / 2);
+      const fullRotations = 3 + Math.random() * 2;
+      const finalRotation = (fullRotations * 360) + (360 - targetAngle);
+      
+      wheel.style.transition = 'transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+      wheel.style.transform = `translateX(-50%) rotate(${finalRotation}deg)`;
+      
+      setTimeout(() => {
+        const isWinner = prize.value || prize.label.toLowerCase().includes('off') || prize.label.toLowerCase().includes('shipping');
+        
+        if (isWinner) {
+          alert(`🎉 Congratulations! You won: ${prize.label}!\n\nIn live mode, this would generate a real discount code.`);
+        } else {
+          alert(`😔 ${prize.label}\n\nBetter luck next time!`);
+        }
+        window.hideAdminPopupPreview();
+      }, 3000);
+    };
+
+    // Click outside to close
+    overlay.addEventListener('click', (e) => {
+      if (e.target.id === 'custom-popup-overlay') {
+        window.hideAdminPopupPreview();
+      }
+    });
+  };
+
+  const hidePopupOverlay = () => {
+    const overlay = document.getElementById('admin-popup-preview-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+  };
+
 
   const handleSaveConfig = useCallback(() => {
     const config = popupType === "email" ? emailConfig : wheelEmailConfig;
@@ -829,7 +1332,7 @@ export default function PopupCustomizer() {
                   <Button onClick={handleSaveConfig} variant="primary">
                     Save Configuration
                   </Button>
-                  <Button onClick={() => setIsPreviewMode(!isPreviewMode)}>
+                  <Button onClick={handleShowPreview}>
                     {isPreviewMode ? "Hide Preview" : "Show Preview"}
                   </Button>
                 </InlineStack>
@@ -840,217 +1343,6 @@ export default function PopupCustomizer() {
           <Layout.Section variant="oneThird">
             <BlockStack gap="500">
               {renderPreview()}
-              
-              <Card>
-                <BlockStack gap="300">
-                  <InlineStack align="space-between">
-                    <Text as="h3" variant="headingMd">
-                      Real-time Analytics
-                    </Text>
-                    <Select
-                      options={[
-                        { label: "Last 24 hours", value: "24h" },
-                        { label: "Last 7 days", value: "7d" },
-                        { label: "Last 30 days", value: "30d" },
-                      ]}
-                      value={analyticsTimeRange}
-                      onChange={setAnalyticsTimeRange}
-                    />
-                  </InlineStack>
-                  
-                  {analyticsFetcher.data?.success ? (
-                    <BlockStack gap="300">
-                      <BlockStack gap="200">
-                        <InlineStack align="space-between">
-                          <Text as="span" variant="bodyMd">
-                            Total Views
-                          </Text>
-                          <Badge>{analyticsFetcher.data.analytics.summary.totalViews.toLocaleString()}</Badge>
-                        </InlineStack>
-                        <InlineStack align="space-between">
-                          <Text as="span" variant="bodyMd">
-                            Emails Collected
-                          </Text>
-                          <Badge tone="success">{analyticsFetcher.data.analytics.summary.emailsEntered.toLocaleString()}</Badge>
-                        </InlineStack>
-                        <InlineStack align="space-between">
-                          <Text as="span" variant="bodyMd">
-                            Wheel Spins
-                          </Text>
-                          <Badge tone="info">{analyticsFetcher.data.analytics.summary.spins.toLocaleString()}</Badge>
-                        </InlineStack>
-                        <InlineStack align="space-between">
-                          <Text as="span" variant="bodyMd">
-                            Winners
-                          </Text>
-                          <Badge tone="success">{analyticsFetcher.data.analytics.summary.wins.toLocaleString()}</Badge>
-                        </InlineStack>
-                        <InlineStack align="space-between">
-                          <Text as="span" variant="bodyMd">
-                            Codes Copied
-                          </Text>
-                          <Badge tone="attention">{analyticsFetcher.data.analytics.summary.codesCopied.toLocaleString()}</Badge>
-                        </InlineStack>
-                      </BlockStack>
-                      
-                      <Divider />
-                      
-                      <BlockStack gap="200">
-                        <Text as="h4" variant="headingSm">Conversion Rates</Text>
-                        <InlineStack align="space-between">
-                          <Text as="span" variant="bodyMd">
-                            Email Conversion
-                          </Text>
-                          <Badge tone={analyticsFetcher.data.analytics.summary.emailConversionRate > 10 ? "success" : "warning"}>
-                            {analyticsFetcher.data.analytics.summary.emailConversionRate}%
-                          </Badge>
-                        </InlineStack>
-                        <InlineStack align="space-between">
-                          <Text as="span" variant="bodyMd">
-                            Win Rate
-                          </Text>
-                          <Badge tone={analyticsFetcher.data.analytics.summary.winRate > 20 ? "success" : "info"}>
-                            {analyticsFetcher.data.analytics.summary.winRate}%
-                          </Badge>
-                        </InlineStack>
-                        <InlineStack align="space-between">
-                          <Text as="span" variant="bodyMd">
-                            Copy Rate
-                          </Text>
-                          <Badge tone={analyticsFetcher.data.analytics.summary.copyRate > 80 ? "success" : "warning"}>
-                            {analyticsFetcher.data.analytics.summary.copyRate}%
-                          </Badge>
-                        </InlineStack>
-                      </BlockStack>
-                      
-                      <Text as="p" variant="bodySm" tone="subdued">
-                        Last updated: {new Date(analyticsFetcher.data.analytics.lastUpdated).toLocaleTimeString()}
-                      </Text>
-                    </BlockStack>
-                  ) : (
-                    <BlockStack gap="200">
-                      <Text as="p" variant="bodyMd">Loading analytics...</Text>
-                      <InlineStack align="space-between">
-                        <Text as="span" variant="bodyMd">Total Views</Text>
-                        <Badge>-</Badge>
-                      </InlineStack>
-                      <InlineStack align="space-between">
-                        <Text as="span" variant="bodyMd">Conversions</Text>
-                        <Badge>-</Badge>
-                      </InlineStack>
-                    </BlockStack>
-                  )}
-                </BlockStack>
-              </Card>
-              
-              <Card>
-                <BlockStack gap="300">
-                  <Text as="h3" variant="headingMd">
-                    Live Activity Feed
-                  </Text>
-                  {analyticsFetcher.data?.success && analyticsFetcher.data.analytics.recentEvents ? (
-                    analyticsFetcher.data.analytics.recentEvents.length > 0 ? (
-                      <BlockStack gap="200">
-                        {analyticsFetcher.data.analytics.recentEvents.map((event, index) => (
-                          <Box key={event.id} padding="300" background="bg-surface-secondary" borderRadius="200">
-                            <InlineStack align="space-between">
-                              <BlockStack gap="100">
-                                <InlineStack gap="200" align="center">
-                                  <Badge tone={
-                                    event.eventType === 'win' ? 'success' :
-                                    event.eventType === 'view' ? 'info' :
-                                    event.eventType === 'email_entered' ? 'attention' :
-                                    event.eventType === 'copy_code' ? 'success' :
-                                    'subdued'
-                                  }>
-                                    {event.eventType === 'view' ? '👁️ View' :
-                                     event.eventType === 'email_entered' ? '📧 Email' :
-                                     event.eventType === 'spin' ? '🎡 Spin' :
-                                     event.eventType === 'win' ? '🎉 Win' :
-                                     event.eventType === 'lose' ? '😔 Lose' :
-                                     event.eventType === 'copy_code' ? '📋 Copy' :
-                                     event.eventType === 'close' ? '❌ Close' :
-                                     event.eventType}
-                                  </Badge>
-                                  {event.email && (
-                                    <Text as="span" variant="bodyMd" tone="subdued">
-                                      {event.email.substring(0, 3)}***@{event.email.split('@')[1]}
-                                    </Text>
-                                  )}
-                                  {event.prizeLabel && (
-                                    <Text as="span" variant="bodyMd">
-                                      {event.prizeLabel}
-                                    </Text>
-                                  )}
-                                  {event.discountCode && (
-                                    <Text as="span" variant="bodyMd" fontWeight="semibold">
-                                      {event.discountCode}
-                                    </Text>
-                                  )}
-                                </InlineStack>
-                              </BlockStack>
-                              <Text as="span" variant="bodySm" tone="subdued">
-                                {event.timeAgo}
-                              </Text>
-                            </InlineStack>
-                          </Box>
-                        ))}
-                      </BlockStack>
-                    ) : (
-                      <EmptyState
-                        heading="No activity yet"
-                        image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-                      >
-                        <p>Activity will appear here when customers interact with your popup.</p>
-                      </EmptyState>
-                    )
-                  ) : (
-                    <Text as="p" variant="bodyMd">Loading activity...</Text>
-                  )}
-                </BlockStack>
-              </Card>
-
-              <Card>
-                <BlockStack gap="200">
-                  <Text as="h3" variant="headingMd">
-                    Generated Discount Codes
-                  </Text>
-                  {discountCodesFetcher.data?.success ? (
-                    discountCodesFetcher.data.discountCodes.length > 0 ? (
-                      <DataTable
-                        columnContentTypes={['text', 'text', 'text', 'text', 'text']}
-                        headings={['Code', 'Email', 'Value', 'Status', 'Created']}
-                        rows={discountCodesFetcher.data.discountCodes.slice(0, 5).map(code => [
-                          code.code,
-                          code.email,
-                          `${code.discountValue}${code.discountType === 'percentage' ? '%' : '$'} off`,
-                          code.isActive ?
-                            <Badge tone="success">Active</Badge> :
-                            <Badge tone="critical">Inactive</Badge>,
-                          new Date(code.createdAt).toLocaleDateString()
-                        ])}
-                      />
-                    ) : (
-                      <EmptyState
-                        heading="No discount codes yet"
-                        image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-                      >
-                        <p>Discount codes will appear here when customers claim them from your popup.</p>
-                      </EmptyState>
-                    )
-                  ) : (
-                    <Text as="p" variant="bodyMd">Loading discount codes...</Text>
-                  )}
-                  {discountCodesFetcher.data?.discountCodes?.length > 5 && (
-                    <Button
-                      onClick={() => discountCodesFetcher.load("/api/admin/discount-codes")}
-                      variant="plain"
-                    >
-                      View all {discountCodesFetcher.data.discountCodes.length} codes
-                    </Button>
-                  )}
-                </BlockStack>
-              </Card>
               
               <Card>
                 <BlockStack gap="200">
@@ -1068,7 +1360,7 @@ export default function PopupCustomizer() {
                       • Use contrasting colors for better visibility
                     </Text>
                     <Text as="p" variant="bodyMd">
-                      • Discount codes are automatically created in Shopify
+                      • Configure discount codes in the wheel segments
                     </Text>
                   </BlockStack>
                 </BlockStack>

@@ -19,6 +19,21 @@ import {
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -72,67 +87,109 @@ export default function AnalyticsPage() {
   const renderHourlyChart = () => {
     if (!analytics?.hourlyData) return null;
 
-    const maxViews = Math.max(...analytics.hourlyData.map(h => h.views));
-    const maxEmails = Math.max(...analytics.hourlyData.map(h => h.emails));
-    const maxWins = Math.max(...analytics.hourlyData.map(h => h.wins));
+    // Prepare data for the chart
+    const chartData = analytics.hourlyData.map((hour) => ({
+      time: `${hour.hour}:00`,
+      hour: hour.hour,
+      Views: hour.views,
+      Emails: hour.emails,
+      Wins: hour.wins,
+    }));
 
     return (
       <Card>
         <BlockStack gap="400">
           <Text as="h3" variant="headingMd">
-            Hourly Performance (Last 24 Hours)
+            Performance Trends ({timeRange === '24h' ? 'Last 24 Hours' : timeRange === '7d' ? 'Last 7 Days' : 'Last 30 Days'})
           </Text>
-          <Box padding="400" background="bg-surface-secondary" borderRadius="200">
-            <BlockStack gap="300">
-              {analytics.hourlyData.slice(-12).map((hour, index) => (
-                <InlineStack key={hour.hour} align="space-between" gap="400">
-                  <Text as="span" variant="bodyMd" fontWeight="semibold">
-                    {hour.hour}:00
-                  </Text>
-                  <InlineStack gap="400" align="center">
-                    <Box minWidth="100px">
-                      <InlineStack gap="200" align="center">
-                        <Text as="span" variant="bodySm">Views:</Text>
-                        <Badge tone="info">{hour.views}</Badge>
-                        <Box width="60px">
-                          <ProgressBar 
-                            progress={maxViews > 0 ? (hour.views / maxViews) * 100 : 0} 
-                            tone="info" 
-                            size="small"
-                          />
-                        </Box>
-                      </InlineStack>
-                    </Box>
-                    <Box minWidth="100px">
-                      <InlineStack gap="200" align="center">
-                        <Text as="span" variant="bodySm">Emails:</Text>
-                        <Badge tone="success">{hour.emails}</Badge>
-                        <Box width="60px">
-                          <ProgressBar 
-                            progress={maxEmails > 0 ? (hour.emails / maxEmails) * 100 : 0} 
-                            tone="success" 
-                            size="small"
-                          />
-                        </Box>
-                      </InlineStack>
-                    </Box>
-                    <Box minWidth="100px">
-                      <InlineStack gap="200" align="center">
-                        <Text as="span" variant="bodySm">Wins:</Text>
-                        <Badge tone="attention">{hour.wins}</Badge>
-                        <Box width="60px">
-                          <ProgressBar 
-                            progress={maxWins > 0 ? (hour.wins / maxWins) * 100 : 0} 
-                            tone="attention" 
-                            size="small"
-                          />
-                        </Box>
-                      </InlineStack>
-                    </Box>
-                  </InlineStack>
-                </InlineStack>
-              ))}
-            </BlockStack>
+          <Box padding="400">
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e1e5e9" />
+                <XAxis
+                  dataKey="time"
+                  stroke="#6c7b7f"
+                  fontSize={12}
+                />
+                <YAxis stroke="#6c7b7f" fontSize={12} />
+                <RechartsTooltip
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e1e5e9',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="Views"
+                  stroke="#2563eb"
+                  strokeWidth={2}
+                  dot={{ fill: '#2563eb', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#2563eb', strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Emails"
+                  stroke="#16a34a"
+                  strokeWidth={2}
+                  dot={{ fill: '#16a34a', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#16a34a', strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Wins"
+                  stroke="#dc2626"
+                  strokeWidth={2}
+                  dot={{ fill: '#dc2626', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#dc2626', strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </Box>
+        </BlockStack>
+      </Card>
+    );
+  };
+
+  const renderConversionFunnelChart = () => {
+    if (!analytics?.summary) return null;
+
+    const funnelData = [
+      { name: 'Views', value: analytics.summary.totalViews, color: '#2563eb' },
+      { name: 'Emails', value: analytics.summary.emailsEntered, color: '#16a34a' },
+      { name: 'Spins', value: analytics.summary.spins, color: '#f59e0b' },
+      { name: 'Wins', value: analytics.summary.wins, color: '#dc2626' },
+    ];
+
+    return (
+      <Card>
+        <BlockStack gap="400">
+          <Text as="h3" variant="headingMd">
+            Conversion Funnel
+          </Text>
+          <Box padding="400">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={funnelData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e1e5e9" />
+                <XAxis
+                  dataKey="name"
+                  stroke="#6c7b7f"
+                  fontSize={12}
+                />
+                <YAxis stroke="#6c7b7f" fontSize={12} />
+                <RechartsTooltip
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e1e5e9',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </Box>
         </BlockStack>
       </Card>
@@ -160,32 +217,81 @@ export default function AnalyticsPage() {
     const sortedPrizes = Object.entries(analytics.prizeDistribution)
       .sort(([,a], [,b]) => b - a);
 
+    // Prepare data for pie chart
+    const pieData = sortedPrizes.map(([prize, count], index) => ({
+      name: prize,
+      value: count,
+      percentage: totalPrizes > 0 ? ((count / totalPrizes) * 100).toFixed(1) : 0,
+    }));
+
+    const COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'];
+
     return (
       <Card>
         <BlockStack gap="400">
           <Text as="h3" variant="headingMd">Prize Distribution</Text>
-          <BlockStack gap="300">
-            {sortedPrizes.map(([prize, count]) => {
-              const percentage = totalPrizes > 0 ? ((count / totalPrizes) * 100).toFixed(1) : 0;
-              return (
-                <Box key={prize} padding="300" background="bg-surface-secondary" borderRadius="200">
-                  <InlineStack align="space-between">
-                    <BlockStack gap="100">
-                      <Text as="span" variant="bodyMd" fontWeight="semibold">
-                        {prize}
-                      </Text>
-                      <Text as="span" variant="bodySm" tone="subdued">
-                        {count} wins ({percentage}%)
-                      </Text>
-                    </BlockStack>
-                    <Box width="100px">
-                      <ProgressBar progress={parseFloat(percentage)} tone="success" />
+          <Layout>
+            <Layout.Section oneHalf>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percentage }) => `${name}: ${percentage}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e1e5e9',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </Layout.Section>
+            <Layout.Section oneHalf>
+              <BlockStack gap="300">
+                {sortedPrizes.map(([prize, count], index) => {
+                  const percentage = totalPrizes > 0 ? ((count / totalPrizes) * 100).toFixed(1) : 0;
+                  return (
+                    <Box key={prize} padding="300" background="bg-surface-secondary" borderRadius="200">
+                      <InlineStack align="space-between">
+                        <InlineStack gap="200" align="center">
+                          <Box
+                            width="12px"
+                            height="12px"
+                            background={COLORS[index % COLORS.length]}
+                            borderRadius="50%"
+                          />
+                          <BlockStack gap="100">
+                            <Text as="span" variant="bodyMd" fontWeight="semibold">
+                              {prize}
+                            </Text>
+                            <Text as="span" variant="bodySm" tone="subdued">
+                              {count} wins ({percentage}%)
+                            </Text>
+                          </BlockStack>
+                        </InlineStack>
+                        <Box width="100px">
+                          <ProgressBar progress={parseFloat(percentage)} tone="success" />
+                        </Box>
+                      </InlineStack>
                     </Box>
-                  </InlineStack>
-                </Box>
-              );
-            })}
-          </BlockStack>
+                  );
+                })}
+              </BlockStack>
+            </Layout.Section>
+          </Layout>
         </BlockStack>
       </Card>
     );
@@ -387,10 +493,16 @@ export default function AnalyticsPage() {
 
                 <Layout>
                   <Layout.Section oneHalf>
-                    {renderPrizeDistribution()}
+                    {renderConversionFunnelChart()}
                   </Layout.Section>
                   <Layout.Section oneHalf>
                     {renderActivityFeed()}
+                  </Layout.Section>
+                </Layout>
+
+                <Layout>
+                  <Layout.Section>
+                    {renderPrizeDistribution()}
                   </Layout.Section>
                 </Layout>
               </BlockStack>

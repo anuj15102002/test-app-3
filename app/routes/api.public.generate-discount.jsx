@@ -85,12 +85,16 @@ export const action = async ({ request }) => {
         fallbackCode += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       
+      // Normalize discount type and value for consistency
+      const finalDiscountType = (discountType === "shipping" || discountValue === "100") ? "shipping" : discountType;
+      const finalDiscountValue = (discountType === "shipping" || discountValue === "100") ? "100" : discountValue;
+      
       // Fallback: Return simple discount code
       return json({
         success: true,
         discountCode: fallbackCode,
-        discountType: discountType,
-        discountValue: discountValue,
+        discountType: finalDiscountType,
+        discountValue: finalDiscountValue,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         shopifyCreated: false,
       }, {

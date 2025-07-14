@@ -61,11 +61,14 @@ export const action = async ({ request }) => {
     if (!session || !session.accessToken) {
       console.error(`No valid session found for shop: ${shopDomain}`);
       // Instead of throwing error, return a fallback response
+      const finalDiscountType = (discountType === "shipping" || discountValue === "100") ? "shipping" : discountType;
+      const finalDiscountValue = (discountType === "shipping" || discountValue === "100") ? "100" : discountValue;
+      
       return json({
         success: true,
         discountCode: discountCode,
-        discountType: discountType,
-        discountValue: discountValue,
+        discountType: finalDiscountType,
+        discountValue: finalDiscountValue,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         shopifyCreated: false,
         error: "No valid session found - app may need to be reinstalled"
@@ -73,21 +76,43 @@ export const action = async ({ request }) => {
     }
 
     // Create discount using REST API (simpler and more reliable)
-    const priceRuleData = {
-      price_rule: {
-        title: `Popup Discount ${discountCode}`,
-        target_type: "line_item",
-        target_selection: "all",
-        allocation_method: "across",
-        value_type: discountType === "percentage" ? "percentage" : "fixed_amount",
-        value: discountType === "percentage" ? `-${discountValue}` : `-${discountValue}.00`,
-        customer_selection: "all",
-        once_per_customer: true,
-        usage_limit: 1,
-        starts_at: new Date().toISOString(),
-        ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      }
-    };
+    let priceRuleData;
+    
+    if (discountType === "shipping" || discountValue === "100") {
+      // Free shipping discount
+      priceRuleData = {
+        price_rule: {
+          title: `Free Shipping ${discountCode}`,
+          target_type: "shipping_line",
+          target_selection: "all",
+          allocation_method: "across",
+          value_type: "percentage",
+          value: "-100.0",
+          customer_selection: "all",
+          once_per_customer: true,
+          usage_limit: 1,
+          starts_at: new Date().toISOString(),
+          ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }
+      };
+    } else {
+      // Regular percentage or fixed amount discount
+      priceRuleData = {
+        price_rule: {
+          title: `Popup Discount ${discountCode}`,
+          target_type: "line_item",
+          target_selection: "all",
+          allocation_method: "across",
+          value_type: discountType === "percentage" ? "percentage" : "fixed_amount",
+          value: discountType === "percentage" ? `-${discountValue}` : `-${discountValue}.00`,
+          customer_selection: "all",
+          once_per_customer: true,
+          usage_limit: 1,
+          starts_at: new Date().toISOString(),
+          ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }
+      };
+    }
 
     // Create price rule
     console.log(`Attempting to create price rule for shop: ${session.shop}`);
@@ -109,11 +134,14 @@ export const action = async ({ request }) => {
       console.error("Price rule creation failed:", priceRuleResponse.status, errorText);
       
       // Return fallback instead of throwing error
+      const finalDiscountType = (discountType === "shipping" || discountValue === "100") ? "shipping" : discountType;
+      const finalDiscountValue = (discountType === "shipping" || discountValue === "100") ? "100" : discountValue;
+      
       return json({
         success: true,
         discountCode: discountCode,
-        discountType: discountType,
-        discountValue: discountValue,
+        discountType: finalDiscountType,
+        discountValue: finalDiscountValue,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         shopifyCreated: false,
         error: `Shopify API error: ${priceRuleResponse.status}`
@@ -145,11 +173,14 @@ export const action = async ({ request }) => {
       console.error("Discount code creation failed:", discountCodeResponse.status, errorText);
       
       // Return fallback instead of throwing error
+      const finalDiscountType = (discountType === "shipping" || discountValue === "100") ? "shipping" : discountType;
+      const finalDiscountValue = (discountType === "shipping" || discountValue === "100") ? "100" : discountValue;
+      
       return json({
         success: true,
         discountCode: discountCode,
-        discountType: discountType,
-        discountValue: discountValue,
+        discountType: finalDiscountType,
+        discountValue: finalDiscountValue,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         shopifyCreated: false,
         error: `Discount code creation failed: ${discountCodeResponse.status}`
@@ -163,13 +194,16 @@ export const action = async ({ request }) => {
 
     // Save to database for tracking
     try {
+      const finalDiscountType = (discountType === "shipping" || discountValue === "100") ? "shipping" : discountType;
+      const finalDiscountValue = (discountType === "shipping" || discountValue === "100") ? "100" : discountValue;
+      
       await prisma.discountCode.create({
         data: {
           shop: session.shop,
           email: email,
           code: discountCode,
-          discountType: discountType,
-          discountValue: discountValue,
+          discountType: finalDiscountType,
+          discountValue: finalDiscountValue,
           priceRuleId: priceRuleId.toString(),
           discountCodeId: discountCodeId.toString(),
           isActive: true,
@@ -180,17 +214,20 @@ export const action = async ({ request }) => {
         },
       });
 
-      console.log(`Saved discount code to database: ${discountCode}`);
+      console.log(`Saved discount code to database: ${discountCode} (${finalDiscountType}: ${finalDiscountValue})`);
     } catch (dbError) {
       console.error("Database save error:", dbError);
       // Don't fail the request if database save fails, the Shopify discount is already created
     }
 
+    const finalDiscountType = (discountType === "shipping" || discountValue === "100") ? "shipping" : discountType;
+    const finalDiscountValue = (discountType === "shipping" || discountValue === "100") ? "100" : discountValue;
+
     return json({
       success: true,
       discountCode: discountCode,
-      discountType: discountType,
-      discountValue: discountValue,
+      discountType: finalDiscountType,
+      discountValue: finalDiscountValue,
       expiresAt: priceRuleData.price_rule.ends_at,
       shopifyCreated: true,
     });
