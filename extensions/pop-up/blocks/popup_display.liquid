@@ -457,6 +457,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
+  let applicationUrl = '';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -476,7 +477,7 @@
       if (metaAppUrl && metaAppUrl.trim() !== '') {
         endpoint = `${metaAppUrl}/api/public/analytics`;
       } else {
-        endpoint = `https://suzuki-accessing-acre-maintenance.trycloudflare.com/api/public/analytics`;
+        endpoint = `${applicationUrl}/api/public/analytics`;
       }
       
       const formData = new FormData();
@@ -537,7 +538,7 @@
         // Try current origin (might be the tunnel URL)
         console.log(currentOrigin + "currentOrigin");
         endpoints = [
-          `${currentOrigin}/api/public/popup-config?shop=${shopDomain}`,
+          `${applicationUrl}/api/public/popup-config?shop=${shopDomain}`,
           `/api/public/popup-config?shop=${shopDomain}`,
         ];
       }
@@ -550,7 +551,7 @@
     for (const endpoint of endpoints) {
       try {
         console.log('Fetching popup config from:', endpoint);
-        const res = await fetch(`https://albums-sucking-aims-rw.trycloudflare.com/api/public/popup-config?shop=${shopDomain}`, {
+        const res = await fetch(`${applicationUrl}/api/public/popup-config?shop=${shopDomain}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -804,9 +805,9 @@
         // Fallback endpoints
         const isLocalhost = window.location.hostname === 'localhost';
         if (isLocalhost) {
-          endpoint = `https://albums-sucking-aims-rw.trycloudflare.com/api/public/generate-discount`;
+          endpoint = `${applicationUrl}/api/public/generate-discount`;
         } else {
-          endpoint = `https://albums-sucking-aims-rw.trycloudflare.com/api/public/generate-discount`;
+          endpoint = `${applicationUrl}/api/public/generate-discount`;
         }
       }
       
