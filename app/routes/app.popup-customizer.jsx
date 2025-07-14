@@ -16,6 +16,7 @@ import {
   Badge,
   Divider,
   Icon,
+  Modal,
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { EmailIcon } from "@shopify/polaris-icons";
@@ -95,11 +96,12 @@ export const action = async ({ request }) => {
         buttonColor: config.buttonColor || "#007ace",
         borderRadius: config.borderRadius || 8,
         showCloseButton: config.showCloseButton !== false,
-        displayDelay: appEmbedEnabled ? 0 : (config.displayDelay || 3000),
-        frequency: appEmbedEnabled ? "once" : (config.frequency || "once"),
-        exitIntent: appEmbedEnabled ? false : (config.exitIntent || false),
+        displayDelay: config.displayDelay || 3000,
+        frequency: config.frequency || "once",
+        exitIntent: config.exitIntent || false,
         exitIntentDelay: config.exitIntentDelay || 1000,
         segments: type === "wheel-email" ? JSON.stringify(config.segments) : null,
+        backgroundType: config.backgroundType || null,
         isActive: true,
         updatedAt: new Date()
       },
@@ -116,11 +118,12 @@ export const action = async ({ request }) => {
         buttonColor: config.buttonColor || "#007ace",
         borderRadius: config.borderRadius || 8,
         showCloseButton: config.showCloseButton !== false,
-        displayDelay: appEmbedEnabled ? 0 : (config.displayDelay || 3000),
-        frequency: appEmbedEnabled ? "once" : (config.frequency || "once"),
-        exitIntent: appEmbedEnabled ? false : (config.exitIntent || false),
+        displayDelay: config.displayDelay || 3000,
+        frequency: config.frequency || "once",
+        exitIntent: config.exitIntent || false,
         exitIntentDelay: config.exitIntentDelay || 1000,
         segments: type === "wheel-email" ? JSON.stringify(config.segments) : null,
+        backgroundType: config.backgroundType || null,
         isActive: true
       }
     });
@@ -140,6 +143,9 @@ export default function PopupCustomizer() {
   
   // Initialize popup type from existing config or default to wheel-email
   const [popupType, setPopupType] = useState(existingConfig?.type || "wheel-email");
+  
+  // State for realtime preview
+  const [showRealtimePreview, setShowRealtimePreview] = useState(false);
   
   // Email popup configuration
   const [emailConfig, setEmailConfig] = useState(() => {
@@ -183,6 +189,18 @@ export default function PopupCustomizer() {
   // Wheel-Email combo configuration
   const [wheelEmailConfig, setWheelEmailConfig] = useState(() => {
     if (existingConfig && existingConfig.type === "wheel-email") {
+      const backgroundColor = existingConfig.backgroundColor || "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)";
+      let backgroundType = "gradient";
+      
+      // Determine background type from existing backgroundColor
+      if (backgroundColor.includes("linear-gradient") || backgroundColor.includes("radial-gradient")) {
+        backgroundType = "gradient";
+      } else if (backgroundColor.startsWith("#") || backgroundColor.startsWith("rgb") || backgroundColor.startsWith("hsl")) {
+        backgroundType = "solid";
+      } else {
+        backgroundType = "custom";
+      }
+      
       return {
         title: existingConfig.title || "GET YOUR CHANCE TO WIN",
         subtitle: "AMAZING DISCOUNTS!",
@@ -198,7 +216,8 @@ export default function PopupCustomizer() {
           { label: 'NO PRIZE', color: '#ff6b6b', code: null },
           { label: 'NEXT TIME', color: '#feca57', code: null }
         ],
-        backgroundColor: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
+        backgroundColor: backgroundColor,
+        backgroundType: backgroundType,
         textColor: "#ffffff",
         displayDelay: existingConfig.displayDelay || 3000,
         frequency: existingConfig.frequency || "once",
@@ -222,6 +241,7 @@ export default function PopupCustomizer() {
         { label: 'NEXT TIME', color: '#feca57', code: null }
       ],
       backgroundColor: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
+      backgroundType: "gradient",
       textColor: "#ffffff",
       displayDelay: 3000,
       frequency: "once",
@@ -482,6 +502,104 @@ export default function PopupCustomizer() {
         ))}
       </BlockStack>
       
+      <Text as="h4" variant="headingSm">Background & Colors</Text>
+      
+      <InlineStack gap="400">
+        <Box minWidth="200px">
+          <Text as="p" variant="bodyMd">Background Type</Text>
+          <Select
+            options={[
+              { label: "Gradient (Default)", value: "gradient" },
+              { label: "Solid Color", value: "solid" },
+              { label: "Custom Gradient", value: "custom" },
+            ]}
+            value={wheelEmailConfig.backgroundType || "gradient"}
+            onChange={(value) => {
+              let newBackground;
+              if (value === "gradient") {
+                newBackground = "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)";
+              } else if (value === "solid") {
+                newBackground = "#1e3c72";
+              } else {
+                newBackground = wheelEmailConfig.backgroundColor || "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)";
+              }
+              setWheelEmailConfig({
+                ...wheelEmailConfig,
+                backgroundType: value,
+                backgroundColor: newBackground
+              });
+            }}
+          />
+        </Box>
+        
+        {(wheelEmailConfig.backgroundType === "solid" || !wheelEmailConfig.backgroundType || wheelEmailConfig.backgroundType === "gradient") && (
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">
+              {wheelEmailConfig.backgroundType === "solid" ? "Background Color" : "Primary Color"}
+            </Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={wheelEmailConfig.backgroundType === "solid" ? wheelEmailConfig.backgroundColor : "#1e3c72"}
+                onChange={(e) => {
+                  const color = e.target.value;
+                  let newBackground;
+                  if (wheelEmailConfig.backgroundType === "solid") {
+                    newBackground = color;
+                  } else {
+                    // Update gradient with new primary color
+                    newBackground = `linear-gradient(135deg, ${color} 0%, #2a5298 100%)`;
+                  }
+                  setWheelEmailConfig({ ...wheelEmailConfig, backgroundColor: newBackground });
+                }}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+        )}
+        
+        {(wheelEmailConfig.backgroundType === "gradient" || !wheelEmailConfig.backgroundType) && (
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Secondary Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value="#2a5298"
+                onChange={(e) => {
+                  const color = e.target.value;
+                  const primaryColor = wheelEmailConfig.backgroundColor?.match(/#[0-9a-fA-F]{6}/)?.[0] || "#1e3c72";
+                  const newBackground = `linear-gradient(135deg, ${primaryColor} 0%, ${color} 100%)`;
+                  setWheelEmailConfig({ ...wheelEmailConfig, backgroundColor: newBackground });
+                }}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+        )}
+      </InlineStack>
+      
+      {wheelEmailConfig.backgroundType === "custom" && (
+        <TextField
+          label="Custom Background CSS"
+          value={wheelEmailConfig.backgroundColor}
+          onChange={(value) => setWheelEmailConfig({ ...wheelEmailConfig, backgroundColor: value })}
+          placeholder="e.g., linear-gradient(45deg, #ff6b6b, #4ecdc4) or #ff6b6b"
+          helpText="Enter any valid CSS background value (color, gradient, image, etc.)"
+        />
+      )}
+      
+      <Box minWidth="200px">
+        <Text as="p" variant="bodyMd">Text Color</Text>
+        <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+          <input
+            type="color"
+            value={wheelEmailConfig.textColor || "#ffffff"}
+            onChange={(e) => setWheelEmailConfig({ ...wheelEmailConfig, textColor: e.target.value })}
+            style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+          />
+        </Box>
+      </Box>
+      
       <RangeSlider
         label={`Display Delay: ${wheelEmailConfig.displayDelay / 1000}s`}
         value={wheelEmailConfig.displayDelay}
@@ -611,7 +729,7 @@ export default function PopupCustomizer() {
                   // Wheel-Email Combo Preview
                   <div
                     style={{
-                      background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
+                      background: wheelEmailConfig.backgroundColor || "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
                       borderRadius: "12px",
                       overflow: "hidden",
                       position: "relative",
@@ -748,6 +866,302 @@ export default function PopupCustomizer() {
     );
   };
 
+  // Realtime popup preview component
+  const renderRealtimePopup = () => {
+    if (!showRealtimePreview) return null;
+
+    const config = popupType === "email" ? emailConfig : wheelEmailConfig;
+
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0, 0, 0, 0.5)",
+          zIndex: 999999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          animation: "fadeIn 0.3s ease-out",
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowRealtimePreview(false);
+          }
+        }}
+      >
+        <style>
+          {`
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes popupSlideIn {
+              from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+              }
+            }
+          `}
+        </style>
+        
+        {popupType === "email" ? (
+          // Email Popup
+          <div
+            style={{
+              backgroundColor: config.backgroundColor || '#ffffff',
+              color: config.textColor || '#000000',
+              padding: '24px',
+              borderRadius: `${config.borderRadius || 8}px`,
+              textAlign: 'center',
+              maxWidth: '400px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              position: 'relative',
+              animation: 'popupSlideIn 0.3s ease-out',
+            }}
+          >
+            {config.showCloseButton && (
+              <button
+                onClick={() => setShowRealtimePreview(false)}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  background: 'rgba(0,0,0,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  cursor: 'pointer',
+                  color: config.textColor || '#000000',
+                  fontSize: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ×
+              </button>
+            )}
+            
+            <div style={{ fontSize: '24px', marginBottom: '10px' }}>📧</div>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', margin: '0 0 15px 0', color: config.textColor || '#000000' }}>
+              {config.title}
+            </h3>
+            <p style={{ marginBottom: '20px', lineHeight: '1.5', color: config.textColor || '#000000' }}>
+              {config.description}
+            </p>
+            <input
+              type="email"
+              placeholder={config.placeholder}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ccc',
+                borderRadius: '6px',
+                marginBottom: '15px',
+                fontSize: '14px',
+                boxSizing: 'border-box'
+              }}
+              readOnly
+            />
+            <button style={{
+              width: '100%',
+              padding: '12px 24px',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '14px',
+              backgroundColor: config.buttonColor || '#007ace',
+              color: 'white'
+            }}>
+              {config.buttonText}
+            </button>
+          </div>
+        ) : (
+          // Wheel-Email Combo Popup
+          <div
+            style={{
+              background: config.backgroundColor || 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              position: 'relative',
+              padding: '16px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              maxWidth: '600px',
+              width: '90%',
+              display: 'flex',
+              alignItems: 'center',
+              minHeight: '300px',
+              animation: 'popupSlideIn 0.3s ease-out',
+            }}
+          >
+            <button
+              onClick={() => setShowRealtimePreview(false)}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                cursor: 'pointer',
+                color: 'white',
+                fontSize: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              ×
+            </button>
+            
+            {/* Wheel Section */}
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 0, overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: '200px',
+                  height: '200px',
+                  borderRadius: '50%',
+                  border: '4px solid white',
+                  position: 'relative',
+                  transform: 'translateX(-50%)',
+                  background: `conic-gradient(${config.segments.map((segment, index) =>
+                    `${segment.color} ${index * (360 / config.segments.length)}deg ${(index + 1) * (360 / config.segments.length)}deg`
+                  ).join(", ")})`,
+                  boxShadow: '0 0 10px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                {/* Wheel pointer */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '-6px',
+                    transform: 'translateY(-50%)',
+                    width: 0,
+                    height: 0,
+                    borderTop: '8px solid transparent',
+                    borderBottom: '8px solid transparent',
+                    borderLeft: '12px solid white',
+                    zIndex: 10,
+                  }}
+                />
+                {/* Wheel center */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'white',
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    border: '2px solid #1e3c72',
+                    zIndex: 5,
+                  }}
+                />
+                {/* Wheel segment labels */}
+                {config.segments.map((segment, index) => {
+                  const segmentAngle = (360 / config.segments.length) * index + (360 / config.segments.length) / 2;
+                  const radius = 60;
+                  const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
+                  const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
+                  
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        position: 'absolute',
+                        left: '50%',
+                        top: '50%',
+                        transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        color: 'white',
+                        textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                        pointerEvents: 'none',
+                        textAlign: 'center',
+                        lineHeight: '1.1',
+                        maxWidth: '50px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '16px',
+                      }}
+                    >
+                      {segment.label}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Form Section */}
+            <div style={{ flex: 1, padding: '20px 30px', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '8px', color: 'white' }}>
+                {config.title}
+              </div>
+              <div style={{ fontSize: '14px', marginBottom: '15px', color: 'rgba(255, 255, 255, 0.9)' }}>
+                {config.subtitle}
+              </div>
+              <div style={{ fontSize: '12px', marginBottom: '20px', color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.4' }}>
+                {config.description}
+              </div>
+              
+              <input
+                type="email"
+                placeholder={config.placeholder}
+                style={{
+                  padding: '12px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: '#fff',
+                  color: '#666',
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  width: '100%',
+                  boxSizing: 'border-box'
+                }}
+                readOnly
+              />
+              
+              <button
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+                  border: 'none',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                {config.buttonText}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Page>
       <TitleBar title="Popup Customizer">
@@ -787,6 +1201,13 @@ export default function PopupCustomizer() {
                   <Button onClick={handleSaveConfig} variant="primary">
                     Save Configuration
                   </Button>
+                  <Button
+                    onClick={() => setShowRealtimePreview(!showRealtimePreview)}
+                    variant="secondary"
+                    tone={showRealtimePreview ? "critical" : "base"}
+                  >
+                    {showRealtimePreview ? "Hide Preview" : "Show Realtime Preview"}
+                  </Button>
                 </InlineStack>
               </BlockStack>
             </Card>
@@ -821,6 +1242,9 @@ export default function PopupCustomizer() {
           </Layout.Section>
         </Layout>
       </BlockStack>
+
+      {/* Realtime Popup Preview */}
+      {renderRealtimePopup()}
     </Page>
   );
 }

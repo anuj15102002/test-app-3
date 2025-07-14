@@ -47,6 +47,7 @@ model PopupConfig {
   showCloseButton Boolean  @default(true)
   displayDelay    Int      @default(3000)
   segments        String?  // JSON string for wheel segments
+  backgroundType  String?  // "gradient", "solid", "custom" - for wheel popup background type
   isActive        Boolean  @default(true)
   // New frequency and exit intent features
   frequency       String   @default("once")     // "once", "daily", "weekly", "always"

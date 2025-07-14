@@ -478,7 +478,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
-  let applicationUrl = 'https://revisions-atlanta-infants-mozambique.trycloudflare.com';
+  let applicationUrl = 'https://derek-shakespeare-calendar-human.trycloudflare.com';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -708,7 +708,7 @@
     } else {
       // Show wheel-email combo layout
       popup.classList.remove('email-popup');
-      popup.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+      popup.style.background = config.backgroundColor || 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
       popup.style.maxWidth = '600px';
       popup.style.display = 'flex';
       
@@ -721,7 +721,7 @@
       formSection.style.flex = '1';
       formSection.style.width = 'auto';
       formSection.style.padding = '40px 30px';
-      formSection.style.color = 'white';
+      formSection.style.color = config.textColor || 'white';
       
       // Ensure popup content uses flex layout for wheel-email popup
       popupContent.style.display = 'flex';
