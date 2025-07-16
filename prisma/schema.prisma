@@ -9,8 +9,8 @@ generator client {
 // enough when changing adapters.
 // See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
-  provider = "sqlite"
-  url      = "file:dev.sqlite"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
@@ -46,7 +46,7 @@ model PopupConfig {
   borderRadius    Int?
   showCloseButton Boolean  @default(true)
   displayDelay    Int      @default(3000)
-  segments        String?  // JSON string for wheel segments
+  segments        String?  @db.Text // JSON string for wheel segments
   backgroundType  String?  // "gradient", "solid", "custom" - for wheel popup background type
   isActive        Boolean  @default(true)
   // New frequency and exit intent features
@@ -92,7 +92,7 @@ model PopupAnalytics {
   ipAddress       String?  // User IP (hashed for privacy)
   sessionId       String?  // Track user sessions
   timestamp       DateTime @default(now())
-  metadata        String?  // JSON string for additional data
+  metadata        String?  @db.Text // JSON string for additional data
 
   @@index([shop])
   @@index([eventType])

@@ -1,0 +1,12 @@
+{
+  "name": "popup-customizer",
+  "version": "1.0.0",
+  "description": "Popup functionality for the store",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "shopify app build"
+  },
+  "dependencies": {
+    "@shopify/web-pixels-extension": "^0.4.0"
+  }
+}
