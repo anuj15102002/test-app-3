@@ -1,2 +1,7 @@
 name = "Popup Customizer"
+type = "theme_app_extension"
+
+[[extensions]]
 type = "theme"
+name = "Popup Display"
+handle = "popup-display"

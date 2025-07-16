@@ -1,0 +1,74 @@
+<!-- App Embed: Popup Display -->
+<!-- This embed loads on every page when enabled by the merchant -->
+
+{% comment %}
+  App Embed for Popup Customizer
+  This will inject the popup functionality on every page when enabled
+{% endcomment %}
+
+<!-- Inject popup root container into DOM -->
+<div id="popup-root">
+  <div id="custom-popup-overlay" style="display: none;">
+    <div id="custom-popup" class="custom-popup">
+      <div class="popup-content">
+        <div class="wheel-section">
+          <div class="popup-wheel-container">
+            <!-- Wheel will be inserted here -->
+          </div>
+        </div>
+        <div class="form-section">
+          <button class="popup-close" onclick="closePopup()">&times;</button>
+          <div class="form-title">GET YOUR CHANCE TO WIN</div>
+          <div class="form-subtitle">AMAZING DISCOUNTS!</div>
+          <p class="form-description">Enter your email below and spin the wheel to see if you're our next lucky winner!</p>
+          <div class="popup-form">
+            <!-- Form content will be dynamically inserted here -->
+          </div>
+          <div class="house-rules">
+            <h4>The House rules:</h4>
+            <ul>
+              <li>Winnings through cheating will not be processed.</li>
+              <li>Only one spin allowed</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Load popup styles -->
+{{ 'popup-styles.css' | asset_url | stylesheet_tag }}
+
+<!-- Load popup JavaScript -->
+<script src="{{ 'popup.js' | asset_url }}" defer></script>
+
+<!-- App URL meta tag for API communication -->
+{% comment %}
+  This meta tag helps the JavaScript find the correct app URL for API calls
+  Uses the app_url setting from the App Embed configuration
+{% endcomment %}
+<meta name="shopify-app-url" content="https://origins-ppm-weddings-download.trycloudflare.com">
+
+{% schema %}
+{
+  "name": "Popup Display",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_popup",
+      "label": "Enable Popup",
+      "default": true,
+      "info": "Toggle to enable or disable the popup on your storefront"
+    },
+    {
+      "type": "text",
+      "id": "app_url",
+      "label": "App URL",
+      "default": "https://origins-ppm-weddings-download.trycloudflare.com",
+      "info": "Your app's URL for API communication"
+    }
+  ]
+}
+{% endschema %}

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -19,7 +19,7 @@ import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { CheckIcon, AlertTriangleIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
-import PopupCreationModal from "../components/PopupCreationModal";
+import PopupModal from "../components/PopupModal";
 
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -86,10 +86,10 @@ export const action = async ({ request }) => {
 export default function AdminHome() {
   const fetcher = useFetcher();
   const shopify = useAppBridge();
+  const navigate = useNavigate();
   const loaderData = useLoaderData();
   const { existingConfig, setupProgress, completionPercentage, storeName } = loaderData;
   
-  const [showCreatePopupModal, setShowCreatePopupModal] = useState(false);
 
   // Handle fetcher response
   useEffect(() => {
@@ -109,22 +109,14 @@ export default function AdminHome() {
     );
   }, [fetcher]);
 
-  const handleModalClose = useCallback(() => {
-    setShowCreatePopupModal(false);
-    // Reload the page to refresh setup progress
-    window.location.reload();
-  }, []);
+
+  const handleNavigateToCustomizer = useCallback(() => {
+    navigate("/app/popup-customizer");
+  }, [navigate]);
 
   return (
     <Page>
-      <TitleBar title="EcomSend Popups">
-        <Button 
-          variant="primary" 
-          onClick={() => setShowCreatePopupModal(true)}
-        >
-          Create popup
-        </Button>
-      </TitleBar>
+      <TitleBar title="EcomSend Popups" />
       
       <BlockStack gap="500">
         {/* Welcome Message */}
@@ -136,6 +128,19 @@ export default function AdminHome() {
             <Text variant="bodyMd" as="p" tone="subdued">
               Get started with creating engaging popups to boost your conversions and grow your email list.
             </Text>
+          </BlockStack>
+        </Card>
+
+        {/* Configure Popup Button */}
+        <Card>
+          <BlockStack gap="300">
+            <Text as="h2" variant="headingMd">
+              Popup Configuration
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              Click the button below to configure your popup settings and customize the appearance.
+            </Text>
+            <PopupModal existingConfig={existingConfig} />
           </BlockStack>
         </Card>
 
@@ -212,20 +217,29 @@ export default function AdminHome() {
                   </InlineStack>
 
                   {/* Step 2: Create a popup */}
-                  <InlineStack align="space-between">
-                    <InlineStack gap="300" align="center">
-                      <Icon 
-                        source={setupProgress.popupCreated ? CheckIcon : AlertTriangleIcon} 
-                        tone={setupProgress.popupCreated ? "success" : "subdued"}
-                      />
-                      <Text variant="bodyMd">
-                        Create a popup
-                      </Text>
+                  <BlockStack gap="200">
+                    <InlineStack align="space-between">
+                      <InlineStack gap="300" align="center">
+                        <Icon
+                          source={setupProgress.popupCreated ? CheckIcon : AlertTriangleIcon}
+                          tone={setupProgress.popupCreated ? "success" : "subdued"}
+                        />
+                        <Text variant="bodyMd">
+                          Create a popup
+                        </Text>
+                      </InlineStack>
+                      {setupProgress.popupCreated && (
+                        <Badge tone="success">Complete</Badge>
+                      )}
                     </InlineStack>
-                    {setupProgress.popupCreated && (
-                      <Badge tone="success">Complete</Badge>
-                    )}
-                  </InlineStack>
+                    
+                    {/* Add button for popup management */}
+                    <Box paddingInlineStart="800">
+                      <div style={{ display: "inline-block" }}>
+                        <PopupModal existingConfig={existingConfig} />
+                      </div>
+                    </Box>
+                  </BlockStack>
 
                   {/* Step 3: Publish popup */}
                   <BlockStack gap="200">
@@ -321,12 +335,6 @@ export default function AdminHome() {
         </Layout>
       </BlockStack>
 
-      {/* Popup Creation Modal */}
-      <PopupCreationModal 
-        active={showCreatePopupModal}
-        onClose={handleModalClose}
-        existingConfig={existingConfig}
-      />
     </Page>
   );
 }

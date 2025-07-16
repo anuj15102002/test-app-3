@@ -719,17 +719,317 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
     );
   };
 
+  // Realtime popup preview component (same as in popup-customizer)
+  const renderRealtimePopup = () => {
+    if (!showRealtimePreview) return null;
+
+    const config = popupType === "email" ? emailConfig : wheelEmailConfig;
+
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0, 0, 0, 0.5)",
+          zIndex: 999999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          animation: "fadeIn 0.3s ease-out",
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowRealtimePreview(false);
+          }
+        }}
+      >
+        <style>
+          {`
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes popupSlideIn {
+              from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+              }
+            }
+          `}
+        </style>
+        
+        {popupType === "email" ? (
+          // Email Popup
+          <div
+            style={{
+              backgroundColor: config.backgroundColor || '#ffffff',
+              color: config.textColor || '#000000',
+              padding: '24px',
+              borderRadius: `${config.borderRadius || 8}px`,
+              textAlign: 'center',
+              maxWidth: '400px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              position: 'relative',
+              animation: 'popupSlideIn 0.3s ease-out',
+            }}
+          >
+            {config.showCloseButton && (
+              <button
+                onClick={() => setShowRealtimePreview(false)}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  background: 'rgba(0,0,0,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  cursor: 'pointer',
+                  color: config.textColor || '#000000',
+                  fontSize: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ×
+              </button>
+            )}
+            
+            <div style={{ fontSize: '24px', marginBottom: '10px' }}>📧</div>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', margin: '0 0 15px 0', color: config.textColor || '#000000' }}>
+              {config.title}
+            </h3>
+            <p style={{ marginBottom: '20px', lineHeight: '1.5', color: config.textColor || '#000000' }}>
+              {config.description}
+            </p>
+            <input
+              type="email"
+              placeholder={config.placeholder}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ccc',
+                borderRadius: '6px',
+                marginBottom: '15px',
+                fontSize: '14px',
+                boxSizing: 'border-box'
+              }}
+              readOnly
+            />
+            <button style={{
+              width: '100%',
+              padding: '12px 24px',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '14px',
+              backgroundColor: config.buttonColor || '#007ace',
+              color: 'white'
+            }}>
+              {config.buttonText}
+            </button>
+          </div>
+        ) : (
+          // Wheel-Email Combo Popup
+          <div
+            style={{
+              background: config.backgroundColor || 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              position: 'relative',
+              padding: '16px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              maxWidth: '600px',
+              width: '90%',
+              display: 'flex',
+              alignItems: 'center',
+              minHeight: '300px',
+              animation: 'popupSlideIn 0.3s ease-out',
+            }}
+          >
+            <button
+              onClick={() => setShowRealtimePreview(false)}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                cursor: 'pointer',
+                color: 'white',
+                fontSize: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              ×
+            </button>
+            
+            {/* Wheel Section */}
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 0, overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: '200px',
+                  height: '200px',
+                  borderRadius: '50%',
+                  border: '4px solid white',
+                  position: 'relative',
+                  transform: 'translateX(-50%)',
+                  background: `conic-gradient(${config.segments.map((segment, index) =>
+                    `${segment.color} ${index * (360 / config.segments.length)}deg ${(index + 1) * (360 / config.segments.length)}deg`
+                  ).join(", ")})`,
+                  boxShadow: '0 0 10px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                {/* Wheel pointer */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '-6px',
+                    transform: 'translateY(-50%)',
+                    width: 0,
+                    height: 0,
+                    borderTop: '8px solid transparent',
+                    borderBottom: '8px solid transparent',
+                    borderLeft: '12px solid white',
+                    zIndex: 10,
+                  }}
+                />
+                {/* Wheel center */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'white',
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    border: '2px solid #1e3c72',
+                    zIndex: 5,
+                  }}
+                />
+                {/* Wheel segment labels */}
+                {config.segments.map((segment, index) => {
+                  const segmentAngle = (360 / config.segments.length) * index + (360 / config.segments.length) / 2;
+                  const radius = 60;
+                  const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
+                  const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
+                  
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        position: 'absolute',
+                        left: '50%',
+                        top: '50%',
+                        transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        color: 'white',
+                        textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                        pointerEvents: 'none',
+                        textAlign: 'center',
+                        lineHeight: '1.1',
+                        maxWidth: '50px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '16px',
+                      }}
+                    >
+                      {segment.label}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Form Section */}
+            <div style={{ flex: 1, padding: '20px 30px', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '8px', color: 'white' }}>
+                {config.title}
+              </div>
+              <div style={{ fontSize: '14px', marginBottom: '15px', color: 'rgba(255, 255, 255, 0.9)' }}>
+                {config.subtitle}
+              </div>
+              <div style={{ fontSize: '12px', marginBottom: '20px', color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.4' }}>
+                {config.description}
+              </div>
+              
+              <input
+                type="email"
+                placeholder={config.placeholder}
+                style={{
+                  padding: '12px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: '#fff',
+                  color: '#666',
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  width: '100%',
+                  boxSizing: 'border-box'
+                }}
+                readOnly
+              />
+              
+              <button
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+                  border: 'none',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                {config.buttonText}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Modal
       open={active}
       onClose={onClose}
-      title="Create Popup"
+      title={existingConfig ? "Edit Popup" : "Create Popup"}
       primaryAction={{
         content: "Save Configuration",
         onAction: handleSaveConfig,
         loading: fetcher.state === "submitting",
       }}
       secondaryActions={[
+        {
+          content: showRealtimePreview ? "Hide Preview" : "Show Realtime Preview",
+          onAction: () => setShowRealtimePreview(!showRealtimePreview),
+        },
         {
           content: "Cancel",
           onAction: onClose,
@@ -798,6 +1098,9 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
           </Layout>
         </BlockStack>
       </Modal.Section>
+
+      {/* Realtime Popup Preview */}
+      {renderRealtimePopup()}
     </Modal>
   );
 }
