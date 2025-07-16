@@ -27,6 +27,7 @@ export default function App() {
           Popup Customizer
         </Link>
         <Link to="/app/analytics">Analytics Dashboard</Link>
+        <Link to="/app/subscribers">Subscribers</Link>
       </NavMenu>
       <Outlet />
     </AppProvider>
