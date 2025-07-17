@@ -132,15 +132,65 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
     };
   });
 
+  // Community popup configuration
+  const [communityConfig, setCommunityConfig] = useState(() => {
+    if (existingConfig && existingConfig.type === "community") {
+      return {
+        title: existingConfig.title || "JOIN OUR COMMUNITY",
+        description: existingConfig.description || "Connect with us on social media and stay updated with our latest news and offers!",
+        buttonText: existingConfig.buttonText || "Follow Us",
+        bannerImage: existingConfig.bannerImage || "",
+        socialIcons: existingConfig.socialIcons ? JSON.parse(existingConfig.socialIcons) : [
+          { platform: 'facebook', url: '', enabled: true },
+          { platform: 'instagram', url: '', enabled: true },
+          { platform: 'linkedin', url: '', enabled: true },
+          { platform: 'x', url: '', enabled: true }
+        ],
+        askMeLaterText: existingConfig.askMeLaterText || "Ask me later",
+        showAskMeLater: existingConfig.showAskMeLater !== false,
+        backgroundColor: existingConfig.backgroundColor || "#ffffff",
+        textColor: existingConfig.textColor || "#000000",
+        borderRadius: existingConfig.borderRadius || 12,
+        showCloseButton: existingConfig.showCloseButton !== false,
+        displayDelay: existingConfig.displayDelay || 3000,
+        frequency: existingConfig.frequency || "once",
+        exitIntent: existingConfig.exitIntent || false,
+        exitIntentDelay: existingConfig.exitIntentDelay || 1000,
+      };
+    }
+    return {
+      title: "JOIN OUR COMMUNITY",
+      description: "Connect with us on social media and stay updated with our latest news and offers!",
+      buttonText: "Follow Us",
+      bannerImage: "",
+      socialIcons: [
+        { platform: 'facebook', url: '', enabled: true },
+        { platform: 'instagram', url: '', enabled: true },
+        { platform: 'linkedin', url: '', enabled: true },
+        { platform: 'x', url: '', enabled: true }
+      ],
+      askMeLaterText: "Ask me later",
+      showAskMeLater: true,
+      backgroundColor: "#ffffff",
+      textColor: "#000000",
+      borderRadius: 12,
+      showCloseButton: false,
+      displayDelay: 3000,
+      frequency: "once",
+      exitIntent: false,
+      exitIntentDelay: 1000,
+    };
+  });
+
   const handleSaveConfig = useCallback(() => {
-    const config = popupType === "email" ? emailConfig : wheelEmailConfig;
+    const config = popupType === "email" ? emailConfig : (popupType === "community" ? communityConfig : wheelEmailConfig);
     
     // Submit to the popup-customizer route
     fetcher.submit(
       { popupConfig: JSON.stringify({ type: popupType, config }) },
       { method: "POST", action: "/app/popup-customizer" }
     );
-  }, [popupType, emailConfig, wheelEmailConfig, fetcher]);
+  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, fetcher]);
 
   // Handle fetcher response
   useEffect(() => {
@@ -157,6 +207,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
   const popupTypeOptions = [
     { label: "Email Discount Popup", value: "email" },
     { label: "Wheel + Email Combo", value: "wheel-email" },
+    { label: "Community Social Popup", value: "community" },
   ];
 
   const renderEmailConfig = () => (
@@ -500,9 +551,168 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
     </BlockStack>
   );
 
+  const renderCommunityConfig = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">Community Social Popup Configuration</Text>
+      
+      <TextField
+        label="Popup Title"
+        value={communityConfig.title}
+        onChange={(value) => setCommunityConfig({ ...communityConfig, title: value })}
+        placeholder="Enter popup title (e.g., JOIN OUR COMMUNITY)"
+      />
+      
+      <TextField
+        label="Description"
+        value={communityConfig.description}
+        onChange={(value) => setCommunityConfig({ ...communityConfig, description: value })}
+        multiline={3}
+        placeholder="Enter popup description"
+      />
+      
+      <TextField
+        label="Banner Image URL"
+        value={communityConfig.bannerImage}
+        onChange={(value) => setCommunityConfig({ ...communityConfig, bannerImage: value })}
+        placeholder="Enter banner image URL (optional)"
+        helpText="Upload your image to a hosting service and paste the URL here"
+      />
+      
+      <Text as="h4" variant="headingSm">Social Media Icons</Text>
+      <BlockStack gap="200">
+        {communityConfig.socialIcons.map((social, index) => (
+          <InlineStack key={social.platform} gap="200" align="center">
+            <Box minWidth="100px">
+              <Checkbox
+                label={social.platform.charAt(0).toUpperCase() + social.platform.slice(1)}
+                checked={social.enabled}
+                onChange={(checked) => {
+                  const newSocialIcons = [...communityConfig.socialIcons];
+                  newSocialIcons[index].enabled = checked;
+                  setCommunityConfig({ ...communityConfig, socialIcons: newSocialIcons });
+                }}
+              />
+            </Box>
+            <Box minWidth="300px">
+              <TextField
+                value={social.url}
+                onChange={(value) => {
+                  const newSocialIcons = [...communityConfig.socialIcons];
+                  newSocialIcons[index].url = value;
+                  setCommunityConfig({ ...communityConfig, socialIcons: newSocialIcons });
+                }}
+                placeholder={`${social.platform.charAt(0).toUpperCase() + social.platform.slice(1)} URL`}
+                disabled={!social.enabled}
+              />
+            </Box>
+          </InlineStack>
+        ))}
+      </BlockStack>
+      
+      <TextField
+        label="Ask Me Later Text"
+        value={communityConfig.askMeLaterText}
+        onChange={(value) => setCommunityConfig({ ...communityConfig, askMeLaterText: value })}
+        placeholder="Text for the ask me later link"
+      />
+      
+      <Checkbox
+        label="Show Ask Me Later link"
+        checked={communityConfig.showAskMeLater}
+        onChange={(checked) => setCommunityConfig({ ...communityConfig, showAskMeLater: checked })}
+        helpText="Allow users to dismiss the popup temporarily"
+      />
+      
+      <InlineStack gap="400">
+        <Box minWidth="200px">
+          <Text as="p" variant="bodyMd">Background Color</Text>
+          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+            <input
+              type="color"
+              value={communityConfig.backgroundColor}
+              onChange={(e) => setCommunityConfig({ ...communityConfig, backgroundColor: e.target.value })}
+              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            />
+          </Box>
+        </Box>
+        <Box minWidth="200px">
+          <Text as="p" variant="bodyMd">Text Color</Text>
+          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+            <input
+              type="color"
+              value={communityConfig.textColor}
+              onChange={(e) => setCommunityConfig({ ...communityConfig, textColor: e.target.value })}
+              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            />
+          </Box>
+        </Box>
+      </InlineStack>
+      
+      <RangeSlider
+        label={`Border Radius: ${communityConfig.borderRadius}px`}
+        value={communityConfig.borderRadius}
+        onChange={(value) => setCommunityConfig({ ...communityConfig, borderRadius: value })}
+        min={0}
+        max={20}
+        step={1}
+      />
+      
+      <RangeSlider
+        label={`Display Delay: ${communityConfig.displayDelay / 1000}s`}
+        value={communityConfig.displayDelay}
+        onChange={(value) => setCommunityConfig({ ...communityConfig, displayDelay: value })}
+        min={0}
+        max={10000}
+        step={500}
+      />
+      
+      <Checkbox
+        label="Show close button"
+        checked={communityConfig.showCloseButton}
+        onChange={(checked) => setCommunityConfig({ ...communityConfig, showCloseButton: checked })}
+      />
+      
+      <Divider />
+      
+      <Text as="h4" variant="headingSm">Advanced Settings</Text>
+      
+      <Select
+        label="Display Frequency"
+        options={[
+          { label: "Show once per visitor", value: "once" },
+          { label: "Show once per day", value: "daily" },
+          { label: "Show once per week", value: "weekly" },
+          { label: "Show on every visit", value: "always" },
+        ]}
+        value={communityConfig.frequency}
+        onChange={(value) => setCommunityConfig({ ...communityConfig, frequency: value })}
+        helpText="Control how often the popup appears to the same visitor"
+      />
+      
+      <Checkbox
+        label="Enable exit intent detection"
+        checked={communityConfig.exitIntent}
+        onChange={(checked) => setCommunityConfig({ ...communityConfig, exitIntent: checked })}
+        helpText="Show popup when user is about to leave the page"
+      />
+      
+      {communityConfig.exitIntent && (
+        <RangeSlider
+          label={`Exit intent delay: ${communityConfig.exitIntentDelay}ms`}
+          value={communityConfig.exitIntentDelay}
+          onChange={(value) => setCommunityConfig({ ...communityConfig, exitIntentDelay: value })}
+          min={500}
+          max={3000}
+          step={100}
+          helpText="Delay before exit intent triggers"
+        />
+      )}
+    </BlockStack>
+  );
+
   const renderPreview = () => {
-    const config = popupType === "email" ? emailConfig : wheelEmailConfig;
-    const badgeText = popupType === "email" ? "Email Popup" : "Wheel + Email Combo";
+    const config = popupType === "email" ? emailConfig : (popupType === "community" ? communityConfig : wheelEmailConfig);
+    const badgeText = popupType === "email" ? "Email Popup" : (popupType === "community" ? "Community Social Popup" : "Wheel + Email Combo");
     
     return (
       <Card>
@@ -523,12 +733,13 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
               style={{
                 backgroundColor: popupType === "wheel-email" ? "transparent" : config.backgroundColor,
                 color: config.textColor,
-                padding: popupType === "wheel-email" ? "0" : "24px",
-                borderRadius: `${popupType === "email" ? emailConfig.borderRadius : 8}px`,
+                padding: popupType === "community" ? "0" : (popupType === "wheel-email" ? "0" : "24px"),
+                borderRadius: `${popupType === "email" ? emailConfig.borderRadius : (popupType === "community" ? 12 : 8)}px`,
                 textAlign: "center",
                 maxWidth: "400px",
                 margin: "0 auto",
                 boxShadow: popupType === "wheel-email" ? "none" : "0 4px 12px rgba(0,0,0,0.15)",
+                overflow: "hidden",
               }}
             >
               <BlockStack gap="300">
@@ -537,6 +748,8 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
                     <InlineStack align="center" gap="200">
                       {popupType === "email" ? (
                         <Icon source={EmailIcon} />
+                      ) : popupType === "community" ? (
+                        <Text as="span" variant="headingLg">👥</Text>
                       ) : (
                         <Text as="span" variant="headingLg">🎡</Text>
                       )}
@@ -578,6 +791,157 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
                       {emailConfig.buttonText}
                     </button>
                   </BlockStack>
+                ) : popupType === "community" ? (
+                  // Community Popup Preview - Exact match with actual popup
+                  <div style={{ position: "relative", overflow: "hidden" }}>
+                    {/* Banner at the very top */}
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "80px",
+                        backgroundColor: "#f0f0f0",
+                        backgroundImage: communityConfig.bannerImage ? `url(${communityConfig.bannerImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        borderRadius: `${communityConfig.borderRadius}px ${communityConfig.borderRadius}px 0 0`,
+                        position: "relative",
+                      }}
+                    >
+                      {/* Close button positioned over banner - hidden by default */}
+                      {communityConfig.showCloseButton && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "8px",
+                            right: "8px",
+                            width: "20px",
+                            height: "20px",
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "white",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          ×
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Content wrapper with padding */}
+                    <div style={{
+                      padding: "20px",
+                      backgroundColor: communityConfig.backgroundColor,
+                      borderRadius: `0 0 ${communityConfig.borderRadius}px ${communityConfig.borderRadius}px`
+                    }}>
+                      {/* Title and Description */}
+                      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+                        <div style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px",
+                          marginBottom: "10px"
+                        }}>
+                          <span style={{ fontSize: "18px" }}>👥</span>
+                          <h3 style={{
+                            color: communityConfig.textColor,
+                            margin: "0",
+                            fontSize: "16px",
+                            fontWeight: "600"
+                          }}>
+                            {communityConfig.title}
+                          </h3>
+                        </div>
+                        <p style={{
+                          color: communityConfig.textColor,
+                          fontSize: "13px",
+                          lineHeight: "1.4",
+                          margin: "0"
+                        }}>
+                          {communityConfig.description}
+                        </p>
+                      </div>
+                      
+                      {/* Social Icons with proper colors */}
+                      <div style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "12px",
+                        marginBottom: "20px"
+                      }}>
+                        {communityConfig.socialIcons.filter(icon => icon.enabled).map((social, index) => {
+                          const getIconStyle = (platform) => {
+                            switch(platform) {
+                              case 'facebook':
+                                return { backgroundColor: '#1877f2', color: 'white' };
+                              case 'instagram':
+                                return {
+                                  background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
+                                  color: 'white'
+                                };
+                              case 'linkedin':
+                                return { backgroundColor: '#0077b5', color: 'white' };
+                              case 'x':
+                                return { backgroundColor: '#000000', color: 'white' };
+                              default:
+                                return { backgroundColor: '#f0f0f0', color: '#666' };
+                            }
+                          };
+                          
+                          const iconStyle = getIconStyle(social.platform);
+                          
+                          return (
+                            <div
+                              key={social.platform}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                                transition: "transform 0.2s ease",
+                                fontSize: "16px",
+                                fontWeight: "bold",
+                                ...iconStyle,
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                              }}
+                              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                              title={`${social.platform.charAt(0).toUpperCase() + social.platform.slice(1)}`}
+                            >
+                              {social.platform === 'facebook' ? 'f' :
+                               social.platform === 'instagram' ? '📷' :
+                               social.platform === 'linkedin' ? 'in' :
+                               social.platform === 'x' ? 'X' : '?'}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Ask Me Later Link */}
+                      {communityConfig.showAskMeLater && (
+                        <div style={{ textAlign: "center" }}>
+                          <a
+                            href="#"
+                            style={{
+                              color: communityConfig.textColor,
+                              textDecoration: "underline",
+                              fontSize: "13px",
+                              opacity: 0.7,
+                            }}
+                          >
+                            {communityConfig.askMeLaterText}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 ) : (
                   // Wheel-Email Combo Preview
                   <div
@@ -723,7 +1087,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
   const renderRealtimePopup = () => {
     if (!showRealtimePreview) return null;
 
-    const config = popupType === "email" ? emailConfig : wheelEmailConfig;
+    const config = popupType === "email" ? emailConfig : (popupType === "community" ? communityConfig : wheelEmailConfig);
 
     return (
       <div
@@ -838,6 +1202,137 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
             }}>
               {config.buttonText}
             </button>
+          </div>
+        ) : popupType === "community" ? (
+          // Community Social Popup - Exact match with storefront implementation
+          <div
+            style={{
+              backgroundColor: config.backgroundColor || '#ffffff',
+              borderRadius: `${config.borderRadius || 12}px`,
+              textAlign: 'center',
+              maxWidth: '400px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              position: 'relative',
+              animation: 'popupSlideIn 0.3s ease-out',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Banner at the very top */}
+            <div
+              style={{
+                width: '100%',
+                height: '120px',
+                backgroundColor: '#f0f0f0',
+                backgroundImage: config.bannerImage ? `url(${config.bannerImage})` : 'url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDQwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImJhbm5lckdyYWRpZW50IiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzY2NjsiLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojY2NjOyIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMTIwIiBmaWxsPSJ1cmwoI2Jhbm5lckdyYWRpZW50KSIvPgo8dGV4dCB4PSIyMDAiIHk9IjY1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iYm9sZCI+QkFOTkVSPC90ZXh0Pgo8L3N2Zz4=")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderRadius: `${config.borderRadius || 12}px ${config.borderRadius || 12}px 0 0`,
+                position: 'relative',
+              }}
+            >
+              {/* Close button positioned over banner */}
+              {config.showCloseButton && (
+                <button
+                  onClick={() => setShowRealtimePreview(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: 'rgba(0,0,0,0.5)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '30px',
+                    height: '30px',
+                    cursor: 'pointer',
+                    color: 'white',
+                    fontSize: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            
+            {/* Content wrapper with padding */}
+            <div style={{ padding: '20px' }}>
+              {/* Title and Description */}
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <h3 style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  margin: '0 0 10px 0',
+                  color: config.textColor || '#000000'
+                }}>
+                  {config.title}
+                </h3>
+                <p style={{
+                  marginBottom: '0',
+                  lineHeight: '1.5',
+                  color: config.textColor || '#000000',
+                  fontSize: '14px'
+                }}>
+                  {config.description}
+                </p>
+              </div>
+              
+              {/* Social Icons */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '15px',
+                marginBottom: '20px'
+              }}>
+                {config.socialIcons.filter(icon => icon.enabled).map((social, index) => (
+                  <div
+                    key={social.platform}
+                    style={{
+                      width: '50px',
+                      height: '50px',
+                      backgroundImage: `url('/extensions/pop-up/assets/${social.platform === 'x' ? 'twitter' : social.platform}.png')`,
+                      backgroundSize: 'contain',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s ease',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      backgroundColor: '#f9f9f9',
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    onClick={() => {
+                      if (social.url) {
+                        window.open(social.url, '_blank');
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+              
+              {/* Ask Me Later Link */}
+              {config.showAskMeLater && (
+                <div style={{ textAlign: 'center' }}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowRealtimePreview(false);
+                    }}
+                    style={{
+                      color: config.textColor || '#000000',
+                      textDecoration: 'underline',
+                      fontSize: '14px',
+                      opacity: 0.8,
+                    }}
+                  >
+                    {config.askMeLaterText}
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           // Wheel-Email Combo Popup
@@ -1063,7 +1558,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig }) 
                   
                   <Divider />
                   
-                  {popupType === "email" ? renderEmailConfig() : renderWheelEmailConfig()}
+                  {popupType === "email" ? renderEmailConfig() : (popupType === "community" ? renderCommunityConfig() : renderWheelEmailConfig())}
                 </BlockStack>
               </Card>
             </Layout.Section>

@@ -7,7 +7,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
-  let applicationUrl = 'https://limitations-sat-bone-incl.trycloudflare.com';
+  let applicationUrl = 'https://shadows-long-mere-emma.trycloudflare.com';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -111,7 +111,7 @@
     for (const endpoint of endpoints) {
       try {
         console.log('Fetching popup config from:', endpoint);
-        const res = await fetch(`${applicationUrl}/api/public/popup-config?shop=${shopDomain}`, {
+        const res = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -166,6 +166,13 @@
     const now = Date.now();
     const shownFlag = localStorage.getItem('popup-shown');
     const lastShown = parseInt(localStorage.getItem('popup-last-shown'), 10);
+    const askLaterTime = parseInt(localStorage.getItem('popup-ask-later'), 10);
+    
+    // Check if "ask me later" is still active
+    if (askLaterTime && now < askLaterTime) {
+      return false;
+    }
+    
     switch (config.frequency) {
       case 'once':
         return !shownFlag;
@@ -181,7 +188,9 @@
   };
 
   const showPopup = (config) => {
-    if (popupShown || !shouldShowPopup(config)) return;
+    // For "always" frequency, ignore popupShown flag
+    if (config.frequency !== 'always' && popupShown) return;
+    if (!shouldShowPopup(config)) return;
 
     const overlay = document.getElementById('custom-popup-overlay');
     const popup = document.getElementById('custom-popup');
@@ -212,9 +221,12 @@
       // Hide wheel section for email popup
       const wheelSection = popup.querySelector('.wheel-section');
       const formSection = popup.querySelector('.form-section');
+      const communityContent = popup.querySelector('.community-content');
       const popupContent = popup.querySelector('.popup-content');
       
       wheelSection.style.display = 'none';
+      communityContent.style.display = 'none';
+      formSection.style.display = 'block';
       formSection.style.color = config.textColor || '#000000';
       
       // Ensure popup content doesn't use flex layout for email popup
@@ -242,6 +254,180 @@
           ">
             ${config.buttonText}
           </button>
+        </div>
+      `;
+    } else if (config.type === 'community') {
+      // Show community popup layout
+      popup.classList.add('community-popup');
+      popup.style.background = config.backgroundColor || '#ffffff';
+      popup.style.color = config.textColor || '#000000';
+      popup.style.borderRadius = `${config.borderRadius || 12}px`;
+      popup.style.maxWidth = '400px';
+      popup.style.display = 'block';
+      
+      // Hide other sections for community popup
+      const wheelSection = popup.querySelector('.wheel-section');
+      const formSection = popup.querySelector('.form-section');
+      const communityContent = popup.querySelector('.community-content');
+      const popupContent = popup.querySelector('.popup-content');
+      
+      wheelSection.style.display = 'none';
+      formSection.style.display = 'none';
+      communityContent.style.display = 'block';
+      
+      // Ensure popup content doesn't use flex layout for community popup
+      popupContent.style.display = 'block';
+      
+      // Parse social icons - handle both string and array formats
+      let socialIcons;
+      try {
+        socialIcons = typeof config.socialIcons === 'string' ? JSON.parse(config.socialIcons) : config.socialIcons;
+      } catch (e) {
+        socialIcons = [
+          { platform: 'facebook', url: '', enabled: true },
+          { platform: 'instagram', url: '', enabled: true },
+          { platform: 'linkedin', url: '', enabled: true },
+          { platform: 'x', url: '', enabled: true }
+        ];
+      }
+      
+      if (!socialIcons || !Array.isArray(socialIcons)) {
+        socialIcons = [
+          { platform: 'facebook', url: '', enabled: true },
+          { platform: 'instagram', url: '', enabled: true },
+          { platform: 'linkedin', url: '', enabled: true },
+          { platform: 'x', url: '', enabled: true }
+        ];
+      }
+      
+      // Create social icons HTML - show all enabled icons
+      const enabledSocialIcons = socialIcons.filter(icon => icon.enabled);
+      const socialIconsHTML = enabledSocialIcons.map(social => {
+        const iconColor = social.platform === 'facebook' ? '#1877f2' :
+                         social.platform === 'instagram' ? '#E4405F' :
+                         social.platform === 'linkedin' ? '#0077b5' :
+                         social.platform === 'x' ? '#1DA1F2' : '#666';
+        
+        // Use the provided social media icon images from assets
+        const getIconHTML = (platform) => {
+          // Use the asset URLs passed from Liquid template
+          const iconUrls = window.socialIconAssets || {};
+          const iconKey = platform === 'x' ? 'twitter' : platform;
+          const iconUrl = iconUrls[iconKey];
+          
+          if (iconUrl) {
+            return `<img src="${iconUrl}" alt="${platform}" style="width: 40px; height: 40px; object-fit: contain; object-position: center; display: block;" onerror="this.style.display='none'" />`;
+          } else {
+            // Fallback to text if image not available
+            const fallbackText = platform === 'facebook' ? 'f' :
+                                platform === 'instagram' ? 'ig' :
+                                platform === 'linkedin' ? 'in' :
+                                platform === 'x' ? 'X' : '?';
+            return `<span style="font-weight: bold; font-size: 18px;">${fallbackText}</span>`;
+          }
+        };
+        
+        const clickAction = social.url && social.url.trim() !== '' ?
+          `window.open('${social.url}', '_blank')` :
+          `alert('Please configure the ${social.platform} URL in admin panel')`;
+        
+        return `
+          <div class="social-icon" onclick="${clickAction}" style="
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            margin: 0 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+          " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            ${getIconHTML(social.platform)}
+          </div>
+        `;
+      }).join('');
+      
+      // Update community content with banner at top
+      communityContent.innerHTML = `
+        ${(() => {
+          // Always show banner - use custom banner image if provided, otherwise use default banner.svg
+          const bannerUrl = (config.bannerImage && config.bannerImage.trim() !== '')
+            ? config.bannerImage
+            : window.defaultBannerAsset;
+          
+          return `
+            <div class="community-banner" style="
+              width: 100%;
+              height: 150px;
+              background-image: url('${bannerUrl}');
+              background-size: cover;
+              background-position: center;
+              background-repeat: no-repeat;
+              margin: 0;
+              padding: 0;
+              border-radius: 12px 12px 0 0;
+              display: block;
+              position: relative;
+            "></div>
+          `;
+        })()}
+        <div class="community-content-inner" style="padding: 20px; text-align: center; position: relative;">
+          <button class="popup-close" onclick="closePopup()" style="
+            position: absolute;
+            top: -135px;
+            right: 15px;
+            background: rgba(0,0,0,0.3);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            color: white;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+          ">&times;</button>
+          <h3 style="
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            color: ${config.textColor || '#000000'};
+            text-align: center;
+          ">
+            ${config.title || 'JOIN OUR COMMUNITY'}
+          </h3>
+          <p style="
+            margin-bottom: 25px;
+            line-height: 1.5;
+            color: ${config.textColor || '#000000'};
+            text-align: center;
+            font-size: 16px;
+          ">
+            ${config.description || 'Connect with us on social media and stay updated with our latest news and offers!'}
+          </p>
+          <div style="
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+          ">
+            ${socialIconsHTML}
+          </div>
+          ${config.showAskMeLater !== false ? `
+            <div style="margin-top: 20px;">
+              <a href="#" onclick="askMeLater(); return false;" style="
+                color: ${config.textColor || '#000000'};
+                text-decoration: underline;
+                font-size: 14px;
+                opacity: 0.7;
+                transition: opacity 0.2s ease;
+              " onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                ${config.askMeLaterText || 'Ask me later'}
+              </a>
+            </div>
+          ` : ''}
         </div>
       `;
     } else {
@@ -346,14 +532,18 @@
       `;
     }
 
-    // Set localStorage
-    popupShown = true;
+    // Set localStorage - but not for "always" frequency
+    if (config.frequency !== 'always') {
+      popupShown = true;
+    }
+    
     const now = Date.now().toString();
     if (config.frequency === 'once') {
       localStorage.setItem('popup-shown', 'true');
-    } else {
+    } else if (config.frequency !== 'always') {
       localStorage.setItem('popup-last-shown', now);
     }
+    // For "always" frequency, don't set any localStorage flags
   };
 
   // Make closePopup globally accessible
@@ -361,6 +551,19 @@
     document.getElementById('custom-popup-overlay').style.display = 'none';
     // Track popup close
     trackEvent('close');
+  };
+
+  // Ask me later function for community popup
+  window.askMeLater = () => {
+    // Set a temporary flag to not show popup for a short period (e.g., 1 hour)
+    const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+    localStorage.setItem('popup-ask-later', (Date.now() + oneHour).toString());
+    
+    // Track ask me later event
+    trackEvent('ask_me_later');
+    
+    // Close the popup
+    window.closePopup();
   };
 
   // Generate real Shopify discount code

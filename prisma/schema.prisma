@@ -34,7 +34,7 @@ model Session {
 model PopupConfig {
   id              String   @id @default(cuid())
   shop            String
-  type            String   // "email" or "wheel"
+  type            String   // "email", "wheel", or "community"
   title           String
   description     String
   placeholder     String?
@@ -53,6 +53,11 @@ model PopupConfig {
   frequency       String   @default("once")     // "once", "daily", "weekly", "always"
   exitIntent      Boolean  @default(false)     // Enable exit intent detection
   exitIntentDelay Int      @default(1000)      // Delay before exit intent triggers (ms)
+  // Community popup specific fields
+  bannerImage     String?  @db.Text            // Banner image URL for community popup
+  socialIcons     String?  @db.Text            // JSON string for social media icons and URLs
+  askMeLaterText  String?                      // "Ask me later" link text
+  showAskMeLater  Boolean  @default(true)      // Show/hide "Ask me later" link
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
