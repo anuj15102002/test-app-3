@@ -134,18 +134,9 @@ export default function AppEmbedManager({ onEmbedStatusChange }) {
           </BlockStack>
         </InlineStack>
         
-        <InlineStack gap="200">
-          <Badge tone={embedStatus.enabled ? "success" : "critical"}>
-            {embedStatus.enabled ? "Active" : "Inactive"}
-          </Badge>
-          <Button 
-            size="small" 
-            onClick={checkEmbedStatus}
-            loading={fetcher.state === "loading"}
-          >
-            Refresh
-          </Button>
-        </InlineStack>
+        <Badge tone={embedStatus.enabled ? "success" : "critical"}>
+          {embedStatus.enabled ? "Active" : "Inactive"}
+        </Badge>
       </InlineStack>
     );
   };
@@ -181,23 +172,14 @@ export default function AppEmbedManager({ onEmbedStatusChange }) {
             Click the button below to open your theme editor where you can add the popup block to your theme.
           </Text>
           
-          <InlineStack gap="200">
-            <Button
-              variant="primary"
-              onClick={handleEnableAppEmbed}
-              loading={fetcher.state === "submitting"}
-              icon={ExternalIcon}
-            >
-              Enable App Embed
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={checkEmbedStatus}
-              loading={fetcher.state === "loading"}
-            >
-              Check Status
-            </Button>
-          </InlineStack>
+          <Button
+            variant="primary"
+            onClick={handleEnableAppEmbed}
+            loading={fetcher.state === "submitting"}
+            icon={ExternalIcon}
+          >
+            Enable App Embed
+          </Button>
           
           <Box paddingBlockStart="200">
             <Text variant="bodySm" tone="subdued">
@@ -205,11 +187,11 @@ export default function AppEmbedManager({ onEmbedStatusChange }) {
               <br />
               1. Click "Enable App Embed" to open the theme editor
               <br />
-              2. In the theme editor, add the "Popup Customizer" block to your theme
+              2. In the theme editor, add the "Popup Display" block to your theme
               <br />
               3. Save your theme changes
               <br />
-              4. Return here and click "Check Status" to verify
+              4. Return here to continue configuring your popup
             </Text>
           </Box>
         </BlockStack>

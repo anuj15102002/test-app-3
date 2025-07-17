@@ -18,6 +18,7 @@ import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { CheckIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
+import AppEmbedManager from "../components/AppEmbedManager";
 
 export const loader = async ({ request }) => {
   const { session, admin } = await authenticate.admin(request);
@@ -367,33 +368,10 @@ export default function Dashboard() {
           </Layout.Section>
         </Layout>
 
-        {/* App Embed Setup Required */}
+        {/* App Embed Management */}
         <Layout>
           <Layout.Section>
-            <Card>
-              <InlineStack align="space-between">
-                <BlockStack gap="200">
-                  <Text as="h3" variant="headingMd">
-                    App embed
-                  </Text>
-                  <Text as="p" variant="bodyMd" tone="subdued">
-                    Enable app embed in theme editor to activate popup functionality
-                  </Text>
-                </BlockStack>
-                <InlineStack gap="200">
-                  <Badge tone={appEmbedEnabled ? "success" : "warning"}>
-                    {appEmbedEnabled ? "Enabled" : "Setup required"}
-                  </Badge>
-                  <Button 
-                    onClick={handleEnableEmbed}
-                    loading={isEnablingEmbed}
-                    disabled={appEmbedEnabled}
-                  >
-                    {appEmbedEnabled ? "Enabled" : "Enable now"}
-                  </Button>
-                </InlineStack>
-              </InlineStack>
-            </Card>
+            <AppEmbedManager onEmbedStatusChange={setAppEmbedEnabled} />
           </Layout.Section>
         </Layout>
       </BlockStack>

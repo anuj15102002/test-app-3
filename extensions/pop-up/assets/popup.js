@@ -7,7 +7,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
-  let applicationUrl = 'https://origins-ppm-weddings-download.trycloudflare.com';
+  let applicationUrl = 'https://limitations-sat-bone-incl.trycloudflare.com';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
