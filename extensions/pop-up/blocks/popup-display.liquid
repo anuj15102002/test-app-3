@@ -47,6 +47,12 @@
             <a href="#" onclick="askMeLater()">Ask me later</a>
           </div>
         </div>
+        <!-- Timer popup content -->
+        <div class="timer-content" style="display: none;">
+          <div class="timer-popup-inner">
+            <!-- Timer popup content will be inserted here -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -67,6 +73,10 @@
     twitter: "{{ 'twitter.png' | asset_url }}"
   };
   window.defaultBannerAsset = "{{ 'banner.svg' | asset_url }}";
+  
+  // Debug log to check if assets are loading
+  console.log('Social Icon Assets:', window.socialIconAssets);
+  console.log('Default Banner Asset:', window.defaultBannerAsset);
 </script>
 
 <!-- App URL meta tag for API communication -->
@@ -74,7 +84,7 @@
   This meta tag helps the JavaScript find the correct app URL for API calls
   Uses the app_url setting from the App Embed configuration
 {% endcomment %}
-<meta name="shopify-app-url" content="https://shadows-long-mere-emma.trycloudflare.com">
+<meta name="shopify-app-url" content="https://practitioner-formal-patients-speakers.trycloudflare.com">
 
 {% schema %}
 {
@@ -92,7 +102,7 @@
       "type": "text",
       "id": "app_url",
       "label": "App URL",
-      "default": "https://shadows-long-mere-emma.trycloudflare.com",
+      "default": "https://practitioner-formal-patients-speakers.trycloudflare.com",
       "info": "Your app's URL for API communication"
     }
   ]

@@ -106,6 +106,20 @@ export const action = async ({ request }) => {
         socialIcons: type === "community" ? JSON.stringify(config.socialIcons) : null,
         askMeLaterText: type === "community" ? config.askMeLaterText || null : null,
         showAskMeLater: type === "community" ? config.showAskMeLater !== false : true,
+        // Timer popup specific fields
+        timerDays: type === "timer" ? config.timerDays || 0 : null,
+        timerHours: type === "timer" ? config.timerHours || 0 : null,
+        timerMinutes: type === "timer" ? config.timerMinutes || 5 : null,
+        timerSeconds: type === "timer" ? config.timerSeconds || 0 : null,
+        timerIcon: type === "timer" ? config.timerIcon || "⏰" : null,
+        onExpiration: type === "timer" ? config.onExpiration || "show_expired" : null,
+        expiredTitle: type === "timer" ? config.expiredTitle || "OFFER EXPIRED" : null,
+        expiredMessage: type === "timer" ? config.expiredMessage || null : null,
+        expiredIcon: type === "timer" ? config.expiredIcon || "⏰" : null,
+        expiredButtonText: type === "timer" ? config.expiredButtonText || "CONTINUE SHOPPING" : null,
+        successTitle: type === "timer" ? config.successTitle || "SUCCESS!" : null,
+        successMessage: type === "timer" ? config.successMessage || null : null,
+        disclaimer: type === "timer" ? config.disclaimer || null : null,
         isActive: true,
         updatedAt: new Date()
       },
@@ -132,6 +146,20 @@ export const action = async ({ request }) => {
         socialIcons: type === "community" ? JSON.stringify(config.socialIcons) : null,
         askMeLaterText: type === "community" ? config.askMeLaterText || null : null,
         showAskMeLater: type === "community" ? config.showAskMeLater !== false : true,
+        // Timer popup specific fields
+        timerDays: type === "timer" ? config.timerDays || 0 : null,
+        timerHours: type === "timer" ? config.timerHours || 0 : null,
+        timerMinutes: type === "timer" ? config.timerMinutes || 5 : null,
+        timerSeconds: type === "timer" ? config.timerSeconds || 0 : null,
+        timerIcon: type === "timer" ? config.timerIcon || "⏰" : null,
+        onExpiration: type === "timer" ? config.onExpiration || "show_expired" : null,
+        expiredTitle: type === "timer" ? config.expiredTitle || "OFFER EXPIRED" : null,
+        expiredMessage: type === "timer" ? config.expiredMessage || null : null,
+        expiredIcon: type === "timer" ? config.expiredIcon || "⏰" : null,
+        expiredButtonText: type === "timer" ? config.expiredButtonText || "CONTINUE SHOPPING" : null,
+        successTitle: type === "timer" ? config.successTitle || "SUCCESS!" : null,
+        successMessage: type === "timer" ? config.successMessage || null : null,
+        disclaimer: type === "timer" ? config.disclaimer || null : null,
         isActive: true
       }
     });
@@ -308,14 +336,79 @@ export default function PopupCustomizer() {
     };
   });
 
+  // Timer popup configuration
+  const [timerConfig, setTimerConfig] = useState(() => {
+    if (existingConfig && existingConfig.type === "timer") {
+      return {
+        title: existingConfig.title || "LIMITED TIME OFFER!",
+        description: existingConfig.description || "Don't miss out on this exclusive deal. Time is running out!",
+        placeholder: existingConfig.placeholder || "Enter your email to claim this offer",
+        buttonText: existingConfig.buttonText || "CLAIM OFFER NOW",
+        discountCode: existingConfig.discountCode || "TIMER10",
+        backgroundColor: existingConfig.backgroundColor || "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        textColor: existingConfig.textColor || "#ffffff",
+        borderRadius: existingConfig.borderRadius || 16,
+        showCloseButton: existingConfig.showCloseButton !== false,
+        displayDelay: existingConfig.displayDelay || 3000,
+        frequency: existingConfig.frequency || "once",
+        exitIntent: existingConfig.exitIntent || false,
+        exitIntentDelay: existingConfig.exitIntentDelay || 1000,
+        timerDays: existingConfig.timerDays || 0,
+        timerHours: existingConfig.timerHours || 0,
+        timerMinutes: existingConfig.timerMinutes || 5,
+        timerSeconds: existingConfig.timerSeconds || 0,
+        timerIcon: existingConfig.timerIcon || "⏰",
+        onExpiration: existingConfig.onExpiration || "show_expired",
+        expiredTitle: existingConfig.expiredTitle || "OFFER EXPIRED",
+        expiredMessage: existingConfig.expiredMessage || "Sorry, this limited time offer has ended. But don't worry, we have other great deals waiting for you!",
+        expiredIcon: existingConfig.expiredIcon || "⏰",
+        expiredButtonText: existingConfig.expiredButtonText || "CONTINUE SHOPPING",
+        successTitle: existingConfig.successTitle || "SUCCESS!",
+        successMessage: existingConfig.successMessage || "You've claimed your exclusive discount! Here's your code:",
+        disclaimer: existingConfig.disclaimer || "Limited time offer. Valid while supplies last.",
+      };
+    }
+    return {
+      title: "LIMITED TIME OFFER!",
+      description: "Don't miss out on this exclusive deal. Time is running out!",
+      placeholder: "Enter your email to claim this offer",
+      buttonText: "CLAIM OFFER NOW",
+      discountCode: "TIMER10",
+      backgroundColor: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      textColor: "#ffffff",
+      borderRadius: 16,
+      showCloseButton: true,
+      displayDelay: 3000,
+      frequency: "once",
+      exitIntent: false,
+      exitIntentDelay: 1000,
+      timerDays: 0,
+      timerHours: 0,
+      timerMinutes: 5,
+      timerSeconds: 0,
+      timerIcon: "⏰",
+      onExpiration: "show_expired",
+      expiredTitle: "OFFER EXPIRED",
+      expiredMessage: "Sorry, this limited time offer has ended. But don't worry, we have other great deals waiting for you!",
+      expiredIcon: "⏰",
+      expiredButtonText: "CONTINUE SHOPPING",
+      successTitle: "SUCCESS!",
+      successMessage: "You've claimed your exclusive discount! Here's your code:",
+      disclaimer: "Limited time offer. Valid while supplies last.",
+    };
+  });
+
   const handleSaveConfig = useCallback(() => {
-    const config = popupType === "email" ? emailConfig : (popupType === "community" ? communityConfig : wheelEmailConfig);
+    const config = popupType === "email" ? emailConfig :
+                   popupType === "community" ? communityConfig :
+                   popupType === "timer" ? timerConfig :
+                   wheelEmailConfig;
     
     fetcher.submit(
       { popupConfig: JSON.stringify({ type: popupType, config }) },
       { method: "POST" }
     );
-  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, fetcher]);
+  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, fetcher]);
 
   // Handle fetcher response
   useEffect(() => {
@@ -332,6 +425,7 @@ export default function PopupCustomizer() {
     { label: "Email Discount Popup", value: "email" },
     { label: "Wheel + Email Combo", value: "wheel-email" },
     { label: "Community Social Popup", value: "community" },
+    { label: "Timer Countdown Popup", value: "timer" },
   ];
 
   const renderEmailConfig = () => (
@@ -865,9 +959,274 @@ export default function PopupCustomizer() {
     </BlockStack>
   );
 
+  const renderTimerConfig = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">Timer Countdown Popup Configuration</Text>
+      
+      <TextField
+        label="Popup Title"
+        value={timerConfig.title}
+        onChange={(value) => setTimerConfig({ ...timerConfig, title: value })}
+        placeholder="Enter popup title (e.g., LIMITED TIME OFFER!)"
+      />
+      
+      <TextField
+        label="Description"
+        value={timerConfig.description}
+        onChange={(value) => setTimerConfig({ ...timerConfig, description: value })}
+        multiline={3}
+        placeholder="Enter popup description"
+      />
+      
+      <TextField
+        label="Email Placeholder"
+        value={timerConfig.placeholder}
+        onChange={(value) => setTimerConfig({ ...timerConfig, placeholder: value })}
+        placeholder="Email input placeholder"
+      />
+      
+      <TextField
+        label="Button Text"
+        value={timerConfig.buttonText}
+        onChange={(value) => setTimerConfig({ ...timerConfig, buttonText: value })}
+        placeholder="Button text (e.g., CLAIM OFFER NOW)"
+      />
+      
+      <TextField
+        label="Discount Code"
+        value={timerConfig.discountCode}
+        onChange={(value) => setTimerConfig({ ...timerConfig, discountCode: value })}
+        placeholder="Discount code to offer"
+      />
+      
+      <Text as="h4" variant="headingSm">Timer Duration</Text>
+      <InlineStack gap="400">
+        <Box minWidth="120px">
+          <TextField
+            label="Days"
+            type="number"
+            value={timerConfig.timerDays.toString()}
+            onChange={(value) => setTimerConfig({ ...timerConfig, timerDays: parseInt(value) || 0 })}
+            min={0}
+            max={365}
+          />
+        </Box>
+        <Box minWidth="120px">
+          <TextField
+            label="Hours"
+            type="number"
+            value={timerConfig.timerHours.toString()}
+            onChange={(value) => setTimerConfig({ ...timerConfig, timerHours: parseInt(value) || 0 })}
+            min={0}
+            max={23}
+          />
+        </Box>
+        <Box minWidth="120px">
+          <TextField
+            label="Minutes"
+            type="number"
+            value={timerConfig.timerMinutes.toString()}
+            onChange={(value) => setTimerConfig({ ...timerConfig, timerMinutes: parseInt(value) || 0 })}
+            min={0}
+            max={59}
+          />
+        </Box>
+        <Box minWidth="120px">
+          <TextField
+            label="Seconds"
+            type="number"
+            value={timerConfig.timerSeconds.toString()}
+            onChange={(value) => setTimerConfig({ ...timerConfig, timerSeconds: parseInt(value) || 0 })}
+            min={0}
+            max={59}
+          />
+        </Box>
+      </InlineStack>
+      
+      <InlineStack gap="400">
+        <Box minWidth="120px">
+          <TextField
+            label="Timer Icon"
+            value={timerConfig.timerIcon}
+            onChange={(value) => setTimerConfig({ ...timerConfig, timerIcon: value })}
+            placeholder="⏰"
+            helpText="Emoji or icon to display"
+          />
+        </Box>
+        <Box minWidth="200px">
+          <Select
+            label="When Timer Expires"
+            options={[
+              { label: "Show expired message", value: "show_expired" },
+              { label: "Hide popup", value: "hide" },
+            ]}
+            value={timerConfig.onExpiration}
+            onChange={(value) => setTimerConfig({ ...timerConfig, onExpiration: value })}
+            helpText="What happens when timer reaches zero"
+          />
+        </Box>
+      </InlineStack>
+      
+      {timerConfig.onExpiration === "show_expired" && (
+        <BlockStack gap="300">
+          <Text as="h4" variant="headingSm">Expired State Configuration</Text>
+          
+          <TextField
+            label="Expired Title"
+            value={timerConfig.expiredTitle}
+            onChange={(value) => setTimerConfig({ ...timerConfig, expiredTitle: value })}
+            placeholder="OFFER EXPIRED"
+          />
+          
+          <TextField
+            label="Expired Message"
+            value={timerConfig.expiredMessage}
+            onChange={(value) => setTimerConfig({ ...timerConfig, expiredMessage: value })}
+            multiline={3}
+            placeholder="Message to show when timer expires"
+          />
+          
+          <InlineStack gap="400">
+            <Box minWidth="120px">
+              <TextField
+                label="Expired Icon"
+                value={timerConfig.expiredIcon}
+                onChange={(value) => setTimerConfig({ ...timerConfig, expiredIcon: value })}
+                placeholder="⏰"
+              />
+            </Box>
+            <Box minWidth="200px">
+              <TextField
+                label="Expired Button Text"
+                value={timerConfig.expiredButtonText}
+                onChange={(value) => setTimerConfig({ ...timerConfig, expiredButtonText: value })}
+                placeholder="CONTINUE SHOPPING"
+              />
+            </Box>
+          </InlineStack>
+        </BlockStack>
+      )}
+      
+      <Text as="h4" variant="headingSm">Success State Configuration</Text>
+      
+      <TextField
+        label="Success Title"
+        value={timerConfig.successTitle}
+        onChange={(value) => setTimerConfig({ ...timerConfig, successTitle: value })}
+        placeholder="SUCCESS!"
+      />
+      
+      <TextField
+        label="Success Message"
+        value={timerConfig.successMessage}
+        onChange={(value) => setTimerConfig({ ...timerConfig, successMessage: value })}
+        multiline={2}
+        placeholder="Message to show when user submits email"
+      />
+      
+      <TextField
+        label="Disclaimer Text"
+        value={timerConfig.disclaimer}
+        onChange={(value) => setTimerConfig({ ...timerConfig, disclaimer: value })}
+        placeholder="Limited time offer. Valid while supplies last."
+        helpText="Small print text shown at bottom of popup"
+      />
+      
+      <Text as="h4" variant="headingSm">Colors & Styling</Text>
+      
+      <TextField
+        label="Background Gradient/Color"
+        value={timerConfig.backgroundColor}
+        onChange={(value) => setTimerConfig({ ...timerConfig, backgroundColor: value })}
+        placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        helpText="CSS gradient or solid color"
+      />
+      
+      <InlineStack gap="400">
+        <Box minWidth="200px">
+          <Text as="p" variant="bodyMd">Text Color</Text>
+          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+            <input
+              type="color"
+              value={timerConfig.textColor}
+              onChange={(e) => setTimerConfig({ ...timerConfig, textColor: e.target.value })}
+              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            />
+          </Box>
+        </Box>
+      </InlineStack>
+      
+      <RangeSlider
+        label={`Border Radius: ${timerConfig.borderRadius}px`}
+        value={timerConfig.borderRadius}
+        onChange={(value) => setTimerConfig({ ...timerConfig, borderRadius: value })}
+        min={0}
+        max={30}
+        step={1}
+      />
+      
+      <RangeSlider
+        label={`Display Delay: ${timerConfig.displayDelay / 1000}s`}
+        value={timerConfig.displayDelay}
+        onChange={(value) => setTimerConfig({ ...timerConfig, displayDelay: value })}
+        min={0}
+        max={10000}
+        step={500}
+      />
+      
+      <Checkbox
+        label="Show close button"
+        checked={timerConfig.showCloseButton}
+        onChange={(checked) => setTimerConfig({ ...timerConfig, showCloseButton: checked })}
+      />
+      
+      <Divider />
+      
+      <Text as="h4" variant="headingSm">Advanced Settings</Text>
+      
+      <Select
+        label="Display Frequency"
+        options={[
+          { label: "Show once per visitor", value: "once" },
+          { label: "Show once per day", value: "daily" },
+          { label: "Show once per week", value: "weekly" },
+          { label: "Show on every visit", value: "always" },
+        ]}
+        value={timerConfig.frequency}
+        onChange={(value) => setTimerConfig({ ...timerConfig, frequency: value })}
+        helpText="Control how often the popup appears to the same visitor"
+      />
+      
+      <Checkbox
+        label="Enable exit intent detection"
+        checked={timerConfig.exitIntent}
+        onChange={(checked) => setTimerConfig({ ...timerConfig, exitIntent: checked })}
+        helpText="Show popup when user is about to leave the page"
+      />
+      
+      {timerConfig.exitIntent && (
+        <RangeSlider
+          label={`Exit intent delay: ${timerConfig.exitIntentDelay}ms`}
+          value={timerConfig.exitIntentDelay}
+          onChange={(value) => setTimerConfig({ ...timerConfig, exitIntentDelay: value })}
+          min={500}
+          max={3000}
+          step={100}
+          helpText="Delay before exit intent triggers"
+        />
+      )}
+    </BlockStack>
+  );
+
   const renderPreview = () => {
-    const config = popupType === "email" ? emailConfig : (popupType === "community" ? communityConfig : wheelEmailConfig);
-    const badgeText = popupType === "email" ? "Email Popup" : (popupType === "community" ? "Community Social Popup" : "Wheel + Email Combo");
+    const config = popupType === "email" ? emailConfig :
+                   popupType === "community" ? communityConfig :
+                   popupType === "timer" ? timerConfig :
+                   wheelEmailConfig;
+    const badgeText = popupType === "email" ? "Email Popup" :
+                      popupType === "community" ? "Community Social Popup" :
+                      popupType === "timer" ? "Timer Countdown Popup" :
+                      "Wheel + Email Combo";
     
     return (
       <Card>
@@ -904,6 +1263,8 @@ export default function PopupCustomizer() {
                         <Icon source={EmailIcon} />
                       ) : popupType === "community" ? (
                         <Text as="span" variant="headingLg">👥</Text>
+                      ) : popupType === "timer" ? (
+                        <Text as="span" variant="headingLg">{timerConfig.timerIcon}</Text>
                       ) : (
                         <Text as="span" variant="headingLg">🎡</Text>
                       )}
@@ -1003,6 +1364,120 @@ export default function PopupCustomizer() {
                         </a>
                       </div>
                     )}
+                  </BlockStack>
+                ) : popupType === "timer" ? (
+                  // Timer Popup Preview
+                  <BlockStack gap="200">
+                    <div style={{
+                      background: timerConfig.backgroundColor,
+                      borderRadius: `${timerConfig.borderRadius}px`,
+                      padding: "20px",
+                      color: timerConfig.textColor,
+                      textAlign: "center"
+                    }}>
+                      <div style={{ fontSize: "24px", marginBottom: "10px" }}>{timerConfig.timerIcon}</div>
+                      <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "15px" }}>
+                        {timerConfig.title}
+                      </div>
+                      <div style={{ fontSize: "12px", marginBottom: "15px", opacity: 0.9 }}>
+                        {timerConfig.description}
+                      </div>
+                      
+                      {/* Timer Display Preview */}
+                      <div style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "8px",
+                        marginBottom: "15px",
+                        flexWrap: "wrap"
+                      }}>
+                        {timerConfig.timerDays > 0 && (
+                          <div style={{
+                            background: "rgba(255,255,255,0.15)",
+                            padding: "8px 6px",
+                            borderRadius: "6px",
+                            minWidth: "35px",
+                            fontSize: "10px"
+                          }}>
+                            <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                              {timerConfig.timerDays.toString().padStart(2, '0')}
+                            </div>
+                            <div style={{ opacity: 0.8 }}>DAYS</div>
+                          </div>
+                        )}
+                        <div style={{
+                          background: "rgba(255,255,255,0.15)",
+                          padding: "8px 6px",
+                          borderRadius: "6px",
+                          minWidth: "35px",
+                          fontSize: "10px"
+                        }}>
+                          <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                            {timerConfig.timerHours.toString().padStart(2, '0')}
+                          </div>
+                          <div style={{ opacity: 0.8 }}>HRS</div>
+                        </div>
+                        <div style={{
+                          background: "rgba(255,255,255,0.15)",
+                          padding: "8px 6px",
+                          borderRadius: "6px",
+                          minWidth: "35px",
+                          fontSize: "10px"
+                        }}>
+                          <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                            {timerConfig.timerMinutes.toString().padStart(2, '0')}
+                          </div>
+                          <div style={{ opacity: 0.8 }}>MIN</div>
+                        </div>
+                        <div style={{
+                          background: "rgba(255,255,255,0.15)",
+                          padding: "8px 6px",
+                          borderRadius: "6px",
+                          minWidth: "35px",
+                          fontSize: "10px"
+                        }}>
+                          <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                            {timerConfig.timerSeconds.toString().padStart(2, '0')}
+                          </div>
+                          <div style={{ opacity: 0.8 }}>SEC</div>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        padding: "6px 12px",
+                        border: "none",
+                        borderRadius: "20px",
+                        backgroundColor: "rgba(255,255,255,0.9)",
+                        color: "#666",
+                        marginBottom: "8px",
+                        fontSize: "10px",
+                      }}>
+                        {timerConfig.placeholder}
+                      </div>
+                      <button style={{
+                        backgroundColor: "#ff6b6b",
+                        color: "#fff",
+                        padding: "8px 16px",
+                        border: "none",
+                        borderRadius: "20px",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        fontSize: "10px",
+                        textTransform: "uppercase"
+                      }}>
+                        {timerConfig.buttonText}
+                      </button>
+                      
+                      {timerConfig.disclaimer && (
+                        <div style={{
+                          fontSize: "8px",
+                          opacity: 0.6,
+                          marginTop: "8px"
+                        }}>
+                          {timerConfig.disclaimer}
+                        </div>
+                      )}
+                    </div>
                   </BlockStack>
                 ) : (
                   // Wheel-Email Combo Preview
@@ -1474,7 +1949,10 @@ export default function PopupCustomizer() {
                 
                 <Divider />
                 
-                {popupType === "email" ? renderEmailConfig() : (popupType === "community" ? renderCommunityConfig() : renderWheelEmailConfig())}
+                {popupType === "email" ? renderEmailConfig() :
+                 popupType === "community" ? renderCommunityConfig() :
+                 popupType === "timer" ? renderTimerConfig() :
+                 renderWheelEmailConfig()}
                 
                 <InlineStack gap="300">
                   <Button onClick={handleSaveConfig} variant="primary">

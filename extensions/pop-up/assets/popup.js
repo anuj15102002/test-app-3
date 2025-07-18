@@ -7,7 +7,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
-  let applicationUrl = 'https://shadows-long-mere-emma.trycloudflare.com';
+  let applicationUrl = 'https://practitioner-formal-patients-speakers.trycloudflare.com';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -353,6 +353,8 @@
             ? config.bannerImage
             : window.defaultBannerAsset;
           
+          console.log('Banner URL:', bannerUrl); // Debug log
+          
           return `
             <div class="community-banner" style="
               width: 100%;
@@ -430,6 +432,32 @@
           ` : ''}
         </div>
       `;
+    } else if (config.type === 'timer') {
+      // Show timer popup layout
+      popup.classList.add('timer-popup');
+      popup.style.background = config.backgroundColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      popup.style.color = config.textColor || '#ffffff';
+      popup.style.borderRadius = `${config.borderRadius || 16}px`;
+      popup.style.maxWidth = '500px';
+      popup.style.display = 'block';
+      
+      // Hide other sections for timer popup
+      const wheelSection = popup.querySelector('.wheel-section');
+      const formSection = popup.querySelector('.form-section');
+      const communityContent = popup.querySelector('.community-content');
+      const timerContent = popup.querySelector('.timer-content');
+      const popupContent = popup.querySelector('.popup-content');
+      
+      wheelSection.style.display = 'none';
+      formSection.style.display = 'none';
+      communityContent.style.display = 'none';
+      timerContent.style.display = 'block';
+      
+      // Ensure popup content doesn't use flex layout for timer popup
+      popupContent.style.display = 'block';
+      
+      // Initialize timer popup
+      initializeTimerPopup(config, timerContent);
     } else {
       // Show wheel-email combo layout
       popup.classList.remove('email-popup');
@@ -1088,6 +1116,344 @@
       }, 300);
     }, 3000);
   }
+
+  // Timer popup functionality
+  let timerInterval = null;
+  let timerEndTime = null;
+
+  function initializeTimerPopup(config, timerContent) {
+    // Calculate timer end time
+    const timerDuration = {
+      days: parseInt(config.timerDays) || 0,
+      hours: parseInt(config.timerHours) || 0,
+      minutes: parseInt(config.timerMinutes) || 5,
+      seconds: parseInt(config.timerSeconds) || 0
+    };
+    
+    const totalMs = (timerDuration.days * 24 * 60 * 60 * 1000) +
+                   (timerDuration.hours * 60 * 60 * 1000) +
+                   (timerDuration.minutes * 60 * 1000) +
+                   (timerDuration.seconds * 1000);
+    
+    // Check for existing timer
+    const storageKey = `timer-popup-end-time-${getShopDomain()}`;
+    const storedEndTime = localStorage.getItem(storageKey);
+    
+    if (storedEndTime && parseInt(storedEndTime) > Date.now()) {
+      // Use existing timer
+      timerEndTime = parseInt(storedEndTime);
+    } else {
+      // Create new timer
+      timerEndTime = Date.now() + totalMs;
+      localStorage.setItem(storageKey, timerEndTime.toString());
+    }
+    
+    // Create timer popup HTML
+    const timerPopupInner = timerContent.querySelector('.timer-popup-inner');
+    timerPopupInner.innerHTML = `
+      <button class="popup-close" onclick="closePopup()" style="
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+        color: white;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        z-index: 10;
+      " onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">&times;</button>
+      
+      <div class="timer-popup-header">
+        <div class="timer-popup-icon">${config.timerIcon || '⏰'}</div>
+        <h2 class="timer-popup-title">${config.title || 'LIMITED TIME OFFER!'}</h2>
+        <p class="timer-popup-subtitle">${config.description || 'Don\'t miss out on this exclusive deal. Time is running out!'}</p>
+      </div>
+      
+      <div class="timer-display" id="timer-display">
+        <div class="timer-unit" id="days-unit" style="display: ${timerDuration.days > 0 ? 'block' : 'none'}">
+          <div class="timer-number" id="days">00</div>
+          <div class="timer-label">Days</div>
+        </div>
+        <div class="timer-unit" id="hours-unit">
+          <div class="timer-number" id="hours">00</div>
+          <div class="timer-label">Hours</div>
+        </div>
+        <div class="timer-unit" id="minutes-unit">
+          <div class="timer-number" id="minutes">00</div>
+          <div class="timer-label">Minutes</div>
+        </div>
+        <div class="timer-unit" id="seconds-unit">
+          <div class="timer-number" id="seconds">00</div>
+          <div class="timer-label">Seconds</div>
+        </div>
+      </div>
+      
+      <div class="timer-form">
+        <input type="email" class="timer-email-input" id="timer-email" placeholder="${config.placeholder || 'Enter your email to claim this offer'}" />
+        <button class="timer-cta-button" onclick="handleTimerSubmit()">
+          ${config.buttonText || 'CLAIM OFFER NOW'}
+        </button>
+      </div>
+      
+      <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-top: 15px;">
+        ${config.disclaimer || 'Limited time offer. Valid while supplies last.'}
+      </div>
+    `;
+    
+    // Start the timer
+    startTimer();
+  }
+
+  function startTimer() {
+    // Clear any existing timer
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+    
+    timerInterval = setInterval(() => {
+      const now = Date.now();
+      const timeLeft = timerEndTime - now;
+      
+      if (timeLeft <= 0) {
+        // Timer expired
+        handleTimerExpired();
+        return;
+      }
+      
+      // Calculate time units
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      
+      // Update display
+      updateTimerDisplay(days, hours, minutes, seconds);
+      
+      // Add urgency effects when time is low
+      if (timeLeft < 60000) { // Less than 1 minute
+        const timerDisplay = document.getElementById('timer-display');
+        if (timerDisplay) {
+          timerDisplay.classList.add('timer-urgent');
+        }
+      }
+      
+    }, 1000);
+    
+    // Initial update
+    const now = Date.now();
+    const timeLeft = timerEndTime - now;
+    if (timeLeft > 0) {
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      updateTimerDisplay(days, hours, minutes, seconds);
+    }
+  }
+
+  function updateTimerDisplay(days, hours, minutes, seconds) {
+    const daysEl = document.getElementById('days');
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
+    
+    if (daysEl) {
+      const newDays = days.toString().padStart(2, '0');
+      if (daysEl.textContent !== newDays) {
+        daysEl.textContent = newDays;
+        const daysUnit = document.getElementById('days-unit');
+        if (daysUnit) {
+          daysUnit.classList.add('flash');
+          setTimeout(() => daysUnit.classList.remove('flash'), 500);
+        }
+      }
+    }
+    
+    if (hoursEl) {
+      const newHours = hours.toString().padStart(2, '0');
+      if (hoursEl.textContent !== newHours) {
+        hoursEl.textContent = newHours;
+        const hoursUnit = document.getElementById('hours-unit');
+        if (hoursUnit) {
+          hoursUnit.classList.add('flash');
+          setTimeout(() => hoursUnit.classList.remove('flash'), 500);
+        }
+      }
+    }
+    
+    if (minutesEl) {
+      const newMinutes = minutes.toString().padStart(2, '0');
+      if (minutesEl.textContent !== newMinutes) {
+        minutesEl.textContent = newMinutes;
+        const minutesUnit = document.getElementById('minutes-unit');
+        if (minutesUnit) {
+          minutesUnit.classList.add('flash');
+          setTimeout(() => minutesUnit.classList.remove('flash'), 500);
+        }
+      }
+    }
+    
+    if (secondsEl) {
+      const newSeconds = seconds.toString().padStart(2, '0');
+      if (secondsEl.textContent !== newSeconds) {
+        secondsEl.textContent = newSeconds;
+        const secondsUnit = document.getElementById('seconds-unit');
+        if (secondsUnit) {
+          secondsUnit.classList.add('flash');
+          setTimeout(() => secondsUnit.classList.remove('flash'), 500);
+        }
+      }
+    }
+  }
+
+  function handleTimerExpired() {
+    clearInterval(timerInterval);
+    
+    const config = popupConfig;
+    const timerContent = document.querySelector('.timer-content .timer-popup-inner');
+    
+    // Track timer expiration
+    trackEvent('timer_expired', {
+      metadata: {
+        popupType: 'timer',
+        expiredAt: new Date().toISOString()
+      }
+    });
+    
+    if (config.onExpiration === 'hide' || config.onExpiration === 'disappear') {
+      // Hide the popup
+      window.closePopup();
+    } else {
+      // Show expired message (default behavior)
+      timerContent.innerHTML = `
+        <button class="popup-close" onclick="closePopup()" style="
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          border-radius: 50%;
+          width: 35px;
+          height: 35px;
+          cursor: pointer;
+          color: white;
+          font-size: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          z-index: 10;
+        " onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">&times;</button>
+        
+        <div class="timer-expired">
+          <div class="timer-expired-icon">${config.expiredIcon || '⏰'}</div>
+          <h2 class="timer-expired-title">${config.expiredTitle || 'OFFER EXPIRED'}</h2>
+          <p class="timer-expired-message">${config.expiredMessage || 'Sorry, this limited time offer has ended. But don\'t worry, we have other great deals waiting for you!'}</p>
+          <button class="timer-cta-button" onclick="window.closePopup()" style="max-width: 200px;">
+            ${config.expiredButtonText || 'CONTINUE SHOPPING'}
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // Timer form submission handler
+  async function handleTimerSubmit() {
+    const email = document.getElementById('timer-email')?.value;
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    
+    // Track email entered for timer popup
+    trackEvent('email_entered', {
+      email: email,
+      metadata: {
+        popupType: 'timer',
+        timeRemaining: timerEndTime - Date.now()
+      }
+    });
+    
+    // Use the pre-configured discount code from admin settings
+    const discountCode = popupConfig.discountCode || 'TIMER10';
+    
+    // Track conversion for timer popup
+    trackEvent('win', {
+      email: email,
+      discountCode: discountCode,
+      prizeLabel: 'Timer Discount',
+      metadata: {
+        popupType: 'timer',
+        preconfigured: true,
+        timeRemaining: timerEndTime - Date.now()
+      }
+    });
+    
+    // Show success message with discount code
+    const timerContent = document.querySelector('.timer-content .timer-popup-inner');
+    timerContent.innerHTML = `
+      <button class="popup-close" onclick="closePopup()" style="
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+        color: white;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        z-index: 10;
+      " onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">&times;</button>
+      
+      <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 48px; margin-bottom: 20px;">🎉</div>
+        <h2 style="font-size: 24px; font-weight: 700; margin: 0 0 15px 0; color: #ffffff;">
+          ${popupConfig.successTitle || 'SUCCESS!'}
+        </h2>
+        <p style="margin-bottom: 25px; color: rgba(255, 255, 255, 0.9); font-size: 16px;">
+          ${popupConfig.successMessage || 'You\'ve claimed your exclusive discount! Here\'s your code:'}
+        </p>
+        <div class="timer-discount-code" onclick="copyDiscountCode()">
+          <div class="timer-discount-code-text" id="discount-code">
+            ${discountCode}
+          </div>
+          <div class="timer-discount-hint">
+            Click to copy to clipboard
+          </div>
+        </div>
+        <button class="timer-cta-button" id="copy-btn" onclick="copyDiscountCode()" style="margin-bottom: 15px; max-width: 250px;">
+          📋 Copy Code
+        </button>
+        <button class="timer-cta-button" onclick="window.closePopup()" style="
+          background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+          max-width: 200px;
+        ">
+          Continue Shopping
+        </button>
+      </div>
+    `;
+    
+    // Stop the timer since user has converted
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+  }
+
+  // Make timer functions globally accessible
+  window.handleTimerSubmit = handleTimerSubmit;
 
   // Embedded function: wheel handler
   function handleWheelSpin() {

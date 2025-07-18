@@ -1,13 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
-// enough when changing adapters.
-// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
@@ -32,54 +26,63 @@ model Session {
 }
 
 model PopupConfig {
-  id              String   @id @default(cuid())
-  shop            String
-  type            String   // "email", "wheel", or "community"
-  title           String
-  description     String
-  placeholder     String?
-  buttonText      String
-  discountCode    String?
-  backgroundColor String
-  textColor       String
-  buttonColor     String?
-  borderRadius    Int?
-  showCloseButton Boolean  @default(true)
-  displayDelay    Int      @default(3000)
-  segments        String?  @db.Text // JSON string for wheel segments
-  backgroundType  String?  // "gradient", "solid", "custom" - for wheel popup background type
-  isActive        Boolean  @default(true)
-  // New frequency and exit intent features
-  frequency       String   @default("once")     // "once", "daily", "weekly", "always"
-  exitIntent      Boolean  @default(false)     // Enable exit intent detection
-  exitIntentDelay Int      @default(1000)      // Delay before exit intent triggers (ms)
-  // Community popup specific fields
-  bannerImage     String?  @db.Text            // Banner image URL for community popup
-  socialIcons     String?  @db.Text            // JSON string for social media icons and URLs
-  askMeLaterText  String?                      // "Ask me later" link text
-  showAskMeLater  Boolean  @default(true)      // Show/hide "Ask me later" link
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([shop])
+  id                String   @id @default(cuid())
+  shop              String   @unique
+  type              String
+  title             String
+  description       String
+  placeholder       String?
+  buttonText        String
+  discountCode      String?
+  backgroundColor   String
+  textColor         String
+  buttonColor       String?
+  borderRadius      Int?
+  showCloseButton   Boolean  @default(true)
+  displayDelay      Int      @default(3000)
+  segments          String?  @db.Text
+  backgroundType    String?
+  isActive          Boolean  @default(true)
+  frequency         String   @default("once")
+  exitIntent        Boolean  @default(false)
+  exitIntentDelay   Int      @default(1000)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  askMeLaterText    String?
+  bannerImage       String?  @db.Text
+  showAskMeLater    Boolean  @default(true)
+  socialIcons       String?  @db.Text
+  timerDays         Int?     @default(0)
+  timerHours        Int?     @default(0)
+  timerMinutes      Int?     @default(5)
+  timerSeconds      Int?     @default(0)
+  timerIcon         String?  @default("⏰")
+  onExpiration      String?  @default("show_expired")
+  expiredTitle      String?  @default("OFFER EXPIRED")
+  expiredMessage    String?  @db.Text
+  expiredIcon       String?  @default("⏰")
+  expiredButtonText String?  @default("CONTINUE SHOPPING")
+  successTitle      String?  @default("SUCCESS!")
+  successMessage    String?  @db.Text
+  disclaimer        String?  @db.Text
 }
 
 model DiscountCode {
-  id              String   @id @default(cuid())
-  shop            String
-  email           String
-  code            String   @unique
-  discountType    String   // "percentage" or "fixed_amount"
-  discountValue   String
-  priceRuleId     String?  // Shopify Price Rule ID
-  discountCodeId  String?  // Shopify Discount Code ID
-  isActive        Boolean  @default(true)
-  usageCount      Int      @default(0)
-  usageLimit      Int      @default(1)
-  startsAt        DateTime @default(now())
-  endsAt          DateTime
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  shop           String
+  email          String
+  code           String   @unique
+  discountType   String
+  discountValue  String
+  priceRuleId    String?
+  discountCodeId String?
+  isActive       Boolean  @default(true)
+  usageCount     Int      @default(0)
+  usageLimit     Int      @default(1)
+  startsAt       DateTime @default(now())
+  endsAt         DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([shop])
   @@index([email])
@@ -87,17 +90,17 @@ model DiscountCode {
 }
 
 model PopupAnalytics {
-  id              String   @id @default(cuid())
-  shop            String
-  eventType       String   // "view", "email_entered", "spin", "win", "lose", "close", "copy_code"
-  email           String?  // Only for email_entered, win events
-  discountCode    String?  // Only for win events
-  prizeLabel      String?  // What prize was won/lost
-  userAgent       String?  // Browser info
-  ipAddress       String?  // User IP (hashed for privacy)
-  sessionId       String?  // Track user sessions
-  timestamp       DateTime @default(now())
-  metadata        String?  @db.Text // JSON string for additional data
+  id           String   @id @default(cuid())
+  shop         String
+  eventType    String
+  email        String?
+  discountCode String?
+  prizeLabel   String?
+  userAgent    String?
+  ipAddress    String?
+  sessionId    String?
+  timestamp    DateTime @default(now())
+  metadata     String?  @db.Text
 
   @@index([shop])
   @@index([eventType])
