@@ -1,0 +1,238 @@
+/* Timer Popup Modal Enhanced Styles */
+
+/* Mobile responsive adjustments for the modal */
+@media (max-width: 768px) {
+  .Polaris-Modal-Dialog {
+    max-width: 95vw !important;
+    margin: 10px !important;
+  }
+  
+  .Polaris-Layout--sectionOneThird {
+    width: 100% !important;
+    margin-top: 20px !important;
+  }
+  
+  .Polaris-Layout {
+    flex-direction: column !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .Polaris-Modal-Dialog {
+    max-width: 98vw !important;
+    margin: 5px !important;
+    max-height: 95vh !important;
+  }
+  
+  .Polaris-Modal-Header {
+    padding: 16px !important;
+  }
+  
+  .Polaris-Modal-Section {
+    padding: 16px !important;
+  }
+  
+  /* Stack form elements vertically on mobile */
+  .Polaris-InlineStack {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  
+  .Polaris-InlineStack > * {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+}
+
+/* Enhanced preview panel styling */
+.timer-preview-container {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+/* Glassmorphic effect for timer units in preview */
+.timer-unit-preview {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+.timer-unit-preview:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Smooth transitions for all interactive elements */
+.timer-config-input {
+  transition: all 0.2s ease !important;
+}
+
+.timer-config-input:focus {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Enhanced button styling */
+.timer-modal-primary-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.timer-modal-primary-button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* Preview panel enhancements */
+.timer-preview-panel {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Responsive timer display in preview */
+@media (max-width: 600px) {
+  .timer-display-preview {
+    gap: 8px !important;
+  }
+  
+  .timer-unit-preview {
+    min-width: 45px !important;
+    padding: 10px 8px !important;
+  }
+  
+  .timer-number-preview {
+    font-size: 16px !important;
+  }
+  
+  .timer-label-preview {
+    font-size: 10px !important;
+  }
+}
+
+/* Smooth scrolling for modal content */
+.Polaris-Modal-Section {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced focus states */
+.Polaris-TextField__Input:focus,
+.Polaris-Select__Input:focus,
+.Polaris-Checkbox__Input:focus {
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+  border-color: #667eea !important;
+}
+
+/* Loading states */
+.timer-modal-loading {
+  opacity: 0.7;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Success states */
+.timer-modal-success {
+  border-left: 4px solid #28a745;
+  background: rgba(40, 167, 69, 0.1);
+  padding: 12px;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+
+/* Error states */
+.timer-modal-error {
+  border-left: 4px solid #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+  padding: 12px;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+
+/* Animation for modal entrance */
+@keyframes timerModalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.Polaris-Modal-Dialog {
+  animation: timerModalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Enhanced color picker styling */
+input[type="color"] {
+  border-radius: 8px !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+input[type="color"]:hover {
+  border-color: #667eea !important;
+  transform: scale(1.05) !important;
+}
+
+/* Improved range slider styling */
+.Polaris-RangeSlider__Track {
+  background: linear-gradient(90deg, #667eea, #764ba2) !important;
+}
+
+.Polaris-RangeSlider__Thumb {
+  background: #667eea !important;
+  border: 2px solid white !important;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Badge enhancements */
+.Polaris-Badge--toneInfo {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
+}
+
+/* Card hover effects */
+.Polaris-Card {
+  transition: all 0.3s ease !important;
+}
+
+.Polaris-Card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Divider styling */
+.Polaris-Divider {
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent) !important;
+}
+
+/* Text selection styling */
+::selection {
+  background: rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Scrollbar styling for webkit browsers */
+.Polaris-Modal-Section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.Polaris-Modal-Section::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.Polaris-Modal-Section::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 3px;
+}
+
+.Polaris-Modal-Section::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a42a0);
+}

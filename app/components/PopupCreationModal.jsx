@@ -20,12 +20,12 @@ import {
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { EmailIcon } from "@shopify/polaris-icons";
 
-export default function PopupCreationModal({ active, onClose, existingConfig }) {
+export default function PopupCreationModal({ active, onClose, existingConfig, initialPopupType }) {
   const fetcher = useFetcher();
   const shopify = useAppBridge();
   
-  // Initialize popup type from existing config or default to wheel-email
-  const [popupType, setPopupType] = useState(existingConfig?.type || "wheel-email");
+  // Initialize popup type from props, existing config, or default to wheel-email
+  const [popupType, setPopupType] = useState(initialPopupType || existingConfig?.type || "wheel-email");
   
   // State for realtime preview
   const [showRealtimePreview, setShowRealtimePreview] = useState(false);

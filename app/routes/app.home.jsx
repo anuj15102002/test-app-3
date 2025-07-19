@@ -20,6 +20,7 @@ import { CheckIcon, AlertTriangleIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import PopupModal from "../components/PopupModal";
+import CreatePopupButton from "../components/CreatePopupButton";
 
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -116,7 +117,9 @@ export default function AdminHome() {
 
   return (
     <Page>
-      <TitleBar title="EcomSend Popups" />
+      <TitleBar title="EcomSend Popups">
+        <CreatePopupButton existingConfig={existingConfig} />
+      </TitleBar>
       
       <BlockStack gap="500">
         {/* Welcome Message */}
@@ -131,16 +134,39 @@ export default function AdminHome() {
           </BlockStack>
         </Card>
 
-        {/* Configure Popup Button */}
+        {/* Create/Configure Popup Section */}
         <Card>
           <BlockStack gap="300">
-            <Text as="h2" variant="headingMd">
-              Popup Configuration
-            </Text>
-            <Text variant="bodyMd" as="p" tone="subdued">
-              Click the button below to configure your popup settings and customize the appearance.
-            </Text>
-            <PopupModal existingConfig={existingConfig} />
+            <InlineStack align="space-between">
+              <BlockStack gap="200">
+                <Text as="h2" variant="headingMd">
+                  Popup Management
+                </Text>
+                <Text variant="bodyMd" as="p" tone="subdued">
+                  Create new popups or configure your existing popup settings and customize the appearance.
+                </Text>
+              </BlockStack>
+              <CreatePopupButton existingConfig={existingConfig} size="large" />
+            </InlineStack>
+            
+            {existingConfig && (
+              <Box paddingBlockStart="300">
+                <InlineStack gap="300">
+                  <PopupModal existingConfig={existingConfig} />
+                  <Text variant="bodyMd" as="p" tone="subdued">
+                    Configure your existing {existingConfig.type} popup
+                  </Text>
+                </InlineStack>
+              </Box>
+            )}
+            
+            {!existingConfig && (
+              <Box paddingBlockStart="300">
+                <Text variant="bodyMd" as="p" tone="subdued">
+                  No popup created yet. Click "Create Popup" to get started with your first popup.
+                </Text>
+              </Box>
+            )}
           </BlockStack>
         </Card>
 

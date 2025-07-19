@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Wheel Popup - Enhanced</title>
+    <link rel="stylesheet" href="extensions/pop-up/assets/popup-styles.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .demo-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+        
+        .demo-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        h1 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        p {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .features {
+            text-align: left;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .layout-note {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .features h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        
+        .features ul {
+            color: #475569;
+            line-height: 1.8;
+        }
+        
+        .features li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🎡 Premium Wheel Popup</h1>
+        <p>Experience the enhanced wheel popup with premium styling, realistic physics, and smooth animations.</p>
+        
+        <div class="layout-note">
+            🎯 <strong>Eye-Catching Vibrant Design:</strong> Bold colors and striking contrast for maximum impact!
+        </div>
+        
+        <div class="features">
+            <h3>✨ Enhanced Features:</h3>
+            <ul>
+                <li><strong>Vibrant Color Scheme:</strong> Bold blue background with bright, contrasting wheel colors</li>
+                <li><strong>Eye-Catching Wheel:</strong> Bright red, cyan, green, amber, purple, and blue segments</li>
+                <li><strong>High Contrast Design:</strong> White form section against deep blue wheel section</li>
+                <li><strong>Interactive Hover:</strong> Hover over the wheel to see it spin briefly</li>
+                <li><strong>Professional Shadows:</strong> Enhanced depth with stronger shadow effects</li>
+                <li><strong>Bold Typography:</strong> Strong, readable text with perfect contrast</li>
+            </ul>
+        </div>
+        
+        <button class="demo-button" onclick="showDemoPopup()">🎯 Show Premium Wheel Popup</button>
+        <button class="demo-button" onclick="showEmailPopup()">📧 Show Email Popup</button>
+    </div>
+
+    <!-- Popup HTML Structure -->
+    <div id="popup-root">
+        <div id="custom-popup-overlay" style="display: none;">
+            <div id="custom-popup" class="custom-popup">
+                <div class="popup-content">
+                    <div class="wheel-section">
+                        <div class="popup-wheel-container">
+                            <!-- Wheel will be inserted here -->
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <button class="popup-close" onclick="closePopup()">&times;</button>
+                        <div class="form-title">GET YOUR CHANCE TO WIN</div>
+                        <div class="form-subtitle">AMAZING DISCOUNTS!</div>
+                        <p class="form-description">Enter your email below and spin the wheel to see if you're our next lucky winner!</p>
+                        <div class="popup-form">
+                            <!-- Form content will be dynamically inserted here -->
+                        </div>
+                        <div class="house-rules">
+                            <h4>The House rules:</h4>
+                            <ul>
+                                <li>Winnings through cheating will not be processed.</li>
+                                <li>Only one spin allowed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load popup JavaScript -->
+    <script src="extensions/pop-up/assets/popup.js"></script>
+    
+    <!-- Demo Configuration -->
+    <script>
+        // Mock configuration for demo
+        window.popupConfig = {
+            type: 'wheel-email',
+            title: 'GET YOUR CHANCE TO WIN',
+            subtitle: 'AMAZING DISCOUNTS!',
+            description: 'Enter your email below and spin the wheel to see if you\'re our next lucky winner!',
+            placeholder: 'Your email address',
+            buttonText: 'TRY YOUR LUCK',
+            discountCode: 'PREMIUM10',
+            segments: [
+                { label: '5% OFF', color: '#dc2626', code: 'SAVE5' },
+                { label: 'TRY AGAIN', color: '#64748b', code: null },
+                { label: '10% OFF', color: '#0891b2', code: 'SAVE10' },
+                { label: '15% OFF', color: '#7c3aed', code: 'SAVE15' },
+                { label: '20% OFF', color: '#059669', code: 'SAVE20' },
+                { label: 'FREE SHIPPING', color: '#ea580c', code: 'FREESHIP' }
+            ],
+            backgroundColor: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+            textColor: '#1e293b',
+            displayDelay: 0,
+            frequency: 'always',
+            exitIntent: false,
+            isActive: true
+        };
+
+        // Demo functions
+        function showDemoPopup() {
+            if (window.showPopup && window.popupConfig) {
+                window.showPopup(window.popupConfig);
+            } else {
+                alert('Popup system is loading... Please try again in a moment.');
+            }
+        }
+
+        function showEmailPopup() {
+            const emailConfig = {
+                type: 'email',
+                title: 'Get 10% Off Your First Order!',
+                description: 'Subscribe to our newsletter and receive exclusive discounts',
+                placeholder: 'Enter your email address',
+                buttonText: 'Get Discount',
+                discountCode: 'WELCOME10',
+                backgroundColor: '#ffffff',
+                textColor: '#000000',
+                buttonColor: '#3b82f6',
+                borderRadius: 12,
+                showCloseButton: true,
+                displayDelay: 0,
+                frequency: 'always',
+                exitIntent: false,
+                isActive: true
+            };
+            
+            if (window.showPopup) {
+                window.showPopup(emailConfig);
+            }
+        }
+
+        // Override closePopup to work with demo
+        window.closePopup = () => {
+            document.getElementById('custom-popup-overlay').style.display = 'none';
+        };
+
+        // Auto-show popup after a short delay for demo
+        setTimeout(() => {
+            console.log('Demo ready! Click the button to see the premium wheel popup.');
+        }, 1000);
+    </script>
+</body>
+</html>

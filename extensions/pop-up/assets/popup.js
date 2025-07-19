@@ -7,7 +7,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
-  let applicationUrl = 'https://practitioner-formal-patients-speakers.trycloudflare.com';
+  let applicationUrl = 'https://aside-jake-gods-filled.trycloudflare.com';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -497,22 +497,31 @@
         </div>
       `;
       
+      // Use vibrant, eye-catching colors for segments
       const segments = config.segments || [
-        { label: '5% OFF', color: '#ff6b6b', value: '5' },
-        { label: '10% OFF', color: '#4ecdc4', value: '10' },
-        { label: '15% OFF', color: '#45b7d1', value: '15' },
-        { label: '20% OFF', color: '#96ceb4', value: '20' },
-        { label: 'FREE SHIPPING', color: '#feca57', value: 'shipping' },
-        { label: 'TRY AGAIN', color: '#1e3c72', value: null }
+        { label: '5% OFF', color: '#ef4444', value: '5' },
+        { label: '10% OFF', color: '#06b6d4', value: '10' },
+        { label: '15% OFF', color: '#10b981', value: '15' },
+        { label: '20% OFF', color: '#f59e0b', value: '20' },
+        { label: 'FREE SHIPPING', color: '#8b5cf6', value: 'shipping' },
+        { label: 'NO PRIZE', color: '#1e40af', value: null }
       ];
       
       const angle = 360 / segments.length;
-      const gradient = segments.map((s, i) => `${s.color} ${i * angle}deg ${(i + 1) * angle}deg`).join(', ');
+      // Create premium gradient with subtle transitions
+      const gradient = segments.map((s, i) => {
+        const startAngle = i * angle;
+        const endAngle = (i + 1) * angle;
+        const midAngle = startAngle + (angle * 0.5);
+        
+        // Add subtle gradient within each segment for depth
+        return `${s.color} ${startAngle}deg, ${s.color}dd ${midAngle}deg, ${s.color} ${endAngle}deg`;
+      }).join(', ');
       
       // Create segment labels with horizontal text positioned within wheel
       const segmentLabels = segments.map((segment, index) => {
         const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
-        const radius = 80; // Reduced radius to keep text within wheel boundaries
+        const radius = 68; // Adjusted radius for larger wheel (250px)
         const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
         const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
         
@@ -522,30 +531,47 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%) translate(${x}px, ${y}px);
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
             color: white;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             pointer-events: none;
             text-align: center;
             line-height: 1.1;
-            max-width: 60px;
+            max-width: 70px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 20px;
+            height: 22px;
           ">
             ${segment.label}
           </div>
         `;
       }).join('');
       
-      // Create the wheel
+      // Create the wheel with premium styling
       wheelContainer.innerHTML = `
-        <div class="spinning-wheel" id="spinning-wheel" style="background: conic-gradient(${gradient}); position: relative;">
+        <div class="spinning-wheel" id="spinning-wheel" style="
+          background: conic-gradient(${gradient});
+          position: relative;
+          background-size: 100% 100%;
+          background-repeat: no-repeat;
+        ">
           <div class="wheel-pointer"></div>
-          <div class="wheel-center"></div>
+          <div class="wheel-center">
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 8px;
+              height: 8px;
+              background: #64748b;
+              border-radius: 50%;
+              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+            "></div>
+          </div>
           ${segmentLabels}
         </div>
       `;
@@ -714,13 +740,23 @@
     button.disabled = true;
     button.textContent = 'SPINNING...';
     
-    // Apply the calculated rotation with smooth animation
-    wheel.style.transition = 'transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)';
-    wheel.style.transform = `translateX(-50%) rotate(${finalRotation}deg)`;
+    // Apply the calculated rotation with realistic physics animation
+    wheel.style.transition = 'transform 4s cubic-bezier(0.23, 1, 0.32, 1)';
+    wheel.style.transform = `rotate(${finalRotation}deg)`;
+    
+    // Add subtle vibration effect during spin
+    wheel.style.filter = 'blur(0.5px)';
     
     setTimeout(async () => {
-      // Reset transition for future spins
-      wheel.style.transition = 'transform 0.5s ease-out';
+      // Add subtle bounce effect when stopping
+      wheel.style.transition = 'transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+      wheel.style.transform = `rotate(${finalRotation + 5}deg)`;
+      wheel.style.filter = 'blur(0px)';
+      
+      setTimeout(() => {
+        wheel.style.transition = 'transform 0.2s ease-out';
+        wheel.style.transform = `rotate(${finalRotation}deg)`;
+      }, 300);
       
       console.log(`Wheel landed on: ${prize.label} (index: ${prizeIndex})`);
       
@@ -751,7 +787,7 @@
         });
         showTryAgainDisplay(prize.label);
       }
-    }, 3000); // 3 second spin
+    }, 4000); // 4 second spin for more realistic feel
   }
 
   // Make handleEmailAndSpin globally accessible

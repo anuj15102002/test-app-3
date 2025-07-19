@@ -94,7 +94,7 @@ export const action = async ({ request }) => {
         backgroundColor: config.backgroundColor,
         textColor: config.textColor,
         buttonColor: config.buttonColor || "#007ace",
-        borderRadius: config.borderRadius || 8,
+        borderRadius: config.borderRadius || 20,
         showCloseButton: config.showCloseButton !== false,
         displayDelay: config.displayDelay || 3000,
         frequency: config.frequency || "once",
@@ -134,7 +134,7 @@ export const action = async ({ request }) => {
         backgroundColor: config.backgroundColor,
         textColor: config.textColor,
         buttonColor: config.buttonColor || "#007ace",
-        borderRadius: config.borderRadius || 8,
+        borderRadius: config.borderRadius || 20,
         showCloseButton: config.showCloseButton !== false,
         displayDelay: config.displayDelay || 3000,
         frequency: config.frequency || "once",
@@ -245,12 +245,12 @@ export default function PopupCustomizer() {
         buttonText: existingConfig.buttonText || "TRY YOUR LUCK",
         discountCode: existingConfig.discountCode || "SAVE5",
         segments: existingConfig.segments ? JSON.parse(existingConfig.segments) : [
-          { label: '5% DISCOUNT', color: '#ff6b6b', code: 'SAVE5' },
-          { label: 'NO PRIZE', color: '#1e3c72', code: null },
-          { label: 'UNLUCKY', color: '#4ecdc4', code: null },
-          { label: '5% DISCOUNT', color: '#96ceb4', code: 'SAVE5' },
-          { label: 'NO PRIZE', color: '#ff6b6b', code: null },
-          { label: 'NEXT TIME', color: '#feca57', code: null }
+          { label: '5% OFF', color: '#ef4444', code: 'SAVE5' },
+          { label: '10% OFF', color: '#06b6d4', code: 'SAVE10' },
+          { label: '15% OFF', color: '#10b981', code: 'SAVE15' },
+          { label: '20% OFF', color: '#f59e0b', code: 'SAVE20' },
+          { label: 'FREE SHIPPING', color: '#8b5cf6', code: 'FREESHIP' },
+          { label: 'NO PRIZE', color: '#1e40af', code: null }
         ],
         backgroundColor: backgroundColor,
         backgroundType: backgroundType,
@@ -269,14 +269,14 @@ export default function PopupCustomizer() {
       buttonText: "TRY YOUR LUCK",
       discountCode: "SAVE5",
       segments: [
-        { label: '5% DISCOUNT', color: '#ff6b6b', code: 'SAVE5' },
-        { label: 'NO PRIZE', color: '#1e3c72', code: null },
-        { label: 'UNLUCKY', color: '#4ecdc4', code: null },
-        { label: '5% DISCOUNT', color: '#96ceb4', code: 'SAVE5' },
-        { label: 'NO PRIZE', color: '#ff6b6b', code: null },
-        { label: 'NEXT TIME', color: '#feca57', code: null }
+        { label: '5% OFF', color: '#ef4444', code: 'SAVE5' },
+        { label: '10% OFF', color: '#06b6d4', code: 'SAVE10' },
+        { label: '15% OFF', color: '#10b981', code: 'SAVE15' },
+        { label: '20% OFF', color: '#f59e0b', code: 'SAVE20' },
+        { label: 'FREE SHIPPING', color: '#8b5cf6', code: 'FREESHIP' },
+        { label: 'NO PRIZE', color: '#1e40af', code: null }
       ],
-      backgroundColor: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
+      backgroundColor: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
       backgroundType: "gradient",
       textColor: "#ffffff",
       displayDelay: 3000,
@@ -1480,112 +1480,120 @@ export default function PopupCustomizer() {
                     </div>
                   </BlockStack>
                 ) : (
-                  // Wheel-Email Combo Preview
+                  // Wheel-Email Combo Preview - Enhanced Size
                   <div
                     style={{
-                      background: wheelEmailConfig.backgroundColor || "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
-                      borderRadius: "12px",
+                      background: wheelEmailConfig.backgroundColor || "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
+                      borderRadius: "20px",
                       overflow: "hidden",
                       position: "relative",
-                      padding: "16px",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      padding: "20px",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                      border: "2px solid rgba(255, 255, 255, 0.2)",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        minHeight: "200px",
+                        minHeight: "240px",
                       }}
                     >
-                      {/* Wheel Section */}
+                      {/* Wheel Section - Larger */}
                       <div
                         style={{
-                          flex: 1,
+                          width: "280px",
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "flex-end",
+                          justifyContent: "center",
                           paddingRight: 0,
                           overflow: "hidden",
                         }}
                       >
                         <div
                           style={{
-                            width: "120px",
-                            height: "120px",
+                            width: "160px",
+                            height: "160px",
                             borderRadius: "50%",
-                            border: "4px solid white",
+                            border: "4px solid rgba(255, 255, 255, 0.8)",
                             position: "relative",
-                            transform: "translateX(-50%)",
                             background: `conic-gradient(${wheelEmailConfig.segments.map((segment, index) =>
                               `${segment.color} ${index * (360 / wheelEmailConfig.segments.length)}deg ${(index + 1) * (360 / wheelEmailConfig.segments.length)}deg`
                             ).join(", ")})`,
-                            boxShadow: "0 0 10px rgba(0, 0, 0, 0.3)",
+                            boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                            filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))",
                           }}
                         >
-                          {/* Wheel pointer */}
+                          {/* Wheel pointer - Enhanced */}
                           <div
                             style={{
                               position: "absolute",
                               top: "50%",
-                              right: "-6px",
+                              right: "-12px",
                               transform: "translateY(-50%)",
                               width: 0,
                               height: 0,
-                              borderTop: "6px solid transparent",
-                              borderBottom: "6px solid transparent",
-                              borderLeft: "10px solid white",
+                              borderTop: "10px solid transparent",
+                              borderBottom: "10px solid transparent",
+                              borderLeft: "18px solid #fbbf24",
                               zIndex: 10,
+                              filter: "drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3))",
                             }}
                           />
-                          {/* Wheel center */}
+                          {/* Wheel center - Enhanced */}
                           <div
                             style={{
                               position: "absolute",
                               top: "50%",
                               left: "50%",
                               transform: "translate(-50%, -50%)",
-                              backgroundColor: "white",
-                              width: "20px",
-                              height: "20px",
+                              background: "linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)",
+                              width: "28px",
+                              height: "28px",
                               borderRadius: "50%",
-                              border: "2px solid #1e3c72",
+                              border: "3px solid rgba(148, 163, 184, 0.3)",
                               zIndex: 5,
+                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1)",
                             }}
                           />
                         </div>
                       </div>
                       
-                      {/* Form Section */}
+                      {/* Form Section - Enhanced */}
                       <div
                         style={{
                           flex: 1,
-                          padding: "10px 15px",
-                          color: "white",
+                          padding: "25px 30px",
+                          color: "#1f2937",
                           display: "flex",
                           flexDirection: "column",
                           justifyContent: "center",
+                          background: "linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)",
+                          backdropFilter: "blur(10px)",
+                          borderRadius: "0 20px 20px 0",
+                          boxShadow: "inset 0 0 0 1px rgba(0, 0, 0, 0.05)",
                         }}
                       >
-                        <div style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "4px", color: "white" }}>
+                        <div style={{ fontSize: "16px", fontWeight: "700", marginBottom: "6px", color: "#0f172a", letterSpacing: "-0.5px" }}>
                           {wheelEmailConfig.title}
                         </div>
-                        <div style={{ fontSize: "10px", marginBottom: "8px", color: "rgba(255, 255, 255, 0.9)" }}>
+                        <div style={{ fontSize: "12px", marginBottom: "12px", color: "#475569", lineHeight: "1.4", fontWeight: "500" }}>
                           {wheelEmailConfig.subtitle}
                         </div>
-                        <div style={{ fontSize: "8px", marginBottom: "10px", color: "rgba(255, 255, 255, 0.8)", lineHeight: "1.2" }}>
-                          Enter email & spin to win!
+                        <div style={{ fontSize: "10px", marginBottom: "14px", color: "#475569", lineHeight: "1.4" }}>
+                          Enter email & spin to win amazing discounts!
                         </div>
                         
                         <div
                           style={{
-                            padding: "6px",
-                            border: "none",
-                            borderRadius: "4px",
-                            backgroundColor: "#fff",
-                            color: "#666",
-                            marginBottom: "6px",
-                            fontSize: "8px",
+                            padding: "10px 12px",
+                            border: "2px solid rgba(148, 163, 184, 0.2)",
+                            borderRadius: "8px",
+                            backgroundColor: "rgba(255, 255, 255, 0.8)",
+                            color: "#94a3b8",
+                            marginBottom: "12px",
+                            fontSize: "10px",
+                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
                           }}
                         >
                           {wheelEmailConfig.placeholder}
@@ -1594,16 +1602,17 @@ export default function PopupCustomizer() {
                         <button
                           style={{
                             width: "100%",
-                            padding: "6px",
-                            background: "linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)",
+                            padding: "12px 16px",
+                            background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
                             border: "none",
-                            borderRadius: "4px",
+                            borderRadius: "10px",
                             color: "white",
-                            fontSize: "8px",
-                            fontWeight: "bold",
+                            fontSize: "11px",
+                            fontWeight: "700",
                             cursor: "pointer",
                             textTransform: "uppercase",
-                            letterSpacing: "0.5px",
+                            letterSpacing: "0.8px",
+                            boxShadow: "0 6px 20px rgba(37, 99, 235, 0.4)",
                           }}
                         >
                           {wheelEmailConfig.buttonText}
@@ -1741,21 +1750,22 @@ export default function PopupCustomizer() {
             </button>
           </div>
         ) : (
-          // Wheel-Email Combo Popup
+          // Wheel-Email Combo Popup - Enhanced Size
           <div
             style={{
-              background: config.backgroundColor || 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-              borderRadius: '12px',
+              background: config.backgroundColor || 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
+              borderRadius: '20px',
               overflow: 'hidden',
               position: 'relative',
-              padding: '16px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              maxWidth: '600px',
+              padding: '20px',
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+              maxWidth: '800px',
               width: '90%',
               display: 'flex',
               alignItems: 'center',
-              minHeight: '300px',
+              minHeight: '320px',
               animation: 'popupSlideIn 0.3s ease-out',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
             }}
           >
             <button
@@ -1780,56 +1790,58 @@ export default function PopupCustomizer() {
               ×
             </button>
             
-            {/* Wheel Section */}
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 0, overflow: 'hidden' }}>
+            {/* Wheel Section - Enhanced */}
+            <div style={{ width: '360px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '25px', overflow: 'hidden' }}>
               <div
                 style={{
-                  width: '200px',
-                  height: '200px',
+                  width: '250px',
+                  height: '250px',
                   borderRadius: '50%',
-                  border: '4px solid white',
+                  border: '4px solid rgba(255, 255, 255, 0.8)',
                   position: 'relative',
-                  transform: 'translateX(-50%)',
                   background: `conic-gradient(${config.segments.map((segment, index) =>
                     `${segment.color} ${index * (360 / config.segments.length)}deg ${(index + 1) * (360 / config.segments.length)}deg`
                   ).join(", ")})`,
-                  boxShadow: '0 0 10px rgba(0, 0, 0, 0.3)',
+                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                  filter: 'drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15))',
                 }}
               >
-                {/* Wheel pointer */}
+                {/* Wheel pointer - Enhanced */}
                 <div
                   style={{
                     position: 'absolute',
                     top: '50%',
-                    right: '-6px',
+                    right: '-18px',
                     transform: 'translateY(-50%)',
                     width: 0,
                     height: 0,
-                    borderTop: '8px solid transparent',
-                    borderBottom: '8px solid transparent',
-                    borderLeft: '12px solid white',
+                    borderTop: '16px solid transparent',
+                    borderBottom: '16px solid transparent',
+                    borderLeft: '28px solid #fbbf24',
                     zIndex: 10,
+                    filter: 'drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4))',
                   }}
                 />
-                {/* Wheel center */}
+                {/* Wheel center - Enhanced */}
                 <div
                   style={{
                     position: 'absolute',
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    backgroundColor: 'white',
-                    width: '30px',
-                    height: '30px',
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
+                    width: '40px',
+                    height: '40px',
                     borderRadius: '50%',
-                    border: '2px solid #1e3c72',
+                    border: '3px solid rgba(148, 163, 184, 0.3)',
                     zIndex: 5,
+                    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1)',
                   }}
                 />
                 {/* Wheel segment labels */}
                 {config.segments.map((segment, index) => {
                   const segmentAngle = (360 / config.segments.length) * index + (360 / config.segments.length) / 2;
-                  const radius = 60;
+                  const radius = 68; // Adjusted for larger wheel
                   const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
                   const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
                   
@@ -1841,19 +1853,19 @@ export default function PopupCustomizer() {
                         left: '50%',
                         top: '50%',
                         transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                        fontSize: '10px',
+                        fontSize: '12px',
                         fontWeight: 'bold',
                         color: 'white',
                         textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
                         pointerEvents: 'none',
                         textAlign: 'center',
                         lineHeight: '1.1',
-                        maxWidth: '50px',
+                        maxWidth: '70px',
                         overflow: 'hidden',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        height: '16px',
+                        height: '22px',
                       }}
                     >
                       {segment.label}
@@ -1863,15 +1875,26 @@ export default function PopupCustomizer() {
               </div>
             </div>
             
-            {/* Form Section */}
-            <div style={{ flex: 1, padding: '20px 30px', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '8px', color: 'white' }}>
+            {/* Form Section - Enhanced */}
+            <div style={{
+              flex: 1,
+              padding: '30px 35px',
+              color: '#1f2937',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '0 20px 20px 0',
+              boxShadow: 'inset 0 0 0 1px rgba(0, 0, 0, 0.05)'
+            }}>
+              <div style={{ fontSize: '24px', fontWeight: '700', marginBottom: '10px', color: '#0f172a', letterSpacing: '-0.5px' }}>
                 {config.title}
               </div>
-              <div style={{ fontSize: '14px', marginBottom: '15px', color: 'rgba(255, 255, 255, 0.9)' }}>
+              <div style={{ fontSize: '16px', marginBottom: '18px', color: '#475569', lineHeight: '1.4', fontWeight: '500' }}>
                 {config.subtitle}
               </div>
-              <div style={{ fontSize: '12px', marginBottom: '20px', color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.4' }}>
+              <div style={{ fontSize: '13px', marginBottom: '20px', color: '#475569', lineHeight: '1.4' }}>
                 {config.description}
               </div>
               
@@ -1879,15 +1902,16 @@ export default function PopupCustomizer() {
                 type="email"
                 placeholder={config.placeholder}
                 style={{
-                  padding: '12px',
-                  border: 'none',
-                  borderRadius: '6px',
-                  backgroundColor: '#fff',
-                  color: '#666',
-                  marginBottom: '12px',
-                  fontSize: '14px',
+                  padding: '14px 18px',
+                  border: '2px solid rgba(148, 163, 184, 0.2)',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  color: '#1e293b',
+                  marginBottom: '18px',
+                  fontSize: '16px',
                   width: '100%',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
                 }}
                 readOnly
               />
@@ -1895,16 +1919,17 @@ export default function PopupCustomizer() {
               <button
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+                  padding: '18px 24px',
+                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '14px',
                   color: 'white',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
+                  fontSize: '17px',
+                  fontWeight: '700',
                   cursor: 'pointer',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
+                  letterSpacing: '0.8px',
+                  boxShadow: '0 8px 25px rgba(37, 99, 235, 0.4)'
                 }}
               >
                 {config.buttonText}

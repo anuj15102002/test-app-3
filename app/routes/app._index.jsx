@@ -19,6 +19,7 @@ import { CheckIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import AppEmbedManager from "../components/AppEmbedManager";
+import CreatePopupButton from "../components/CreatePopupButton";
 
 export const loader = async ({ request }) => {
   const { session, admin } = await authenticate.admin(request);
@@ -176,9 +177,7 @@ export default function Dashboard() {
   return (
     <Page>
       <TitleBar title="QuickPop Dashboard">
-        <Button variant="primary" onClick={handleCreatePopup}>
-          Create popup
-        </Button>
+        <CreatePopupButton existingConfig={existingConfig} />
       </TitleBar>
       
       <BlockStack gap="500">
@@ -189,6 +188,7 @@ export default function Dashboard() {
               <Text as="h1" variant="headingLg">
                 developmentandtesting, welcome to QuickPop!
               </Text>
+              <CreatePopupButton existingConfig={existingConfig} size="large" />
             </InlineStack>
           </Layout.Section>
         </Layout>
