@@ -25,12 +25,16 @@ export const loader = async ({ request }) => {
   const { session, admin } = await authenticate.admin(request);
   
   try {
-    // Load existing popup configuration if it exists
-    let existingConfig = await db.popupConfig.findUnique({
-      where: { shop: session.shop }
+    // Load all popups for this shop
+    const popups = await db.popupConfig.findMany({
+      where: { shop: session.shop },
+      orderBy: { createdAt: 'desc' }
     });
     
-    // Check app embed status - for now we'll check if popup config has been modified
+    // For backward compatibility, get the first popup as existingConfig
+    const existingConfig = popups.length > 0 ? popups[0] : null;
+    
+    // Check app embed status - for now we'll check if any popup config has been modified
     // to indicate app embed is enabled (displayDelay = 0, frequency = "once", exitIntent = false)
     let appEmbedEnabled = false;
     if (existingConfig) {
@@ -39,42 +43,9 @@ export const loader = async ({ request }) => {
                       existingConfig.exitIntent === false;
     }
     
-    // If no configuration exists, create a default one
-    if (!existingConfig) {
-      existingConfig = await db.popupConfig.create({
-        data: {
-          shop: session.shop,
-          type: "wheel-email",
-          title: "GET YOUR CHANCE TO WIN",
-          description: "Enter your email below and spin the wheel to see if you're our next lucky winner!",
-          placeholder: "Your email",
-          buttonText: "TRY YOUR LUCK",
-          discountCode: "SAVE5",
-          backgroundColor: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
-          textColor: "#ffffff",
-          buttonColor: "#ff6b6b",
-          borderRadius: 8,
-          showCloseButton: true,
-          displayDelay: appEmbedEnabled ? 0 : 3000, // Disable delay when app embed is enabled
-          frequency: "once",
-          exitIntent: appEmbedEnabled ? false : false, // Disable exit intent when app embed is enabled
-          exitIntentDelay: 1000,
-          segments: JSON.stringify([
-            { label: '5% DISCOUNT', color: '#ff6b6b', code: 'SAVE5' },
-            { label: 'NO PRIZE', color: '#1e3c72', code: null },
-            { label: 'UNLUCKY', color: '#4ecdc4', code: null },
-            { label: '5% DISCOUNT', color: '#96ceb4', code: 'SAVE5' },
-            { label: 'NO PRIZE', color: '#ff6b6b', code: null },
-            { label: 'NEXT TIME', color: '#feca57', code: null }
-          ]),
-          isActive: true
-        }
-      });
-    }
-    
-    return { existingConfig, appEmbedEnabled };
+    return { existingConfig, appEmbedEnabled, popups };
   } catch (error) {
-    return { existingConfig: null, appEmbedEnabled: false };
+    return { existingConfig: null, appEmbedEnabled: false, popups: [] };
   }
 };
 
@@ -127,14 +98,15 @@ export default function Dashboard() {
   const loaderData = useLoaderData();
   const existingConfig = loaderData?.existingConfig || null;
   const serverAppEmbedEnabled = loaderData?.appEmbedEnabled || false;
+  const popups = loaderData?.popups || [];
   
   // State for app embed status - initialize from server data
   const [appEmbedEnabled, setAppEmbedEnabled] = useState(serverAppEmbedEnabled);
   const [isEnablingEmbed, setIsEnablingEmbed] = useState(false);
   
   // Calculate setup progress
-  const hasPopup = !!existingConfig;
-  const isPublished = existingConfig?.isActive || false;
+  const hasPopup = popups.length > 0;
+  const isPublished = popups.some(popup => popup.isActive);
   const completedTasks = [appEmbedEnabled, hasPopup, isPublished].filter(Boolean).length;
   const totalTasks = 3;
   const progressPercentage = (completedTasks / totalTasks) * 100;
@@ -154,9 +126,6 @@ export default function Dashboard() {
     }
   }, [fetcher, shopify]);
 
-  const handleCreatePopup = useCallback(() => {
-    navigate("/app/popup-customizer");
-  }, [navigate]);
 
   // Handle fetcher response
   useEffect(() => {
@@ -177,7 +146,7 @@ export default function Dashboard() {
   return (
     <Page>
       <TitleBar title="QuickPop Dashboard">
-        <CreatePopupButton existingConfig={existingConfig} />
+        <CreatePopupButton existingConfig={existingConfig} popups={popups} />
       </TitleBar>
       
       <BlockStack gap="500">
@@ -188,7 +157,7 @@ export default function Dashboard() {
               <Text as="h1" variant="headingLg">
                 developmentandtesting, welcome to QuickPop!
               </Text>
-              <CreatePopupButton existingConfig={existingConfig} size="large" />
+              <CreatePopupButton existingConfig={existingConfig} popups={popups} size="large" />
             </InlineStack>
           </Layout.Section>
         </Layout>
@@ -319,11 +288,11 @@ export default function Dashboard() {
                           {hasPopup ? (
                             <Icon source={CheckIcon} tone="success" />
                           ) : (
-                            <div style={{ 
-                              width: '20px', 
-                              height: '20px', 
-                              border: '2px solid #ccc', 
-                              borderRadius: '50%' 
+                            <div style={{
+                              width: '20px',
+                              height: '20px',
+                              border: '2px solid #ccc',
+                              borderRadius: '50%'
                             }} />
                           )}
                         </Box>
@@ -331,9 +300,6 @@ export default function Dashboard() {
                           Create a popup
                         </Text>
                       </InlineStack>
-                      <Button onClick={handleCreatePopup}>
-                        {hasPopup ? "Edit popup" : "Create popup"}
-                      </Button>
                     </InlineStack>
                   </Card>
 
@@ -345,11 +311,11 @@ export default function Dashboard() {
                           {isPublished ? (
                             <Icon source={CheckIcon} tone="success" />
                           ) : (
-                            <div style={{ 
-                              width: '20px', 
-                              height: '20px', 
-                              border: '2px solid #ccc', 
-                              borderRadius: '50%' 
+                            <div style={{
+                              width: '20px',
+                              height: '20px',
+                              border: '2px solid #ccc',
+                              borderRadius: '50%'
                             }} />
                           )}
                         </Box>
@@ -357,9 +323,6 @@ export default function Dashboard() {
                           Publish your popup
                         </Text>
                       </InlineStack>
-                      <Button disabled={!hasPopup}>
-                        {isPublished ? "Published" : "Publish"}
-                      </Button>
                     </InlineStack>
                   </Card>
                 </BlockStack>

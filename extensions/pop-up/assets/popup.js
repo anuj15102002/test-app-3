@@ -7,7 +7,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
-  let applicationUrl = 'https://aside-jake-gods-filled.trycloudflare.com';
+  let applicationUrl = 'https://childhood-tx-page-thehun.trycloudflare.com';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -144,9 +144,9 @@
         { label: '5% OFF', color: '#ff6b6b', value: '5' },
         { label: '10% OFF', color: '#4ecdc4', value: '10' },
         { label: '15% OFF', color: '#45b7d1', value: '15' },
-        { label: '20% OFF', color: '#96ceb4', value: '20' },
-        { label: 'FREE SHIPPING', color: '#feca57', value: 'shipping' },
-        { label: 'TRY AGAIN', color: '#1e3c72', value: null }
+        { label: '20% OFF', color: '#feca57', value: '20' },
+        { label: 'FREE SHIPPING', color: '#ff9ff3', value: 'shipping' },
+        { label: 'TRY AGAIN', color: '#54a0ff', value: null }
       ],
       backgroundColor: '#fff',
       textColor: '#000',
@@ -499,12 +499,12 @@
       
       // Use vibrant, eye-catching colors for segments
       const segments = config.segments || [
-        { label: '5% OFF', color: '#ef4444', value: '5' },
-        { label: '10% OFF', color: '#06b6d4', value: '10' },
-        { label: '15% OFF', color: '#10b981', value: '15' },
-        { label: '20% OFF', color: '#f59e0b', value: '20' },
-        { label: 'FREE SHIPPING', color: '#8b5cf6', value: 'shipping' },
-        { label: 'NO PRIZE', color: '#1e40af', value: null }
+        { label: '5% OFF', color: '#ff6b6b', value: '5' },
+        { label: '10% OFF', color: '#4ecdc4', value: '10' },
+        { label: '15% OFF', color: '#45b7d1', value: '15' },
+        { label: '20% OFF', color: '#feca57', value: '20' },
+        { label: 'FREE SHIPPING', color: '#ff9ff3', value: 'shipping' },
+        { label: 'TRY AGAIN', color: '#54a0ff', value: null }
       ];
       
       const angle = 360 / segments.length;
@@ -521,7 +521,7 @@
       // Create segment labels with horizontal text positioned within wheel
       const segmentLabels = segments.map((segment, index) => {
         const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
-        const radius = 68; // Adjusted radius for larger wheel (250px)
+        const radius = 75; // Adjusted radius for larger wheel (220px)
         const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
         const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
         
@@ -531,19 +531,20 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%) translate(${x}px, ${y}px);
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 13px;
+            font-weight: 800;
             color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 2px rgba(0,0,0,0.8);
             pointer-events: none;
             text-align: center;
             line-height: 1.1;
-            max-width: 70px;
+            max-width: 75px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 22px;
+            height: 24px;
+            letter-spacing: 0.5px;
           ">
             ${segment.label}
           </div>
@@ -708,9 +709,9 @@
       { label: '5% OFF', color: '#ff6b6b', code: 'SAVE5' },
       { label: '10% OFF', color: '#4ecdc4', code: 'SAVE10' },
       { label: '15% OFF', color: '#45b7d1', code: 'SAVE15' },
-      { label: '20% OFF', color: '#96ceb4', code: 'SAVE20' },
-      { label: 'FREE SHIPPING', color: '#feca57', code: 'FREESHIP' },
-      { label: 'TRY AGAIN', color: '#1e3c72', code: null }
+      { label: '20% OFF', color: '#feca57', code: 'SAVE20' },
+      { label: 'FREE SHIPPING', color: '#ff9ff3', code: 'FREESHIP' },
+      { label: 'TRY AGAIN', color: '#54a0ff', code: null }
     ];
     
     // Randomly select a prize FIRST

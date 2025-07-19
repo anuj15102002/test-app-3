@@ -27,7 +27,8 @@ model Session {
 
 model PopupConfig {
   id                String   @id @default(cuid())
-  shop              String   @unique
+  shop              String
+  name              String   @default("Untitled Popup")
   type              String
   title             String
   description       String
@@ -65,6 +66,9 @@ model PopupConfig {
   successTitle      String?  @default("SUCCESS!")
   successMessage    String?  @db.Text
   disclaimer        String?  @db.Text
+
+  @@index([shop])
+  @@index([shop, isActive])
 }
 
 model DiscountCode {

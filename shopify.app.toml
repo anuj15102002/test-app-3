@@ -3,7 +3,7 @@
 client_id = "0249c9ec8c24958292aa21be203e2b38"
 name = "testAPp"
 handle = "testapp-4139"
-application_url = "https://aside-jake-gods-filled.trycloudflare.com"
+application_url = "https://childhood-tx-page-thehun.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-07"
 scopes = "write_products,write_customers,write_discounts,write_price_rules,read_themes,write_themes,write_app_proxy"
 
 [auth]
-redirect_urls = ["https://aside-jake-gods-filled.trycloudflare.com/auth/callback", "https://aside-jake-gods-filled.trycloudflare.com/auth/shopify/callback", "https://aside-jake-gods-filled.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://childhood-tx-page-thehun.trycloudflare.com/auth/callback", "https://childhood-tx-page-thehun.trycloudflare.com/auth/shopify/callback", "https://childhood-tx-page-thehun.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

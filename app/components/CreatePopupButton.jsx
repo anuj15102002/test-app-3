@@ -2,7 +2,12 @@ import { useState } from "react";
 import { Button } from "@shopify/polaris";
 import PopupTypeSelectionModal from "./PopupTypeSelectionModal";
 
-export default function CreatePopupButton({ existingConfig, variant = "primary", size = "medium" }) {
+export default function CreatePopupButton({
+  existingConfig,
+  popups = [],
+  variant = "primary",
+  size = "medium"
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);

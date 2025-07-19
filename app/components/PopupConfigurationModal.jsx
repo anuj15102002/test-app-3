@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, useNavigate } from "@remix-run/react";
 import {
   Modal,
   Layout,
@@ -31,17 +31,22 @@ import "../styles/timer-popup-modal.css";
  * - Shopify-like UX with Polaris components
  * - Mobile responsive design
  */
-export default function PopupConfigurationModal({ 
-  isOpen, 
-  onClose, 
+export default function PopupConfigurationModal({
+  isOpen,
+  onClose,
   initialConfig = null,
-  initialPopupType = "wheel-email"
+  initialPopupType = "wheel-email",
+  initialPopupName = ""
 }) {
   const fetcher = useFetcher();
   const shopify = useAppBridge();
+  const navigate = useNavigate();
   
   // Initialize popup type from props or default
   const [popupType, setPopupType] = useState(initialPopupType);
+  
+  // Popup name state - use initialPopupName for new popups, initialConfig.name for editing
+  const [popupName, setPopupName] = useState(initialConfig?.name || initialPopupName || "");
   
   // Email popup configuration
   const [emailConfig, setEmailConfig] = useState(() => {
@@ -103,12 +108,12 @@ export default function PopupConfigurationModal({
         buttonText: initialConfig.buttonText || "TRY YOUR LUCK",
         discountCode: initialConfig.discountCode || "SAVE5",
         segments: initialConfig.segments ? JSON.parse(initialConfig.segments) : [
-          { label: '5% DISCOUNT', color: '#ff6b6b', code: 'SAVE5' },
-          { label: 'NO PRIZE', color: '#1e3c72', code: null },
-          { label: 'UNLUCKY', color: '#4ecdc4', code: null },
-          { label: '5% DISCOUNT', color: '#96ceb4', code: 'SAVE5' },
-          { label: 'NO PRIZE', color: '#ff6b6b', code: null },
-          { label: 'NEXT TIME', color: '#feca57', code: null }
+          { label: '5% OFF', color: '#ff6b6b', code: 'SAVE5' },
+          { label: '10% OFF', color: '#4ecdc4', code: 'SAVE10' },
+          { label: '15% OFF', color: '#45b7d1', code: 'SAVE15' },
+          { label: '20% OFF', color: '#feca57', code: 'SAVE20' },
+          { label: 'FREE SHIPPING', color: '#ff9ff3', code: 'FREESHIP' },
+          { label: 'TRY AGAIN', color: '#54a0ff', code: null }
         ],
         backgroundColor: backgroundColor,
         backgroundType: backgroundType,
@@ -120,21 +125,21 @@ export default function PopupConfigurationModal({
       };
     }
     return {
-      title: "Spin & Win This Christmas!",
-      subtitle: "FESTIVE DISCOUNTS!",
-      description: "Celebrate the season of giving! Subscribe and spin the wheel for a chance to win festive discounts!",
+      title: "GET YOUR CHANCE TO WIN",
+      subtitle: "AMAZING DISCOUNTS!",
+      description: "Enter your email below and spin the wheel to see if you're our next lucky winner!",
       placeholder: "Enter your email address",
-      buttonText: "Unlock My Gift!",
-      discountCode: "XMAS10",
+      buttonText: "TRY YOUR LUCK",
+      discountCode: "SAVE10",
       segments: [
-        { label: '5%', color: '#e3f2fd', code: 'XMAS5' },
-        { label: '10%', color: '#81c784', code: 'XMAS10' },
-        { label: '15%', color: '#64b5f6', code: 'XMAS15' },
-        { label: '$1', color: '#fff3e0', code: 'DOLLAR1' },
-        { label: '$10', color: '#ffab91', code: 'DOLLAR10' },
-        { label: '$5', color: '#a5d6a7', code: 'DOLLAR5' }
+        { label: '5% OFF', color: '#ff6b6b', code: 'SAVE5' },
+        { label: '10% OFF', color: '#4ecdc4', code: 'SAVE10' },
+        { label: '15% OFF', color: '#45b7d1', code: 'SAVE15' },
+        { label: '20% OFF', color: '#feca57', code: 'SAVE20' },
+        { label: 'FREE SHIPPING', color: '#ff9ff3', code: 'FREESHIP' },
+        { label: 'TRY AGAIN', color: '#54a0ff', code: null }
       ],
-      backgroundColor: "linear-gradient(135deg, #1a237e 0%, #3949ab 100%)",
+      backgroundColor: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
       backgroundType: "gradient",
       textColor: "#ffffff",
       displayDelay: 3000,
@@ -263,25 +268,42 @@ export default function PopupConfigurationModal({
                    popupType === "timer" ? timerConfig :
                    wheelEmailConfig;
     
-    fetcher.submit(
-      { popupConfig: JSON.stringify({ type: popupType, config }) },
-      { method: "POST", action: "/app/popup-customizer" }
-    );
+    // Generate a default name if not provided
+    const finalPopupName = popupName || `${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup - ${new Date().toLocaleDateString()}`;
     
-    // Close modal after save
+    const formData = {
+      popupConfig: JSON.stringify({
+        type: popupType,
+        config,
+        name: finalPopupName
+      })
+    };
+    
+    // Include popupId if editing existing popup
+    if (initialConfig?.id) {
+      formData.popupId = initialConfig.id;
+    }
+    
+    fetcher.submit(formData, { method: "POST", action: "/app/popup-customizer" });
+    
+    // Close modal after save - this will trigger the parent to close both modals
     onClose();
-  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, fetcher, onClose]);
+  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, popupName, initialConfig, fetcher, onClose]);
 
   // Handle fetcher response
   useEffect(() => {
     if (fetcher.data) {
       if (fetcher.data.success) {
         shopify.toast.show("Popup configuration saved successfully!");
+        // Navigate to manage popup page to refresh the list
+        setTimeout(() => {
+          navigate("/app/popups");
+        }, 1000); // Small delay to show the toast
       } else if (fetcher.data.error) {
         shopify.toast.show(`Error: ${fetcher.data.error}`, { isError: true });
       }
     }
-  }, [fetcher.data, shopify]);
+  }, [fetcher.data, shopify, navigate]);
 
   const popupTypeOptions = [
     { label: "Email Discount Popup", value: "email" },
@@ -1103,22 +1125,22 @@ export default function PopupConfigurationModal({
                         <div
                           style={{
                             width: "100%",
-                            height: "120px",
+                            height: "60px",
                             backgroundImage: `url(${communityConfig.bannerImage})`,
                             backgroundSize: "cover",
                             backgroundPosition: "center",
-                            borderRadius: "8px",
-                            marginBottom: "10px",
+                            borderRadius: "6px",
+                            marginBottom: "8px",
                           }}
                         />
                       )}
-                      <div style={{ display: "flex", justifyContent: "center", gap: "15px", margin: "15px 0" }}>
+                      <div style={{ display: "flex", justifyContent: "center", gap: "10px", margin: "10px 0" }}>
                         {communityConfig.socialIcons.filter(icon => icon.enabled && icon.url).map((social, index) => (
                           <div
                             key={social.platform}
                             style={{
-                              width: "40px",
-                              height: "40px",
+                              width: "32px",
+                              height: "32px",
                               borderRadius: "50%",
                               backgroundColor: social.platform === 'facebook' ? '#1877f2' :
                                              social.platform === 'instagram' ? '#E4405F' :
@@ -1128,7 +1150,7 @@ export default function PopupConfigurationModal({
                               alignItems: "center",
                               justifyContent: "center",
                               color: "white",
-                              fontSize: "18px",
+                              fontSize: "14px",
                               cursor: "pointer",
                             }}
                           >
@@ -1140,13 +1162,13 @@ export default function PopupConfigurationModal({
                         ))}
                       </div>
                       {communityConfig.showAskMeLater && (
-                        <div style={{ textAlign: "center", marginTop: "10px" }}>
+                        <div style={{ textAlign: "center", marginTop: "8px" }}>
                           <a
                             href="#"
                             style={{
                               color: config.textColor,
                               textDecoration: "underline",
-                              fontSize: "14px",
+                              fontSize: "12px",
                               opacity: 0.8,
                             }}
                           >
@@ -1157,116 +1179,88 @@ export default function PopupConfigurationModal({
                     </BlockStack>
                   ) : popupType === "timer" ? (
                     <BlockStack gap="200">
-                      <div style={{
-                        background: timerConfig.backgroundColor,
-                        borderRadius: `${timerConfig.borderRadius}px`,
-                        padding: "20px",
-                        color: timerConfig.textColor,
-                        textAlign: "center"
-                      }}>
-                        <div style={{ fontSize: "24px", marginBottom: "10px" }}>{timerConfig.timerIcon}</div>
-                        <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "15px" }}>
-                          {timerConfig.title}
-                        </div>
-                        <div style={{ fontSize: "12px", marginBottom: "15px", opacity: 0.9 }}>
-                          {timerConfig.description}
-                        </div>
-                        
-                        {/* Timer Display Preview */}
-                        <div className="timer-display-preview" style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          gap: "8px",
-                          marginBottom: "15px",
-                          flexWrap: "wrap"
-                        }}>
-                          {timerConfig.timerDays > 0 && (
-                            <div className="timer-unit-preview" style={{
-                              background: "rgba(255,255,255,0.15)",
-                              padding: "8px 6px",
-                              borderRadius: "6px",
-                              minWidth: "35px",
-                              fontSize: "10px"
-                            }}>
-                              <div className="timer-number-preview" style={{ fontWeight: "bold", fontSize: "14px" }}>
-                                {timerConfig.timerDays.toString().padStart(2, '0')}
-                              </div>
-                              <div className="timer-label-preview" style={{ opacity: 0.8 }}>DAYS</div>
-                            </div>
-                          )}
-                          <div className="timer-unit-preview" style={{
-                            background: "rgba(255,255,255,0.15)",
-                            padding: "8px 6px",
-                            borderRadius: "6px",
-                            minWidth: "35px",
-                            fontSize: "10px"
-                          }}>
-                            <div className="timer-number-preview" style={{ fontWeight: "bold", fontSize: "14px" }}>
-                              {timerConfig.timerHours.toString().padStart(2, '0')}
-                            </div>
-                            <div className="timer-label-preview" style={{ opacity: 0.8 }}>HRS</div>
-                          </div>
-                          <div className="timer-unit-preview" style={{
-                            background: "rgba(255,255,255,0.15)",
-                            padding: "8px 6px",
-                            borderRadius: "6px",
-                            minWidth: "35px",
-                            fontSize: "10px"
-                          }}>
-                            <div className="timer-number-preview" style={{ fontWeight: "bold", fontSize: "14px" }}>
-                              {timerConfig.timerMinutes.toString().padStart(2, '0')}
-                            </div>
-                            <div className="timer-label-preview" style={{ opacity: 0.8 }}>MIN</div>
-                          </div>
-                          <div className="timer-unit-preview" style={{
-                            background: "rgba(255,255,255,0.15)",
-                            padding: "8px 6px",
-                            borderRadius: "6px",
-                            minWidth: "35px",
-                            fontSize: "10px"
-                          }}>
-                            <div className="timer-number-preview" style={{ fontWeight: "bold", fontSize: "14px" }}>
-                              {timerConfig.timerSeconds.toString().padStart(2, '0')}
-                            </div>
-                            <div className="timer-label-preview" style={{ opacity: 0.8 }}>SEC</div>
-                          </div>
-                        </div>
-                        
-                        <div style={{
-                          padding: "6px 12px",
-                          border: "none",
-                          borderRadius: "20px",
-                          backgroundColor: "rgba(255,255,255,0.9)",
-                          color: "#666",
-                          marginBottom: "8px",
-                          fontSize: "10px",
-                        }}>
-                          {timerConfig.placeholder}
-                        </div>
-                        <button style={{
-                          backgroundColor: "#ff6b6b",
-                          color: "#fff",
-                          padding: "8px 16px",
-                          border: "none",
-                          borderRadius: "20px",
-                          cursor: "pointer",
-                          fontWeight: "bold",
-                          fontSize: "10px",
-                          textTransform: "uppercase"
-                        }}>
-                          {timerConfig.buttonText}
-                        </button>
-                        
-                        {timerConfig.disclaimer && (
+                      <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginBottom: "12px" }}>
+                        {timerConfig.timerDays > 0 && (
                           <div style={{
-                            fontSize: "8px",
-                            opacity: 0.6,
-                            marginTop: "8px"
+                            background: "rgba(255,255,255,0.2)",
+                            padding: "4px 6px",
+                            borderRadius: "4px",
+                            minWidth: "24px",
+                            fontSize: "10px",
+                            textAlign: "center"
                           }}>
-                            {timerConfig.disclaimer}
+                            <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                              {timerConfig.timerDays.toString().padStart(2, '0')}
+                            </div>
+                            <div style={{ opacity: 0.8, fontSize: "8px" }}>D</div>
                           </div>
                         )}
+                        <div style={{
+                          background: "rgba(255,255,255,0.2)",
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          minWidth: "24px",
+                          fontSize: "10px",
+                          textAlign: "center"
+                        }}>
+                          <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                            {timerConfig.timerHours.toString().padStart(2, '0')}
+                          </div>
+                          <div style={{ opacity: 0.8, fontSize: "8px" }}>H</div>
+                        </div>
+                        <div style={{
+                          background: "rgba(255,255,255,0.2)",
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          minWidth: "24px",
+                          fontSize: "10px",
+                          textAlign: "center"
+                        }}>
+                          <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                            {timerConfig.timerMinutes.toString().padStart(2, '0')}
+                          </div>
+                          <div style={{ opacity: 0.8, fontSize: "8px" }}>M</div>
+                        </div>
+                        <div style={{
+                          background: "rgba(255,255,255,0.2)",
+                          padding: "4px 6px",
+                          borderRadius: "4px",
+                          minWidth: "24px",
+                          fontSize: "10px",
+                          textAlign: "center"
+                        }}>
+                          <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                            {timerConfig.timerSeconds.toString().padStart(2, '0')}
+                          </div>
+                          <div style={{ opacity: 0.8, fontSize: "8px" }}>S</div>
+                        </div>
                       </div>
+                      <div
+                        style={{
+                          padding: "8px 12px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                          backgroundColor: "#fff",
+                          color: "#666",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {timerConfig.placeholder}
+                      </div>
+                      <button
+                        style={{
+                          backgroundColor: "#ff6b6b",
+                          color: "#fff",
+                          padding: "10px 20px",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {timerConfig.buttonText}
+                      </button>
                     </BlockStack>
                   ) : (
                     // Wheel-Email Combo Preview
@@ -1464,6 +1458,14 @@ export default function PopupConfigurationModal({
                 </BlockStack>
                 
                 <Divider />
+                
+                <TextField
+                  label="Popup Name"
+                  value={popupName}
+                  onChange={setPopupName}
+                  placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
+                  helpText="Give your popup a descriptive name for easy identification"
+                />
                 
                 <Select
                   label="Popup Type"

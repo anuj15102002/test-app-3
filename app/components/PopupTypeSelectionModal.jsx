@@ -9,12 +9,15 @@ import {
   Box,
   InlineStack,
   Icon,
+  TextField,
 } from "@shopify/polaris";
 import { EmailIcon, ClockIcon } from "@shopify/polaris-icons";
-import PopupCreationModal from "./PopupCreationModal";
+import PopupConfigurationModal from "./PopupConfigurationModal";
 
 export default function PopupTypeSelectionModal({ active, onClose, existingConfig }) {
   const [selectedPopupType, setSelectedPopupType] = useState(null);
+  const [showNameInput, setShowNameInput] = useState(false);
+  const [popupName, setPopupName] = useState("");
   const [showCreationModal, setShowCreationModal] = useState(false);
 
   const popupTypes = [
@@ -54,26 +57,53 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
 
   const handleSelectPopupType = (type) => {
     setSelectedPopupType(type);
-    setShowCreationModal(true);
-    onClose(); // Close the selection modal
+    setShowNameInput(true);
+    // Generate a default name based on popup type
+    const defaultName = `${type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')} Popup - ${new Date().toLocaleDateString()}`;
+    setPopupName(defaultName);
+  };
+
+  const handleNameConfirm = () => {
+    if (popupName.trim()) {
+      setShowNameInput(false);
+      setShowCreationModal(true);
+    }
+  };
+
+  const handleBackToTypeSelection = () => {
+    setShowNameInput(false);
+    setSelectedPopupType(null);
+    setPopupName("");
   };
 
   const handleCloseCreationModal = () => {
     setShowCreationModal(false);
+    setShowNameInput(false);
     setSelectedPopupType(null);
+    setPopupName("");
+    onClose(); // Close the selection modal when configuration modal is closed
+  };
+
+  const handleCloseAll = () => {
+    setShowCreationModal(false);
+    setShowNameInput(false);
+    setSelectedPopupType(null);
+    setPopupName("");
+    onClose();
   };
 
   return (
     <>
+      {/* Popup Type Selection Modal */}
       <Modal
-        open={active}
-        onClose={onClose}
+        open={active && !showNameInput}
+        onClose={handleCloseAll}
         title="Choose Your Popup Type"
         size="large"
         secondaryActions={[
           {
             content: "Cancel",
-            onAction: onClose,
+            onAction: handleCloseAll,
           },
         ]}
       >
@@ -184,13 +214,73 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
         </Modal.Section>
       </Modal>
 
-      {/* Popup Creation Modal */}
+      {/* Popup Name Input Modal */}
+      <Modal
+        open={showNameInput}
+        onClose={handleCloseAll}
+        title={`Name Your ${selectedPopupType ? selectedPopupType.charAt(0).toUpperCase() + selectedPopupType.slice(1).replace('-', ' ') : ''} Popup`}
+        primaryAction={{
+          content: "Continue to Configuration",
+          onAction: handleNameConfirm,
+          disabled: !popupName.trim()
+        }}
+        secondaryActions={[
+          {
+            content: "Back",
+            onAction: handleBackToTypeSelection,
+          },
+          {
+            content: "Cancel",
+            onAction: handleCloseAll,
+          },
+        ]}
+      >
+        <Modal.Section>
+          <BlockStack gap="400">
+            <Text variant="bodyMd" as="p">
+              Give your popup a descriptive name to easily identify it in your popup management dashboard.
+            </Text>
+            
+            <TextField
+              label="Popup Name"
+              value={popupName}
+              onChange={setPopupName}
+              placeholder={`Enter a name for your ${selectedPopupType ? selectedPopupType.replace('-', ' ') : ''} popup`}
+              helpText="This name will help you identify this popup in your management dashboard"
+              autoComplete="off"
+              autoFocus
+            />
+            
+            <Box padding="300" background="bg-surface-secondary" borderRadius="200">
+              <BlockStack gap="200">
+                <Text as="h4" variant="headingSm">
+                  💡 Naming Tips:
+                </Text>
+                <BlockStack gap="100">
+                  <Text variant="bodyMd" as="p" tone="subdued">
+                    • Use descriptive names like "Holiday Sale Email Popup" or "Exit Intent Wheel"
+                  </Text>
+                  <Text variant="bodyMd" as="p" tone="subdued">
+                    • Include the purpose or campaign name for easy identification
+                  </Text>
+                  <Text variant="bodyMd" as="p" tone="subdued">
+                    • You can always change the name later from the management page
+                  </Text>
+                </BlockStack>
+              </BlockStack>
+            </Box>
+          </BlockStack>
+        </Modal.Section>
+      </Modal>
+
+      {/* Popup Configuration Modal */}
       {showCreationModal && selectedPopupType && (
-        <PopupCreationModal
-          active={showCreationModal}
+        <PopupConfigurationModal
+          isOpen={showCreationModal}
           onClose={handleCloseCreationModal}
-          existingConfig={existingConfig}
+          initialConfig={existingConfig}
           initialPopupType={selectedPopupType}
+          initialPopupName={popupName}
         />
       )}
     </>

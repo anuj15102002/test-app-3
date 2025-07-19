@@ -25,24 +25,28 @@ import db from "../db.server";
 
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
+  const url = new URL(request.url);
+  const popupId = url.searchParams.get("id");
   
   try {
-    // Load existing popup configuration if it exists
-    let existingConfig = await db.popupConfig.findUnique({
-      where: { shop: session.shop }
-    });
+    let existingConfig = null;
     
-    // Check app embed status based on existing configuration
-    let appEmbedEnabled = false;
-    if (existingConfig) {
-      appEmbedEnabled = existingConfig.displayDelay === 0 &&
-                      existingConfig.frequency === "once" &&
-                      existingConfig.exitIntent === false;
+    // If popupId is provided, load that specific popup
+    if (popupId) {
+      existingConfig = await db.popupConfig.findFirst({
+        where: {
+          id: popupId,
+          shop: session.shop
+        }
+      });
     }
     
-    return { existingConfig, appEmbedEnabled };
+    // Check app embed status - simplified check
+    let appEmbedEnabled = true; // Assume enabled for new popup management system
+    
+    return { existingConfig, appEmbedEnabled, popupId };
   } catch (error) {
-    return { existingConfig: null, appEmbedEnabled: false };
+    return { existingConfig: null, appEmbedEnabled: false, popupId: null };
   }
 };
 
@@ -50,6 +54,7 @@ export const action = async ({ request }) => {
   const { session } = await authenticate.admin(request);
   const formData = await request.formData();
   const popupConfigString = formData.get("popupConfig");
+  const popupId = formData.get("popupId");
   
   if (!popupConfigString) {
     return { success: false, error: "No popup configuration provided" };
@@ -62,109 +67,116 @@ export const action = async ({ request }) => {
     return { success: false, error: "Invalid popup configuration format" };
   }
   
-  const { type, config } = popupData;
+  const { type, config, name } = popupData;
   
   if (!type || !config) {
     return { success: false, error: "Missing popup type or configuration" };
   }
   
+  // Generate a default name if not provided
+  const popupName = name || `${type.charAt(0).toUpperCase() + type.slice(1)} Popup - ${new Date().toLocaleDateString()}`;
+  
   try {
-    // Check app embed status based on existing configuration
-    let appEmbedEnabled = false;
-    const existingConfig = await db.popupConfig.findUnique({
-      where: { shop: session.shop }
-    });
+    let savedConfig;
     
-    if (existingConfig) {
-      appEmbedEnabled = existingConfig.displayDelay === 0 &&
-                      existingConfig.frequency === "once" &&
-                      existingConfig.exitIntent === false;
+    if (popupId) {
+      // Update existing popup
+      savedConfig = await db.popupConfig.update({
+        where: {
+          id: popupId,
+          shop: session.shop
+        },
+        data: {
+          name: popupName,
+          type,
+          title: config.title,
+          description: config.description,
+          placeholder: config.placeholder || "",
+          buttonText: config.buttonText || (type === "community" ? "Follow Us" : ""),
+          discountCode: config.discountCode || "",
+          backgroundColor: config.backgroundColor,
+          textColor: config.textColor,
+          buttonColor: config.buttonColor || "#007ace",
+          borderRadius: config.borderRadius || 20,
+          showCloseButton: config.showCloseButton !== false,
+          displayDelay: config.displayDelay || 3000,
+          frequency: config.frequency || "once",
+          exitIntent: config.exitIntent || false,
+          exitIntentDelay: config.exitIntentDelay || 1000,
+          segments: type === "wheel-email" ? JSON.stringify(config.segments) : null,
+          backgroundType: config.backgroundType || null,
+          bannerImage: type === "community" ? config.bannerImage || null : null,
+          socialIcons: type === "community" ? JSON.stringify(config.socialIcons) : null,
+          askMeLaterText: type === "community" ? config.askMeLaterText || null : null,
+          showAskMeLater: type === "community" ? config.showAskMeLater !== false : true,
+          // Timer popup specific fields
+          timerDays: type === "timer" ? config.timerDays || 0 : null,
+          timerHours: type === "timer" ? config.timerHours || 0 : null,
+          timerMinutes: type === "timer" ? config.timerMinutes || 5 : null,
+          timerSeconds: type === "timer" ? config.timerSeconds || 0 : null,
+          timerIcon: type === "timer" ? config.timerIcon || "⏰" : null,
+          onExpiration: type === "timer" ? config.onExpiration || "show_expired" : null,
+          expiredTitle: type === "timer" ? config.expiredTitle || "OFFER EXPIRED" : null,
+          expiredMessage: type === "timer" ? config.expiredMessage || null : null,
+          expiredIcon: type === "timer" ? config.expiredIcon || "⏰" : null,
+          expiredButtonText: type === "timer" ? config.expiredButtonText || "CONTINUE SHOPPING" : null,
+          successTitle: type === "timer" ? config.successTitle || "SUCCESS!" : null,
+          successMessage: type === "timer" ? config.successMessage || null : null,
+          disclaimer: type === "timer" ? config.disclaimer || null : null,
+          updatedAt: new Date()
+        }
+      });
+    } else {
+      // Create new popup
+      savedConfig = await db.popupConfig.create({
+        data: {
+          shop: session.shop,
+          name: popupName,
+          type,
+          title: config.title,
+          description: config.description,
+          placeholder: config.placeholder || "",
+          buttonText: config.buttonText || (type === "community" ? "Follow Us" : ""),
+          discountCode: config.discountCode || "",
+          backgroundColor: config.backgroundColor,
+          textColor: config.textColor,
+          buttonColor: config.buttonColor || "#007ace",
+          borderRadius: config.borderRadius || 20,
+          showCloseButton: config.showCloseButton !== false,
+          displayDelay: config.displayDelay || 3000,
+          frequency: config.frequency || "once",
+          exitIntent: config.exitIntent || false,
+          exitIntentDelay: config.exitIntentDelay || 1000,
+          segments: type === "wheel-email" ? JSON.stringify(config.segments) : null,
+          backgroundType: config.backgroundType || null,
+          bannerImage: type === "community" ? config.bannerImage || null : null,
+          socialIcons: type === "community" ? JSON.stringify(config.socialIcons) : null,
+          askMeLaterText: type === "community" ? config.askMeLaterText || null : null,
+          showAskMeLater: type === "community" ? config.showAskMeLater !== false : true,
+          // Timer popup specific fields
+          timerDays: type === "timer" ? config.timerDays || 0 : null,
+          timerHours: type === "timer" ? config.timerHours || 0 : null,
+          timerMinutes: type === "timer" ? config.timerMinutes || 5 : null,
+          timerSeconds: type === "timer" ? config.timerSeconds || 0 : null,
+          timerIcon: type === "timer" ? config.timerIcon || "⏰" : null,
+          onExpiration: type === "timer" ? config.onExpiration || "show_expired" : null,
+          expiredTitle: type === "timer" ? config.expiredTitle || "OFFER EXPIRED" : null,
+          expiredMessage: type === "timer" ? config.expiredMessage || null : null,
+          expiredIcon: type === "timer" ? config.expiredIcon || "⏰" : null,
+          expiredButtonText: type === "timer" ? config.expiredButtonText || "CONTINUE SHOPPING" : null,
+          successTitle: type === "timer" ? config.successTitle || "SUCCESS!" : null,
+          successMessage: type === "timer" ? config.successMessage || null : null,
+          disclaimer: type === "timer" ? config.disclaimer || null : null,
+          isActive: false // New popups start as inactive
+        }
+      });
     }
     
-    // Save popup configuration to database
-    const savedConfig = await db.popupConfig.upsert({
-      where: { shop: session.shop },
-      update: {
-        type,
-        title: config.title,
-        description: config.description,
-        placeholder: config.placeholder || "",
-        buttonText: config.buttonText || (type === "community" ? "Follow Us" : ""),
-        discountCode: config.discountCode || "",
-        backgroundColor: config.backgroundColor,
-        textColor: config.textColor,
-        buttonColor: config.buttonColor || "#007ace",
-        borderRadius: config.borderRadius || 20,
-        showCloseButton: config.showCloseButton !== false,
-        displayDelay: config.displayDelay || 3000,
-        frequency: config.frequency || "once",
-        exitIntent: config.exitIntent || false,
-        exitIntentDelay: config.exitIntentDelay || 1000,
-        segments: type === "wheel-email" ? JSON.stringify(config.segments) : null,
-        backgroundType: config.backgroundType || null,
-        bannerImage: type === "community" ? config.bannerImage || null : null,
-        socialIcons: type === "community" ? JSON.stringify(config.socialIcons) : null,
-        askMeLaterText: type === "community" ? config.askMeLaterText || null : null,
-        showAskMeLater: type === "community" ? config.showAskMeLater !== false : true,
-        // Timer popup specific fields
-        timerDays: type === "timer" ? config.timerDays || 0 : null,
-        timerHours: type === "timer" ? config.timerHours || 0 : null,
-        timerMinutes: type === "timer" ? config.timerMinutes || 5 : null,
-        timerSeconds: type === "timer" ? config.timerSeconds || 0 : null,
-        timerIcon: type === "timer" ? config.timerIcon || "⏰" : null,
-        onExpiration: type === "timer" ? config.onExpiration || "show_expired" : null,
-        expiredTitle: type === "timer" ? config.expiredTitle || "OFFER EXPIRED" : null,
-        expiredMessage: type === "timer" ? config.expiredMessage || null : null,
-        expiredIcon: type === "timer" ? config.expiredIcon || "⏰" : null,
-        expiredButtonText: type === "timer" ? config.expiredButtonText || "CONTINUE SHOPPING" : null,
-        successTitle: type === "timer" ? config.successTitle || "SUCCESS!" : null,
-        successMessage: type === "timer" ? config.successMessage || null : null,
-        disclaimer: type === "timer" ? config.disclaimer || null : null,
-        isActive: true,
-        updatedAt: new Date()
-      },
-      create: {
-        shop: session.shop,
-        type,
-        title: config.title,
-        description: config.description,
-        placeholder: config.placeholder || "",
-        buttonText: config.buttonText || (type === "community" ? "Follow Us" : ""),
-        discountCode: config.discountCode || "",
-        backgroundColor: config.backgroundColor,
-        textColor: config.textColor,
-        buttonColor: config.buttonColor || "#007ace",
-        borderRadius: config.borderRadius || 20,
-        showCloseButton: config.showCloseButton !== false,
-        displayDelay: config.displayDelay || 3000,
-        frequency: config.frequency || "once",
-        exitIntent: config.exitIntent || false,
-        exitIntentDelay: config.exitIntentDelay || 1000,
-        segments: type === "wheel-email" ? JSON.stringify(config.segments) : null,
-        backgroundType: config.backgroundType || null,
-        bannerImage: type === "community" ? config.bannerImage || null : null,
-        socialIcons: type === "community" ? JSON.stringify(config.socialIcons) : null,
-        askMeLaterText: type === "community" ? config.askMeLaterText || null : null,
-        showAskMeLater: type === "community" ? config.showAskMeLater !== false : true,
-        // Timer popup specific fields
-        timerDays: type === "timer" ? config.timerDays || 0 : null,
-        timerHours: type === "timer" ? config.timerHours || 0 : null,
-        timerMinutes: type === "timer" ? config.timerMinutes || 5 : null,
-        timerSeconds: type === "timer" ? config.timerSeconds || 0 : null,
-        timerIcon: type === "timer" ? config.timerIcon || "⏰" : null,
-        onExpiration: type === "timer" ? config.onExpiration || "show_expired" : null,
-        expiredTitle: type === "timer" ? config.expiredTitle || "OFFER EXPIRED" : null,
-        expiredMessage: type === "timer" ? config.expiredMessage || null : null,
-        expiredIcon: type === "timer" ? config.expiredIcon || "⏰" : null,
-        expiredButtonText: type === "timer" ? config.expiredButtonText || "CONTINUE SHOPPING" : null,
-        successTitle: type === "timer" ? config.successTitle || "SUCCESS!" : null,
-        successMessage: type === "timer" ? config.successMessage || null : null,
-        disclaimer: type === "timer" ? config.disclaimer || null : null,
-        isActive: true
-      }
-    });
-    
-    return { success: true, config: savedConfig };
+    return {
+      success: true,
+      config: savedConfig,
+      message: popupId ? "Popup updated successfully!" : "Popup created successfully!"
+    };
   } catch (error) {
     return { success: false, error: `Failed to save configuration: ${error.message}` };
   }
@@ -176,9 +188,13 @@ export default function PopupCustomizer() {
   const loaderData = useLoaderData();
   const existingConfig = loaderData?.existingConfig || null;
   const appEmbedEnabled = loaderData?.appEmbedEnabled || false;
+  const popupId = loaderData?.popupId || null;
   
   // Initialize popup type from existing config or default to wheel-email
   const [popupType, setPopupType] = useState(existingConfig?.type || "wheel-email");
+  
+  // Popup name state
+  const [popupName, setPopupName] = useState(existingConfig?.name || "");
   
   // State for realtime preview
   const [showRealtimePreview, setShowRealtimePreview] = useState(false);
@@ -249,8 +265,8 @@ export default function PopupCustomizer() {
           { label: '10% OFF', color: '#06b6d4', code: 'SAVE10' },
           { label: '15% OFF', color: '#10b981', code: 'SAVE15' },
           { label: '20% OFF', color: '#f59e0b', code: 'SAVE20' },
-          { label: 'FREE SHIPPING', color: '#8b5cf6', code: 'FREESHIP' },
-          { label: 'NO PRIZE', color: '#1e40af', code: null }
+          { label: 'FREE SHIPPING', color: '#ff9ff3', code: 'FREESHIP' },
+          { label: 'TRY AGAIN', color: '#54a0ff', code: null }
         ],
         backgroundColor: backgroundColor,
         backgroundType: backgroundType,
@@ -269,12 +285,12 @@ export default function PopupCustomizer() {
       buttonText: "TRY YOUR LUCK",
       discountCode: "SAVE5",
       segments: [
-        { label: '5% OFF', color: '#ef4444', code: 'SAVE5' },
-        { label: '10% OFF', color: '#06b6d4', code: 'SAVE10' },
-        { label: '15% OFF', color: '#10b981', code: 'SAVE15' },
-        { label: '20% OFF', color: '#f59e0b', code: 'SAVE20' },
-        { label: 'FREE SHIPPING', color: '#8b5cf6', code: 'FREESHIP' },
-        { label: 'NO PRIZE', color: '#1e40af', code: null }
+        { label: '5% OFF', color: '#ff6b6b', code: 'SAVE5' },
+        { label: '10% OFF', color: '#4ecdc4', code: 'SAVE10' },
+        { label: '15% OFF', color: '#45b7d1', code: 'SAVE15' },
+        { label: '20% OFF', color: '#feca57', code: 'SAVE20' },
+        { label: 'FREE SHIPPING', color: '#ff9ff3', code: 'FREESHIP' },
+        { label: 'TRY AGAIN', color: '#54a0ff', code: null }
       ],
       backgroundColor: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
       backgroundType: "gradient",
@@ -404,17 +420,27 @@ export default function PopupCustomizer() {
                    popupType === "timer" ? timerConfig :
                    wheelEmailConfig;
     
-    fetcher.submit(
-      { popupConfig: JSON.stringify({ type: popupType, config }) },
-      { method: "POST" }
-    );
-  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, fetcher]);
+    const formData = {
+      popupConfig: JSON.stringify({
+        type: popupType,
+        config,
+        name: popupName || `${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`
+      })
+    };
+    
+    // Include popupId if editing existing popup
+    if (popupId) {
+      formData.popupId = popupId;
+    }
+    
+    fetcher.submit(formData, { method: "POST" });
+  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, popupName, popupId, fetcher]);
 
   // Handle fetcher response
   useEffect(() => {
     if (fetcher.data) {
       if (fetcher.data.success) {
-        shopify.toast.show("Popup configuration saved successfully!");
+        shopify.toast.show(fetcher.data.message || "Popup configuration saved successfully!");
       } else if (fetcher.data.error) {
         shopify.toast.show(`Error: ${fetcher.data.error}`, { isError: true });
       }
@@ -1964,6 +1990,14 @@ export default function PopupCustomizer() {
                 </BlockStack>
                 
                 <Divider />
+                
+                <TextField
+                  label="Popup Name"
+                  value={popupName}
+                  onChange={setPopupName}
+                  placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
+                  helpText="Give your popup a descriptive name for easy identification"
+                />
                 
                 <Select
                   label="Popup Type"
