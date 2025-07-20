@@ -1258,7 +1258,8 @@ export default function PopupConfigurationModal({
                   padding: popupType === "wheel-email" ? "0" : "24px",
                   borderRadius: `${popupType === "email" ? emailConfig.borderRadius : 8}px`,
                   textAlign: "center",
-                  maxWidth: "600px",
+                  maxWidth: "400px",
+                  width: "400px",
                   margin: "0 auto",
                   boxShadow: popupType === "wheel-email" ? "none" : "0 4px 12px rgba(0,0,0,0.15)",
                 }}
@@ -1289,269 +1290,454 @@ export default function PopupConfigurationModal({
                   
                   {popupType === "email" ? (
                     <BlockStack gap="200">
-                      <div
+                      <div style={{ fontSize: "24px", marginBottom: "10px", textAlign: "center" }}>📧</div>
+                      <Text as="h4" variant="headingMd" style={{
+                        color: config.textColor,
+                        textAlign: "center",
+                        fontSize: "20px",
+                        fontWeight: "600",
+                        margin: "0 0 15px 0"
+                      }}>
+                        {emailConfig.title}
+                      </Text>
+                      <Text as="p" variant="bodyMd" style={{
+                        color: config.textColor,
+                        textAlign: "center",
+                        marginBottom: "20px",
+                        lineHeight: "1.5"
+                      }}>
+                        {emailConfig.description}
+                      </Text>
+                      <input
+                        type="email"
+                        placeholder={emailConfig.placeholder}
                         style={{
-                          padding: "8px 12px",
+                          width: "100%",
+                          padding: "12px",
                           border: "1px solid #ccc",
-                          borderRadius: "4px",
-                          backgroundColor: "#fff",
-                          color: "#666",
+                          borderRadius: "6px",
+                          marginBottom: "15px",
+                          fontSize: "14px",
+                          boxSizing: "border-box"
                         }}
-                      >
-                        {emailConfig.placeholder}
-                      </div>
+                        readOnly
+                      />
                       <button
                         style={{
+                          width: "100%",
                           backgroundColor: emailConfig.buttonColor,
                           color: "#fff",
                           padding: "12px 24px",
                           border: "none",
-                          borderRadius: "4px",
+                          borderRadius: "6px",
                           cursor: "pointer",
-                          fontWeight: "bold",
+                          fontWeight: "600",
+                          fontSize: "14px"
                         }}
                       >
                         {emailConfig.buttonText}
                       </button>
                     </BlockStack>
                   ) : popupType === "community" ? (
-                    <BlockStack gap="200">
-                      {communityConfig.bannerImage && (
-                        <div
-                          style={{
-                            width: "100%",
-                            height: "60px",
-                            backgroundImage: `url(${communityConfig.bannerImage})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            borderRadius: "6px",
-                            marginBottom: "8px",
-                          }}
-                        />
-                      )}
-                      <div style={{ display: "flex", justifyContent: "center", gap: "10px", margin: "10px 0" }}>
-                        {communityConfig.socialIcons.filter(icon => icon.enabled && icon.url).map((social, index) => (
+                    // Community Popup Preview - Exact match with real implementation
+                    <div style={{
+                      backgroundColor: communityConfig.backgroundColor || '#ffffff',
+                      borderRadius: `${communityConfig.borderRadius || 12}px`,
+                      overflow: "hidden",
+                      maxWidth: "350px",
+                      margin: "0 auto",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                    }}>
+                      {/* Banner at the very top */}
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100px',
+                          backgroundColor: '#f0f0f0',
+                          backgroundImage: communityConfig.bannerImage ?
+                            `url(${communityConfig.bannerImage})` :
+                            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          borderRadius: `${communityConfig.borderRadius || 12}px ${communityConfig.borderRadius || 12}px 0 0`,
+                          position: 'relative',
+                        }}
+                      >
+                        {/* Close button positioned over banner */}
+                        {communityConfig.showCloseButton && (
                           <div
-                            key={social.platform}
                             style={{
-                              width: "32px",
-                              height: "32px",
-                              borderRadius: "50%",
-                              backgroundColor: social.platform === 'facebook' ? '#1877f2' :
-                                             social.platform === 'instagram' ? '#E4405F' :
-                                             social.platform === 'linkedin' ? '#0077b5' :
-                                             social.platform === 'x' ? '#000000' : '#666',
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "white",
-                              fontSize: "14px",
-                              cursor: "pointer",
+                              position: 'absolute',
+                              top: '8px',
+                              right: '8px',
+                              width: '20px',
+                              height: '20px',
+                              backgroundColor: 'rgba(0,0,0,0.3)',
+                              borderRadius: '50%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontSize: '14px',
+                              cursor: 'pointer',
                             }}
                           >
-                            {social.platform === 'facebook' ? 'f' :
-                             social.platform === 'instagram' ? '📷' :
-                             social.platform === 'linkedin' ? 'in' :
-                             social.platform === 'x' ? 'X' : '?'}
+                            ×
                           </div>
-                        ))}
+                        )}
                       </div>
-                      {communityConfig.showAskMeLater && (
-                        <div style={{ textAlign: "center", marginTop: "8px" }}>
-                          <a
-                            href="#"
-                            style={{
-                              color: config.textColor,
-                              textDecoration: "underline",
-                              fontSize: "12px",
-                              opacity: 0.8,
-                            }}
-                          >
-                            {communityConfig.askMeLaterText}
-                          </a>
+                      
+                      {/* Content wrapper with padding */}
+                      <div style={{ padding: '20px', textAlign: 'center' }}>
+                        {/* Title and Description */}
+                        <div style={{ marginBottom: '20px' }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            marginBottom: '10px'
+                          }}>
+                            <span style={{ fontSize: '18px' }}>👥</span>
+                            <Text as="h3" variant="headingMd" style={{
+                              color: communityConfig.textColor || '#000000',
+                              margin: '0',
+                              fontSize: '16px',
+                              fontWeight: '600'
+                            }}>
+                              {communityConfig.title}
+                            </Text>
+                          </div>
+                          <Text as="p" variant="bodyMd" style={{
+                            color: communityConfig.textColor || '#000000',
+                            fontSize: '13px',
+                            lineHeight: '1.4',
+                            margin: '0'
+                          }}>
+                            {communityConfig.description}
+                          </Text>
                         </div>
-                      )}
-                    </BlockStack>
+                        
+                        {/* Social Icons with proper colors */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          gap: '12px',
+                          marginBottom: '20px'
+                        }}>
+                          {communityConfig.socialIcons.filter(icon => icon.enabled).map((social, index) => {
+                            const getIconStyle = (platform) => {
+                              switch(platform) {
+                                case 'facebook':
+                                  return { backgroundColor: '#1877f2', color: 'white' };
+                                case 'instagram':
+                                  return {
+                                    background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
+                                    color: 'white'
+                                  };
+                                case 'linkedin':
+                                  return { backgroundColor: '#0077b5', color: 'white' };
+                                case 'x':
+                                  return { backgroundColor: '#000000', color: 'white' };
+                                default:
+                                  return { backgroundColor: '#f0f0f0', color: '#666' };
+                              }
+                            };
+                            
+                            const iconStyle = getIconStyle(social.platform);
+                            
+                            return (
+                              <div
+                                key={social.platform}
+                                style={{
+                                  width: '35px',
+                                  height: '35px',
+                                  borderRadius: '50%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer',
+                                  fontSize: '14px',
+                                  fontWeight: 'bold',
+                                  ...iconStyle,
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                }}
+                              >
+                                {social.platform === 'facebook' ? 'f' :
+                                 social.platform === 'instagram' ? '📷' :
+                                 social.platform === 'linkedin' ? 'in' :
+                                 social.platform === 'x' ? 'X' : '?'}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        
+                        {/* Ask Me Later Link */}
+                        {communityConfig.showAskMeLater && (
+                          <div style={{ textAlign: 'center' }}>
+                            <a
+                              href="#"
+                              style={{
+                                color: communityConfig.textColor || '#000000',
+                                textDecoration: 'underline',
+                                fontSize: '13px',
+                                opacity: 0.7,
+                              }}
+                            >
+                              {communityConfig.askMeLaterText}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ) : popupType === "timer" ? (
-                    <BlockStack gap="200">
-                      <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginBottom: "12px" }}>
+                    // Timer Popup Preview - Exact match with real implementation
+                    <div style={{
+                      background: timerConfig.backgroundColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      borderRadius: `${timerConfig.borderRadius || 16}px`,
+                      padding: "20px",
+                      color: timerConfig.textColor || '#ffffff',
+                      textAlign: "center",
+                      maxWidth: "350px",
+                      margin: "0 auto"
+                    }}>
+                      {/* Timer Icon and Title */}
+                      <div style={{ marginBottom: "15px" }}>
+                        <div style={{ fontSize: "24px", marginBottom: "8px" }}>{timerConfig.timerIcon || '⏰'}</div>
+                        <Text as="h4" variant="headingMd" style={{
+                          color: timerConfig.textColor || '#ffffff',
+                          fontSize: "18px",
+                          fontWeight: "600",
+                          margin: "0 0 8px 0"
+                        }}>
+                          {timerConfig.title}
+                        </Text>
+                        <Text as="p" variant="bodyMd" style={{
+                          color: timerConfig.textColor || '#ffffff',
+                          fontSize: "12px",
+                          opacity: 0.9,
+                          lineHeight: "1.4",
+                          margin: "0 0 15px 0"
+                        }}>
+                          {timerConfig.description}
+                        </Text>
+                      </div>
+
+                      {/* Timer Display */}
+                      <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginBottom: "20px" }}>
                         {timerConfig.timerDays > 0 && (
                           <div style={{
                             background: "rgba(255,255,255,0.2)",
-                            padding: "4px 6px",
-                            borderRadius: "4px",
-                            minWidth: "24px",
-                            fontSize: "10px",
+                            padding: "8px 6px",
+                            borderRadius: "6px",
+                            minWidth: "40px",
                             textAlign: "center"
                           }}>
-                            <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                            <div style={{ fontWeight: "bold", fontSize: "16px", color: "white" }}>
                               {timerConfig.timerDays.toString().padStart(2, '0')}
                             </div>
-                            <div style={{ opacity: 0.8, fontSize: "8px" }}>D</div>
+                            <div style={{ opacity: 0.8, fontSize: "10px", color: "white" }}>Days</div>
                           </div>
                         )}
                         <div style={{
                           background: "rgba(255,255,255,0.2)",
-                          padding: "4px 6px",
-                          borderRadius: "4px",
-                          minWidth: "24px",
-                          fontSize: "10px",
+                          padding: "8px 6px",
+                          borderRadius: "6px",
+                          minWidth: "40px",
                           textAlign: "center"
                         }}>
-                          <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                          <div style={{ fontWeight: "bold", fontSize: "16px", color: "white" }}>
                             {timerConfig.timerHours.toString().padStart(2, '0')}
                           </div>
-                          <div style={{ opacity: 0.8, fontSize: "8px" }}>H</div>
+                          <div style={{ opacity: 0.8, fontSize: "10px", color: "white" }}>Hours</div>
                         </div>
                         <div style={{
                           background: "rgba(255,255,255,0.2)",
-                          padding: "4px 6px",
-                          borderRadius: "4px",
-                          minWidth: "24px",
-                          fontSize: "10px",
+                          padding: "8px 6px",
+                          borderRadius: "6px",
+                          minWidth: "40px",
                           textAlign: "center"
                         }}>
-                          <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                          <div style={{ fontWeight: "bold", fontSize: "16px", color: "white" }}>
                             {timerConfig.timerMinutes.toString().padStart(2, '0')}
                           </div>
-                          <div style={{ opacity: 0.8, fontSize: "8px" }}>M</div>
+                          <div style={{ opacity: 0.8, fontSize: "10px", color: "white" }}>Minutes</div>
                         </div>
                         <div style={{
                           background: "rgba(255,255,255,0.2)",
-                          padding: "4px 6px",
-                          borderRadius: "4px",
-                          minWidth: "24px",
-                          fontSize: "10px",
+                          padding: "8px 6px",
+                          borderRadius: "6px",
+                          minWidth: "40px",
                           textAlign: "center"
                         }}>
-                          <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                          <div style={{ fontWeight: "bold", fontSize: "16px", color: "white" }}>
                             {timerConfig.timerSeconds.toString().padStart(2, '0')}
                           </div>
-                          <div style={{ opacity: 0.8, fontSize: "8px" }}>S</div>
+                          <div style={{ opacity: 0.8, fontSize: "10px", color: "white" }}>Seconds</div>
                         </div>
                       </div>
-                      <div
-                        style={{
-                          padding: "8px 12px",
-                          border: "1px solid #ccc",
-                          borderRadius: "4px",
-                          backgroundColor: "#fff",
-                          color: "#666",
-                          fontSize: "12px",
-                        }}
-                      >
-                        {timerConfig.placeholder}
-                      </div>
-                      <button
-                        style={{
-                          backgroundColor: "#ff6b6b",
-                          color: "#fff",
-                          padding: "10px 20px",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontWeight: "bold",
-                          fontSize: "12px",
-                        }}
-                      >
-                        {timerConfig.buttonText}
-                      </button>
-                    </BlockStack>
-                  ) : popupType === "scratch-card" ? (
-                    // Scratch Card Preview
-                    <BlockStack gap="200">
-                      <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "12px" }}>
-                        {/* Scratch Card */}
-                        <div
+
+                      {/* Form */}
+                      <div style={{ marginBottom: "15px" }}>
+                        <input
+                          type="email"
+                          placeholder={timerConfig.placeholder}
                           style={{
-                            width: "80px",
-                            height: "80px",
-                            background: "linear-gradient(135deg, #4A90E2 0%, #5BA0F2 100%)",
-                            borderRadius: "8px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "white",
-                            fontSize: "10px",
-                            fontWeight: "bold",
-                            textAlign: "center",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                            position: "relative",
-                            overflow: "hidden",
+                            width: "100%",
+                            padding: "12px",
+                            border: "none",
+                            borderRadius: "6px",
+                            fontSize: "14px",
+                            boxSizing: "border-box",
+                            marginBottom: "12px"
+                          }}
+                          readOnly
+                        />
+                        <button
+                          style={{
+                            width: "100%",
+                            backgroundColor: "#ff6b6b",
+                            color: "#fff",
+                            padding: "12px 20px",
+                            border: "none",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontWeight: "600",
+                            fontSize: "14px",
+                            textTransform: "uppercase"
                           }}
                         >
-                          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                            <div style={{ fontSize: "8px", marginBottom: "2px" }}>SCRATCH</div>
-                            <div style={{ fontSize: "8px" }}>HERE</div>
-                            <div style={{ fontSize: "12px", marginTop: "2px" }}>✋</div>
-                          </div>
-                          {/* Hidden discount preview */}
+                          {timerConfig.buttonText}
+                        </button>
+                      </div>
+
+                      {/* Disclaimer */}
+                      <div style={{
+                        fontSize: "10px",
+                        color: "rgba(255, 255, 255, 0.6)",
+                        fontStyle: "italic"
+                      }}>
+                        {timerConfig.disclaimer}
+                      </div>
+                    </div>
+                  ) : popupType === "scratch-card" ? (
+                    // Scratch Card Preview - Exact match with real implementation
+                    <div style={{ display: "flex", gap: "20px", alignItems: "flex-start", padding: "20px" }}>
+                      {/* Left side - Scratch Card */}
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <div style={{ position: "relative", marginBottom: "10px" }}>
+                          {/* Scratch Canvas Preview */}
                           <div
                             style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              width: "100%",
-                              height: "100%",
-                              background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
+                              width: "120px",
+                              height: "120px",
+                              background: "linear-gradient(135deg, #4A90E2 0%, #5BA0F2 100%)",
+                              borderRadius: "8px",
                               display: "flex",
                               flexDirection: "column",
                               alignItems: "center",
                               justifyContent: "center",
-                              opacity: 0.3,
-                              fontSize: "16px",
-                              fontWeight: "900",
+                              color: "white",
+                              fontSize: "12px",
+                              fontWeight: "bold",
+                              textAlign: "center",
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                              position: "relative",
+                              overflow: "hidden",
                             }}
                           >
-                            <div>20%</div>
-                            <div style={{ fontSize: "8px" }}>OFF</div>
+                            <div>SCRATCH</div>
+                            <div>HERE</div>
+                            <div style={{ fontSize: "16px", marginTop: "5px" }}>✋</div>
+                            
+                            {/* Hidden discount preview */}
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                height: "100%",
+                                background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                opacity: 0.2,
+                                fontSize: "24px",
+                                fontWeight: "900",
+                                color: "white"
+                              }}
+                            >
+                              <div>20%</div>
+                              <div style={{ fontSize: "12px" }}>OFF</div>
+                            </div>
                           </div>
                         </div>
-                        
-                        {/* Form Preview */}
-                        <div style={{ flex: 1 }}>
-                          <div
-                            style={{
-                              padding: "6px",
-                              border: "1px solid #ccc",
-                              borderRadius: "4px",
-                              backgroundColor: "#fff",
-                              color: "#666",
-                              marginBottom: "6px",
-                              fontSize: "10px",
-                            }}
-                          >
-                            {scratchCardConfig.placeholder}
-                          </div>
-                          
-                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "6px", fontSize: "8px" }}>
-                            <input type="checkbox" style={{ width: "10px", height: "10px" }} />
-                            <span style={{ color: config.textColor }}>I agree to terms</span>
-                          </div>
-                          
-                          <button
-                            style={{
-                              width: "100%",
-                              padding: "6px",
-                              background: "linear-gradient(135deg, #4299e1 0%, #3182ce 100%)",
-                              border: "none",
-                              borderRadius: "4px",
-                              color: "white",
-                              fontSize: "8px",
-                              fontWeight: "bold",
-                              cursor: "pointer",
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            {scratchCardConfig.buttonText}
-                          </button>
+                        <div style={{ fontSize: "10px", color: config.textColor, textAlign: "center", fontStyle: "italic" }}>
+                          Enter email to start scratching!
                         </div>
                       </div>
                       
-                      <div style={{ fontSize: "8px", color: config.textColor, textAlign: "center", fontStyle: "italic" }}>
-                        Scratch to reveal discount!
+                      {/* Right side - Form */}
+                      <div style={{ flex: 1 }}>
+                        <Text as="h4" variant="headingMd" style={{
+                          color: config.textColor,
+                          fontSize: "18px",
+                          fontWeight: "600",
+                          margin: "0 0 10px 0"
+                        }}>
+                          {scratchCardConfig.title}
+                        </Text>
+                        <Text as="p" variant="bodyMd" style={{
+                          color: config.textColor,
+                          fontSize: "12px",
+                          marginBottom: "15px",
+                          lineHeight: "1.4"
+                        }}>
+                          {scratchCardConfig.description}
+                        </Text>
+                        
+                        <div style={{ marginBottom: "10px" }}>
+                          <input
+                            type="email"
+                            placeholder={scratchCardConfig.placeholder}
+                            style={{
+                              width: "100%",
+                              padding: "8px",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                              fontSize: "12px",
+                              boxSizing: "border-box"
+                            }}
+                            readOnly
+                          />
+                        </div>
+                        
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "10px", fontSize: "10px" }}>
+                          <input type="checkbox" style={{ width: "12px", height: "12px" }} />
+                          <span style={{ color: config.textColor }}>I agree to receive promotional emails</span>
+                        </div>
+                        
+                        <button
+                          style={{
+                            width: "100%",
+                            padding: "8px 12px",
+                            background: "linear-gradient(135deg, #4299e1 0%, #3182ce 100%)",
+                            border: "none",
+                            borderRadius: "4px",
+                            color: "white",
+                            fontSize: "11px",
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                            textTransform: "uppercase",
+                            opacity: 0.6
+                          }}
+                        >
+                          Enable Scratching
+                        </button>
                       </div>
-                    </BlockStack>
+                    </div>
                   ) : (
                     // Wheel-Email Combo Preview
                     <div
@@ -1726,7 +1912,29 @@ export default function PopupConfigurationModal({
           }
           .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
             max-height: 90vh !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          .popup-config-layout {
+            display: flex !important;
+            height: 85vh !important;
+            overflow: hidden !important;
+          }
+          .popup-config-settings {
+            flex: 1 !important;
             overflow-y: auto !important;
+            padding-right: 16px !important;
+            max-height: 85vh !important;
+          }
+          .popup-config-preview {
+            width: 600px !important;
+            flex-shrink: 0 !important;
+            overflow: hidden !important;
+            position: sticky !important;
+            top: 0 !important;
+            height: fit-content !important;
+            max-height: 85vh !important;
           }
         `}
       </style>
@@ -1748,8 +1956,8 @@ export default function PopupConfigurationModal({
         ]}
       >
       <Modal.Section>
-        <Layout>
-          <Layout.Section variant="oneThird">
+        <div className="popup-config-layout">
+          <div className="popup-config-settings">
             <Card>
               <BlockStack gap="500">
                 <BlockStack gap="200">
@@ -1783,12 +1991,12 @@ export default function PopupConfigurationModal({
                 {renderConfigurationPanel()}
               </BlockStack>
             </Card>
-          </Layout.Section>
+          </div>
           
-          <Layout.Section>
+          <div className="popup-config-preview">
             {renderPreviewPanel()}
-          </Layout.Section>
-        </Layout>
+          </div>
+        </div>
       </Modal.Section>
     </Modal>
     </>

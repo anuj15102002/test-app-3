@@ -12,12 +12,16 @@ import {
   Badge,
   Banner,
   EmptyState,
-  DataTable,
   ButtonGroup,
   Modal,
   TextField,
+  Thumbnail,
+  Icon,
+  Popover,
+  ActionList,
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
+import { PlusIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import PopupTypeSelectionModal from "../components/PopupTypeSelectionModal";
@@ -111,6 +115,7 @@ export default function PopupsPage() {
   const [showNameModal, setShowNameModal] = useState(false);
   const [editingName, setEditingName] = useState("");
   const [namePopupId, setNamePopupId] = useState(null);
+  const [activePopover, setActivePopover] = useState(null);
 
   // Handle fetcher response
   useEffect(() => {
@@ -176,188 +181,222 @@ export default function PopupsPage() {
       case "wheel-email": return "Wheel + Email";
       case "community": return "Community Social";
       case "timer": return "Timer Countdown";
+      case "scratch-card": return "Scratch Card";
       default: return type;
     }
   };
 
-  const getPopupTypeBadge = (type) => {
-    const colors = {
-      "email": "info",
-      "wheel-email": "success", 
-      "community": "warning",
-      "timer": "critical"
-    };
-    return colors[type] || "info";
-  };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
       month: 'short',
       day: 'numeric',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
   };
 
-  const tableRows = popups.map((popup) => [
-    <Text variant="bodyMd" fontWeight="semibold">
-      {popup.name}
-    </Text>,
-    <Badge tone={getPopupTypeBadge(popup.type)}>
-      {getPopupTypeLabel(popup.type)}
-    </Badge>,
-    <Text variant="bodyMd" tone="subdued">
-      {popup.title}
-    </Text>,
-    <Badge tone={popup.isActive ? "success" : "subdued"}>
-      {popup.isActive ? "Active" : "Inactive"}
-    </Badge>,
-    <Text variant="bodyMd" tone="subdued">
-      {formatDate(popup.createdAt)}
-    </Text>,
-    <ButtonGroup>
-      <Button
-        size="micro"
-        onClick={() => handleToggleActive(popup)}
-        tone={popup.isActive ? "critical" : "success"}
-      >
-        {popup.isActive ? "Deactivate" : "Activate"}
-      </Button>
-      <Button
-        size="micro"
-        onClick={() => handleEditPopup(popup)}
-      >
-        Edit
-      </Button>
-      <Button
-        size="micro"
-        tone="critical"
-        onClick={() => handleDeletePopup(popup.id)}
-      >
-        Delete
-      </Button>
-    </ButtonGroup>
-  ]);
+  const getPopupThumbnail = (popup) => {
+    // Generate different thumbnails based on popup type
+    const thumbnails = {
+      "email": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTAwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjVGNUY1Ii8+CjxyZWN0IHg9IjEwIiB5PSIxNSIgd2lkdGg9IjgwIiBoZWlnaHQ9IjUwIiByeD0iNCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iI0UxRTNFNSIvPgo8dGV4dCB4PSI1MCIgeT0iMzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2QjczODAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4Ij7wn5OIPC90ZXh0Pgo8dGV4dCB4PSI1MCIgeT0iNDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzNzQxNTEiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI2Ij5FbWFpbCBQb3B1cDwvdGV4dD4KPHN2Zz4K",
+      "wheel-email": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTAwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiBmaWxsPSJsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCAjMWUzYzcyIDAlLCAjMmE1Mjk4IDEwMCUpIi8+CjxjaXJjbGUgY3g9IjMwIiBjeT0iNDAiIHI9IjE4IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiLz4KPHN2ZyB4PSIyNSIgeT0iMzUiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+CjxwYXRoIGQ9Ik01IDAgTDEwIDUgTDUgMTAgTDAgNSBaIiBmaWxsPSIjRkY2QjZCIi8+Cjwvc3ZnPgo8dGV4dCB4PSI3MCIgeT0iMzUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNiI+U3BpbiB0byBXaW48L3RleHQ+CjxyZWN0IHg9IjU1IiB5PSI0NSIgd2lkdGg9IjMwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRkY2QjZCIi8+CjwvcmVjdD4KPHN2Zz4K",
+      "community": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTAwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjVGNUY1Ii8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjYwIiByeD0iNCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iI0UxRTNFNSIvPgo8cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSI4MCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzY2N0VFQSIvPgo8dGV4dCB4PSI1MCIgeT0iNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzNzQxNTEiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4Ij7wn5G1IEpvaW4gVXM8L3RleHQ+CjxjaXJjbGUgY3g9IjM1IiBjeT0iNTUiIHI9IjQiIGZpbGw9IiMxODc3RjIiLz4KPGNpcmNsZSBjeD0iNTAiIGN5PSI1NSIgcj0iNCIgZmlsbD0iI0U0NDA1RiIvPgo8Y2lyY2xlIGN4PSI2NSIgY3k9IjU1IiByPSI0IiBmaWxsPSIjMDA3N0I1Ii8+Cjwvc3ZnPgo=",
+      "timer": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTAwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiBmaWxsPSJsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCAjNjY3ZWVhIDAlLCAjNzY0YmEyIDEwMCUpIi8+Cjx0ZXh0IHg9IjUwIiB5PSIyNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4Ij5MSU1JVEVEIFRJTUUhPC90ZXh0Pgo8dGV4dCB4PSI1MCIgeT0iNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPjAwOjA1OjAwPC90ZXh0Pgo8cmVjdCB4PSIyNSIgeT0iNTUiIHdpZHRoPSI1MCIgaGVpZ2h0PSIxMCIgcng9IjUiIGZpbGw9IiNGRjZCNkIiLz4KPHN2Zz4K",
+      "scratch-card": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiB2aWV3Qm94PSIwIDAgMTAwIDgwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjVGNUY1Ii8+CjxyZWN0IHg9IjIwIiB5PSIyMCIgd2lkdGg9IjM1IiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0iIzRBOTBFMiIvPgo8dGV4dCB4PSIzNy41IiB5PSIzNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI2Ij5TQ1JBVENIPC90ZXh0Pgo8dGV4dCB4PSIzNy41IiB5PSI0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI2Ij5IRVJFPC90ZXh0Pgo8dGV4dCB4PSIzNy41IiB5PSI1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4Ij7inIvvuI88L3RleHQ+Cjx0ZXh0IHg9IjcwIiB5PSI0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzM3NDE1MSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgiPlNjcmF0Y2ggJiBXaW4hPC90ZXh0Pgo8L3N2Zz4K"
+    };
+    return thumbnails[popup.type] || thumbnails["email"];
+  };
 
   return (
     <Page>
-      <TitleBar title="Popup Management" />
+      <TitleBar title="QuickPop" />
       
       <BlockStack gap="500">
-        {/* Stats Banner */}
-        <Layout>
-          <Layout.Section variant="oneThird">
-            <Card>
-              <BlockStack gap="200">
-                <Text as="h3" variant="headingMd">Total Popups</Text>
-                <Text as="p" variant="heading2xl">{popups.length}</Text>
-              </BlockStack>
-            </Card>
-          </Layout.Section>
-          <Layout.Section variant="oneThird">
-            <Card>
-              <BlockStack gap="200">
-                <Text as="h3" variant="headingMd">Active Popups</Text>
-                <Text as="p" variant="heading2xl" tone="success">
-                  {popups.filter(p => p.isActive).length}
-                </Text>
-              </BlockStack>
-            </Card>
-          </Layout.Section>
-          <Layout.Section variant="oneThird">
-            <Card>
-              <BlockStack gap="200">
-                <Text as="h3" variant="headingMd">Inactive Popups</Text>
-                <Text as="p" variant="heading2xl" tone="subdued">
-                  {popups.filter(p => !p.isActive).length}
-                </Text>
-              </BlockStack>
-            </Card>
-          </Layout.Section>
-        </Layout>
+        {/* Header */}
+        <InlineStack align="space-between">
+          <Text as="h1" variant="headingLg">
+            Popups
+          </Text>
+          <Button
+            variant="primary"
+            icon={PlusIcon}
+            onClick={() => setShowCreateModal(true)}
+          >
+            Create popup
+          </Button>
+        </InlineStack>
 
-        {/* Popups List */}
-        <Layout>
-          <Layout.Section>
+        {/* Promotional Banner */}
+        <Banner
+          title="🎯 Ecomsend Back in Stock Alert"
+          status="info"
+          onDismiss={() => {}}
+        >
+          <Text variant="bodyMd">
+            Win back out-of-stock lost sales with smarter auto email or SMS notifications when restocking.
+          </Text>
+          <Box paddingBlockStart="200">
+            <Button size="slim">Start for free</Button>
+          </Box>
+        </Banner>
+
+        {/* Popup Library */}
+        <BlockStack gap="400">
+          <Text as="h2" variant="headingMd">
+            Popup library
+          </Text>
+          
+          {popups.length === 0 ? (
             <Card>
-              <BlockStack gap="400">
-                <InlineStack align="space-between">
-                  <Text as="h2" variant="headingMd">
-                    Your Popups
-                  </Text>
-                  <Button
-                    variant="primary"
-                    onClick={() => setShowCreateModal(true)}
-                  >
-                    + Create Popup
-                  </Button>
-                </InlineStack>
-                
-                {popups.length === 0 ? (
-                  <EmptyState
-                    heading="Create your first popup"
-                    action={{
-                      content: "+ Create Popup",
-                      onAction: () => setShowCreateModal(true)
-                    }}
-                    image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-                  >
-                    <p>
-                      Start engaging your customers with beautiful popups.
-                      Choose from email capture, spinning wheels, social media, and countdown timers.
-                    </p>
-                  </EmptyState>
-                ) : (
-                  <DataTable
-                    columnContentTypes={[
-                      'text',
-                      'text', 
-                      'text',
-                      'text',
-                      'text',
-                      'text'
-                    ]}
-                    headings={[
-                      'Name',
-                      'Type', 
-                      'Title',
-                      'Status',
-                      'Created',
-                      'Actions'
-                    ]}
-                    rows={tableRows}
-                  />
-                )}
+              <EmptyState
+                heading="Create your first popup"
+                action={{
+                  content: "Create popup",
+                  onAction: () => setShowCreateModal(true)
+                }}
+                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+              >
+                <p>
+                  Start engaging your customers with beautiful popups.
+                  Choose from email capture, spinning wheels, social media, and countdown timers.
+                </p>
+              </EmptyState>
+            </Card>
+          ) : (
+            <Card>
+              <BlockStack gap="0">
+                {popups.map((popup, index) => (
+                  <div key={popup.id}>
+                    <Box padding="400">
+                      <InlineStack gap="400" align="space-between">
+                        {/* Left side: Thumbnail + Details */}
+                        <InlineStack gap="400" align="center">
+                          <Box minWidth="80px">
+                            <Thumbnail
+                              source={getPopupThumbnail(popup)}
+                              alt={popup.name}
+                              size="large"
+                            />
+                          </Box>
+                          
+                          <BlockStack gap="100">
+                            <Text as="h3" variant="headingSm" fontWeight="semibold">
+                              {popup.name}
+                            </Text>
+                            <Text variant="bodySm" tone="subdued">
+                              Created: {formatDate(popup.createdAt)}
+                            </Text>
+                            <Text variant="bodySm" tone="subdued">
+                              Last saved: {formatDate(popup.updatedAt || popup.createdAt)}
+                            </Text>
+                          </BlockStack>
+                        </InlineStack>
+                        
+                        {/* Center: Stats */}
+                        <InlineStack gap="800" align="center">
+                          <BlockStack gap="050" inlineAlign="center">
+                            <Text variant="bodySm" tone="subdued">Popup views</Text>
+                            <Text variant="bodyMd" fontWeight="semibold">-</Text>
+                          </BlockStack>
+                          <BlockStack gap="050" inlineAlign="center">
+                            <Text variant="bodySm" tone="subdued">Subscribers</Text>
+                            <Text variant="bodyMd" fontWeight="semibold">-</Text>
+                          </BlockStack>
+                          <BlockStack gap="050" inlineAlign="center">
+                            <Text variant="bodySm" tone="subdued">Conversion rate</Text>
+                            <Text variant="bodyMd" fontWeight="semibold">0%</Text>
+                          </BlockStack>
+                        </InlineStack>
+                        
+                        {/* Right side: Toggle + Actions */}
+                        <InlineStack gap="300" align="center">
+                          {/* Toggle Switch */}
+                          <input
+                            type="checkbox"
+                            checked={popup.isActive}
+                            onChange={() => handleToggleActive(popup)}
+                            style={{
+                              width: '44px',
+                              height: '24px',
+                              appearance: 'none',
+                              backgroundColor: popup.isActive ? '#008060' : '#E1E3E5',
+                              borderRadius: '12px',
+                              position: 'relative',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.2s',
+                            }}
+                          />
+                          
+                          {/* Action Buttons */}
+                          <InlineStack gap="200">
+                            <Button
+                              onClick={() => handleEditPopup(popup)}
+                              variant="primary"
+                              size="slim"
+                            >
+                              Customize
+                            </Button>
+                            <Popover
+                              active={activePopover === popup.id}
+                              activator={
+                                <Button
+                                  variant="plain"
+                                  size="slim"
+                                  onClick={() => setActivePopover(activePopover === popup.id ? null : popup.id)}
+                                >
+                                  •••
+                                </Button>
+                              }
+                              onClose={() => setActivePopover(null)}
+                            >
+                              <ActionList
+                                items={[
+                                  {
+                                    content: 'Edit name',
+                                    onAction: () => {
+                                      handleEditName(popup);
+                                      setActivePopover(null);
+                                    }
+                                  },
+                                  {
+                                    content: 'Delete',
+                                    destructive: true,
+                                    onAction: () => {
+                                      handleDeletePopup(popup.id);
+                                      setActivePopover(null);
+                                    }
+                                  }
+                                ]}
+                              />
+                            </Popover>
+                          </InlineStack>
+                        </InlineStack>
+                      </InlineStack>
+                    </Box>
+                    
+                    {/* Divider between items (except last) */}
+                    {index < popups.length - 1 && (
+                      <Box borderBlockEndWidth="025" borderColor="border" />
+                    )}
+                  </div>
+                ))}
               </BlockStack>
             </Card>
-          </Layout.Section>
-        </Layout>
+          )}
+        </BlockStack>
 
-        {/* Help Section */}
-        <Layout>
-          <Layout.Section>
-            <Banner
-              title="💡 Popup Management Tips"
-              status="info"
-            >
-              <BlockStack gap="100">
-                <Text variant="bodyMd">
-                  • Only activate popups when you're ready to show them to customers
-                </Text>
-                <Text variant="bodyMd">
-                  • Test your popups before activating them
-                </Text>
-                <Text variant="bodyMd">
-                  • Monitor popup performance in the Analytics section
-                </Text>
-                <Text variant="bodyMd">
-                  • You can have multiple popups but only activate the ones you need
-                </Text>
-              </BlockStack>
-            </Banner>
-          </Layout.Section>
-        </Layout>
+        {/* Footer */}
+        <Box paddingBlockStart="800">
+          <InlineStack align="center" gap="100">
+            <Text variant="bodySm" tone="subdued">
+              Learn more about
+            </Text>
+            <Button variant="plain" size="slim">
+              Channelwill
+            </Button>
+          </InlineStack>
+        </Box>
       </BlockStack>
 
       {/* Create Popup Modal */}

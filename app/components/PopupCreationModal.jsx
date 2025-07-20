@@ -736,7 +736,8 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
                 padding: popupType === "community" ? "0" : (popupType === "wheel-email" ? "0" : "24px"),
                 borderRadius: `${popupType === "email" ? emailConfig.borderRadius : (popupType === "community" ? 12 : 8)}px`,
                 textAlign: "center",
-                maxWidth: "600px",
+                maxWidth: "400px",
+                width: "400px",
                 margin: "0 auto",
                 boxShadow: popupType === "wheel-email" ? "none" : "0 4px 12px rgba(0,0,0,0.15)",
                 overflow: "hidden",
@@ -766,64 +767,96 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
                 
                 {popupType === "email" ? (
                   <BlockStack gap="200">
-                    <div
+                    <div style={{ fontSize: "24px", marginBottom: "10px", textAlign: "center" }}>📧</div>
+                    <Text as="h4" variant="headingMd" style={{
+                      color: config.textColor,
+                      textAlign: "center",
+                      fontSize: "20px",
+                      fontWeight: "600",
+                      margin: "0 0 15px 0"
+                    }}>
+                      {emailConfig.title}
+                    </Text>
+                    <Text as="p" variant="bodyMd" style={{
+                      color: config.textColor,
+                      textAlign: "center",
+                      marginBottom: "20px",
+                      lineHeight: "1.5"
+                    }}>
+                      {emailConfig.description}
+                    </Text>
+                    <input
+                      type="email"
+                      placeholder={emailConfig.placeholder}
                       style={{
-                        padding: "8px 12px",
+                        width: "100%",
+                        padding: "12px",
                         border: "1px solid #ccc",
-                        borderRadius: "4px",
-                        backgroundColor: "#fff",
-                        color: "#666",
+                        borderRadius: "6px",
+                        marginBottom: "15px",
+                        fontSize: "14px",
+                        boxSizing: "border-box"
                       }}
-                    >
-                      {emailConfig.placeholder}
-                    </div>
+                      readOnly
+                    />
                     <button
                       style={{
+                        width: "100%",
                         backgroundColor: emailConfig.buttonColor,
                         color: "#fff",
                         padding: "12px 24px",
                         border: "none",
-                        borderRadius: "4px",
+                        borderRadius: "6px",
                         cursor: "pointer",
-                        fontWeight: "bold",
+                        fontWeight: "600",
+                        fontSize: "14px"
                       }}
                     >
                       {emailConfig.buttonText}
                     </button>
                   </BlockStack>
                 ) : popupType === "community" ? (
-                  // Community Popup Preview - Exact match with actual popup
-                  <div style={{ position: "relative", overflow: "hidden" }}>
+                  // Community Popup Preview - Exact match with real implementation
+                  <div style={{
+                    backgroundColor: communityConfig.backgroundColor || '#ffffff',
+                    borderRadius: `${communityConfig.borderRadius || 12}px`,
+                    overflow: "hidden",
+                    maxWidth: "350px",
+                    margin: "0 auto",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                  }}>
                     {/* Banner at the very top */}
                     <div
                       style={{
-                        width: "100%",
-                        height: "80px",
-                        backgroundColor: "#f0f0f0",
-                        backgroundImage: communityConfig.bannerImage ? `url(${communityConfig.bannerImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        borderRadius: `${communityConfig.borderRadius}px ${communityConfig.borderRadius}px 0 0`,
-                        position: "relative",
+                        width: '100%',
+                        height: '100px',
+                        backgroundColor: '#f0f0f0',
+                        backgroundImage: communityConfig.bannerImage ?
+                          `url(${communityConfig.bannerImage})` :
+                          'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        borderRadius: `${communityConfig.borderRadius || 12}px ${communityConfig.borderRadius || 12}px 0 0`,
+                        position: 'relative',
                       }}
                     >
-                      {/* Close button positioned over banner - hidden by default */}
+                      {/* Close button positioned over banner */}
                       {communityConfig.showCloseButton && (
                         <div
                           style={{
-                            position: "absolute",
-                            top: "8px",
-                            right: "8px",
-                            width: "20px",
-                            height: "20px",
-                            backgroundColor: "rgba(0,0,0,0.5)",
-                            borderRadius: "50%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "white",
-                            fontSize: "14px",
-                            cursor: "pointer",
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            width: '20px',
+                            height: '20px',
+                            backgroundColor: 'rgba(0,0,0,0.3)',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '14px',
+                            cursor: 'pointer',
                           }}
                         >
                           ×
@@ -832,46 +865,42 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
                     </div>
                     
                     {/* Content wrapper with padding */}
-                    <div style={{
-                      padding: "20px",
-                      backgroundColor: communityConfig.backgroundColor,
-                      borderRadius: `0 0 ${communityConfig.borderRadius}px ${communityConfig.borderRadius}px`
-                    }}>
+                    <div style={{ padding: '20px', textAlign: 'center' }}>
                       {/* Title and Description */}
-                      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+                      <div style={{ marginBottom: '20px' }}>
                         <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "8px",
-                          marginBottom: "10px"
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          marginBottom: '10px'
                         }}>
-                          <span style={{ fontSize: "18px" }}>👥</span>
-                          <h3 style={{
-                            color: communityConfig.textColor,
-                            margin: "0",
-                            fontSize: "16px",
-                            fontWeight: "600"
+                          <span style={{ fontSize: '18px' }}>👥</span>
+                          <Text as="h3" variant="headingMd" style={{
+                            color: communityConfig.textColor || '#000000',
+                            margin: '0',
+                            fontSize: '16px',
+                            fontWeight: '600'
                           }}>
                             {communityConfig.title}
-                          </h3>
+                          </Text>
                         </div>
-                        <p style={{
-                          color: communityConfig.textColor,
-                          fontSize: "13px",
-                          lineHeight: "1.4",
-                          margin: "0"
+                        <Text as="p" variant="bodyMd" style={{
+                          color: communityConfig.textColor || '#000000',
+                          fontSize: '13px',
+                          lineHeight: '1.4',
+                          margin: '0'
                         }}>
                           {communityConfig.description}
-                        </p>
+                        </Text>
                       </div>
                       
                       {/* Social Icons with proper colors */}
                       <div style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "12px",
-                        marginBottom: "20px"
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '12px',
+                        marginBottom: '20px'
                       }}>
                         {communityConfig.socialIcons.filter(icon => icon.enabled).map((social, index) => {
                           const getIconStyle = (platform) => {
@@ -898,22 +927,18 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
                             <div
                               key={social.platform}
                               style={{
-                                width: "40px",
-                                height: "40px",
-                                borderRadius: "50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                cursor: "pointer",
-                                transition: "transform 0.2s ease",
-                                fontSize: "16px",
-                                fontWeight: "bold",
+                                width: '35px',
+                                height: '35px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: 'bold',
                                 ...iconStyle,
-                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                               }}
-                              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                              title={`${social.platform.charAt(0).toUpperCase() + social.platform.slice(1)}`}
                             >
                               {social.platform === 'facebook' ? 'f' :
                                social.platform === 'instagram' ? '📷' :
@@ -926,13 +951,13 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
                       
                       {/* Ask Me Later Link */}
                       {communityConfig.showAskMeLater && (
-                        <div style={{ textAlign: "center" }}>
+                        <div style={{ textAlign: 'center' }}>
                           <a
                             href="#"
                             style={{
-                              color: communityConfig.textColor,
-                              textDecoration: "underline",
-                              fontSize: "13px",
+                              color: communityConfig.textColor || '#000000',
+                              textDecoration: 'underline',
+                              fontSize: '13px',
                               opacity: 0.7,
                             }}
                           >
@@ -1521,7 +1546,29 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
           }
           .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
             max-height: 90vh !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          .popup-config-layout {
+            display: flex !important;
+            height: 85vh !important;
+            overflow: hidden !important;
+          }
+          .popup-config-settings {
+            flex: 1 !important;
             overflow-y: auto !important;
+            padding-right: 16px !important;
+            max-height: 85vh !important;
+          }
+          .popup-config-preview {
+            width: 600px !important;
+            flex-shrink: 0 !important;
+            overflow: hidden !important;
+            position: sticky !important;
+            top: 0 !important;
+            height: fit-content !important;
+            max-height: 85vh !important;
           }
         `}
       </style>
@@ -1547,65 +1594,63 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
         size="fullScreen"
       >
       <Modal.Section>
-        <BlockStack gap="500">
-          <Layout>
-            <Layout.Section variant="oneThird">
+        <div className="popup-config-layout">
+          <div className="popup-config-settings">
+            <Card>
+              <BlockStack gap="500">
+                <BlockStack gap="200">
+                  <Text as="h2" variant="headingMd">
+                    Popup Configuration
+                  </Text>
+                  <Text variant="bodyMd" as="p">
+                    Customize your popup to engage visitors and boost conversions. Choose between email capture or spinning wheel discount popups.
+                  </Text>
+                </BlockStack>
+                
+                <Divider />
+                
+                <Select
+                  label="Popup Type"
+                  options={popupTypeOptions}
+                  value={popupType}
+                  onChange={setPopupType}
+                />
+                
+                <Divider />
+                
+                {popupType === "email" ? renderEmailConfig() : (popupType === "community" ? renderCommunityConfig() : renderWheelEmailConfig())}
+              </BlockStack>
+            </Card>
+          </div>
+          
+          <div className="popup-config-preview">
+            <BlockStack gap="500">
+              {renderPreview()}
+              
               <Card>
-                <BlockStack gap="500">
-                  <BlockStack gap="200">
-                    <Text as="h2" variant="headingMd">
-                      Popup Configuration
+                <BlockStack gap="200">
+                  <Text as="h3" variant="headingMd">
+                    Quick Tips
+                  </Text>
+                  <BlockStack gap="100">
+                    <Text as="p" variant="bodyMd">
+                      • Keep your popup title short and compelling
                     </Text>
-                    <Text variant="bodyMd" as="p">
-                      Customize your popup to engage visitors and boost conversions. Choose between email capture or spinning wheel discount popups.
+                    <Text as="p" variant="bodyMd">
+                      • Test different delay times to find optimal engagement
+                    </Text>
+                    <Text as="p" variant="bodyMd">
+                      • Use contrasting colors for better visibility
+                    </Text>
+                    <Text as="p" variant="bodyMd">
+                      • Configure discount codes in the wheel segments
                     </Text>
                   </BlockStack>
-                  
-                  <Divider />
-                  
-                  <Select
-                    label="Popup Type"
-                    options={popupTypeOptions}
-                    value={popupType}
-                    onChange={setPopupType}
-                  />
-                  
-                  <Divider />
-                  
-                  {popupType === "email" ? renderEmailConfig() : (popupType === "community" ? renderCommunityConfig() : renderWheelEmailConfig())}
                 </BlockStack>
               </Card>
-            </Layout.Section>
-            
-            <Layout.Section>
-              <BlockStack gap="500">
-                {renderPreview()}
-                
-                <Card>
-                  <BlockStack gap="200">
-                    <Text as="h3" variant="headingMd">
-                      Quick Tips
-                    </Text>
-                    <BlockStack gap="100">
-                      <Text as="p" variant="bodyMd">
-                        • Keep your popup title short and compelling
-                      </Text>
-                      <Text as="p" variant="bodyMd">
-                        • Test different delay times to find optimal engagement
-                      </Text>
-                      <Text as="p" variant="bodyMd">
-                        • Use contrasting colors for better visibility
-                      </Text>
-                      <Text as="p" variant="bodyMd">
-                        • Configure discount codes in the wheel segments
-                      </Text>
-                    </BlockStack>
-                  </BlockStack>
-                </Card>
-              </BlockStack>
-            </Layout.Section>
-          </Layout>
-        </BlockStack>
+            </BlockStack>
+          </div>
+        </div>
       </Modal.Section>
 
       {/* Realtime Popup Preview */}

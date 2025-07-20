@@ -31,7 +31,7 @@ export default function CreatePopupButton({
       <PopupTypeSelectionModal
         active={isModalOpen}
         onClose={closeModal}
-        existingConfig={existingConfig}
+        existingConfig={null}
       />
     </>
   );
