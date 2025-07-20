@@ -52,6 +52,14 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
       icon: ClockIcon,
       color: "#f59e0b",
       features: ["Countdown timer", "Urgency creation", "Email capture", "Custom expiry"]
+    },
+    {
+      type: "scratch-card",
+      title: "Scratch Card Popup",
+      description: "Interactive scratch-to-win experience with discount reveals",
+      icon: "🎲",
+      color: "#8b5cf6",
+      features: ["Canvas scratch effect", "Random discounts", "Email capture", "Gamification"]
     }
   ];
 

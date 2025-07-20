@@ -736,7 +736,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
                 padding: popupType === "community" ? "0" : (popupType === "wheel-email" ? "0" : "24px"),
                 borderRadius: `${popupType === "email" ? emailConfig.borderRadius : (popupType === "community" ? 12 : 8)}px`,
                 textAlign: "center",
-                maxWidth: "400px",
+                maxWidth: "600px",
                 margin: "0 auto",
                 boxShadow: popupType === "wheel-email" ? "none" : "0 4px 12px rgba(0,0,0,0.15)",
                 overflow: "hidden",
@@ -1511,31 +1511,45 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
   };
 
   return (
-    <Modal
-      open={active}
-      onClose={onClose}
-      title={existingConfig ? "Edit Popup" : "Create Popup"}
-      primaryAction={{
-        content: "Save Configuration",
-        onAction: handleSaveConfig,
-        loading: fetcher.state === "submitting",
-      }}
-      secondaryActions={[
-        {
-          content: showRealtimePreview ? "Hide Preview" : "Show Realtime Preview",
-          onAction: () => setShowRealtimePreview(!showRealtimePreview),
-        },
-        {
-          content: "Cancel",
-          onAction: onClose,
-        },
-      ]}
-      large
-    >
+    <>
+      <style>
+        {`
+          .Polaris-Modal-Dialog--sizeFullScreen {
+            max-width: 95vw !important;
+            width: 95vw !important;
+            margin: 2.5vw auto !important;
+          }
+          .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
+            max-height: 90vh !important;
+            overflow-y: auto !important;
+          }
+        `}
+      </style>
+      <Modal
+        open={active}
+        onClose={onClose}
+        title={existingConfig ? "Edit Popup" : "Create Popup"}
+        primaryAction={{
+          content: "Save Configuration",
+          onAction: handleSaveConfig,
+          loading: fetcher.state === "submitting",
+        }}
+        secondaryActions={[
+          {
+            content: showRealtimePreview ? "Hide Preview" : "Show Realtime Preview",
+            onAction: () => setShowRealtimePreview(!showRealtimePreview),
+          },
+          {
+            content: "Cancel",
+            onAction: onClose,
+          },
+        ]}
+        size="fullScreen"
+      >
       <Modal.Section>
         <BlockStack gap="500">
           <Layout>
-            <Layout.Section>
+            <Layout.Section variant="oneThird">
               <Card>
                 <BlockStack gap="500">
                   <BlockStack gap="200">
@@ -1563,7 +1577,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
               </Card>
             </Layout.Section>
             
-            <Layout.Section variant="oneThird">
+            <Layout.Section>
               <BlockStack gap="500">
                 {renderPreview()}
                 
@@ -1597,5 +1611,6 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
       {/* Realtime Popup Preview */}
       {renderRealtimePopup()}
     </Modal>
+    </>
   );
 }

@@ -261,11 +261,48 @@ export default function PopupConfigurationModal({
     };
   });
 
+  // Scratch card popup configuration
+  const [scratchCardConfig, setScratchCardConfig] = useState(() => {
+    if (initialConfig && initialConfig.type === "scratch-card") {
+      return {
+        title: initialConfig.title || "Scratch & Win!",
+        description: initialConfig.description || "Scratch the card to reveal your exclusive discount and enter your email to claim it!",
+        placeholder: initialConfig.placeholder || "Enter your email",
+        buttonText: initialConfig.buttonText || "CLAIM DISCOUNT",
+        discountCode: initialConfig.discountCode || "SCRATCH10",
+        backgroundColor: initialConfig.backgroundColor || "#ffffff",
+        textColor: initialConfig.textColor || "#000000",
+        borderRadius: initialConfig.borderRadius || 16,
+        showCloseButton: initialConfig.showCloseButton !== false,
+        displayDelay: initialConfig.displayDelay || 3000,
+        frequency: initialConfig.frequency || "once",
+        exitIntent: initialConfig.exitIntent || false,
+        exitIntentDelay: initialConfig.exitIntentDelay || 1000,
+      };
+    }
+    return {
+      title: "Scratch & Win!",
+      description: "Scratch the card to reveal your exclusive discount and enter your email to claim it!",
+      placeholder: "Enter your email",
+      buttonText: "CLAIM DISCOUNT",
+      discountCode: "SCRATCH10",
+      backgroundColor: "#ffffff",
+      textColor: "#000000",
+      borderRadius: 16,
+      showCloseButton: true,
+      displayDelay: 3000,
+      frequency: "once",
+      exitIntent: false,
+      exitIntentDelay: 1000,
+    };
+  });
+
   // Handle save configuration
   const handleSaveConfig = useCallback(() => {
     const config = popupType === "email" ? emailConfig :
                    popupType === "community" ? communityConfig :
                    popupType === "timer" ? timerConfig :
+                   popupType === "scratch-card" ? scratchCardConfig :
                    wheelEmailConfig;
     
     // Generate a default name if not provided
@@ -288,7 +325,7 @@ export default function PopupConfigurationModal({
     
     // Close modal after save - this will trigger the parent to close both modals
     onClose();
-  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, popupName, initialConfig, fetcher, onClose]);
+  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, scratchCardConfig, popupName, initialConfig, fetcher, onClose]);
 
   // Handle fetcher response
   useEffect(() => {
@@ -310,6 +347,7 @@ export default function PopupConfigurationModal({
     { label: "Wheel + Email Combo", value: "wheel-email" },
     { label: "Community Social Popup", value: "community" },
     { label: "Timer Countdown Popup", value: "timer" },
+    { label: "Scratch Card Popup", value: "scratch-card" },
   ];
 
   // Get current config based on popup type
@@ -318,6 +356,7 @@ export default function PopupConfigurationModal({
       case "email": return emailConfig;
       case "community": return communityConfig;
       case "timer": return timerConfig;
+      case "scratch-card": return scratchCardConfig;
       default: return wheelEmailConfig;
     }
   };
@@ -331,6 +370,8 @@ export default function PopupConfigurationModal({
         return renderCommunityConfig();
       case "timer":
         return renderTimerConfig();
+      case "scratch-card":
+        return renderScratchCardConfig();
       default:
         return renderWheelEmailConfig();
     }
@@ -1032,12 +1073,166 @@ export default function PopupConfigurationModal({
     </BlockStack>
   );
 
+  // Scratch card popup configuration
+  const renderScratchCardConfig = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">Scratch Card Popup Configuration</Text>
+      
+      <TextField
+        label="Popup Title"
+        value={scratchCardConfig.title}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, title: value })}
+        placeholder="Enter popup title (e.g., Scratch & Win!)"
+      />
+      
+      <TextField
+        label="Description"
+        value={scratchCardConfig.description}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, description: value })}
+        multiline={3}
+        placeholder="Enter popup description"
+      />
+      
+      <TextField
+        label="Email Placeholder"
+        value={scratchCardConfig.placeholder}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, placeholder: value })}
+        placeholder="Email input placeholder"
+      />
+      
+      <TextField
+        label="Button Text"
+        value={scratchCardConfig.buttonText}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, buttonText: value })}
+        placeholder="Button text (e.g., CLAIM DISCOUNT)"
+      />
+      
+      <TextField
+        label="Discount Code"
+        value={scratchCardConfig.discountCode}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, discountCode: value })}
+        placeholder="Discount code to offer (e.g., SCRATCH10)"
+      />
+      
+      <InlineStack gap="400">
+        <Box minWidth="200px">
+          <Text as="p" variant="bodyMd">Background Color</Text>
+          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+            <input
+              type="color"
+              value={scratchCardConfig.backgroundColor}
+              onChange={(e) => setScratchCardConfig({ ...scratchCardConfig, backgroundColor: e.target.value })}
+              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            />
+          </Box>
+        </Box>
+        <Box minWidth="200px">
+          <Text as="p" variant="bodyMd">Text Color</Text>
+          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+            <input
+              type="color"
+              value={scratchCardConfig.textColor}
+              onChange={(e) => setScratchCardConfig({ ...scratchCardConfig, textColor: e.target.value })}
+              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            />
+          </Box>
+        </Box>
+      </InlineStack>
+      
+      <RangeSlider
+        label={`Border Radius: ${scratchCardConfig.borderRadius}px`}
+        value={scratchCardConfig.borderRadius}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, borderRadius: value })}
+        min={0}
+        max={30}
+        step={1}
+      />
+      
+      <RangeSlider
+        label={`Display Delay: ${scratchCardConfig.displayDelay / 1000}s`}
+        value={scratchCardConfig.displayDelay}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, displayDelay: value })}
+        min={0}
+        max={10000}
+        step={500}
+      />
+      
+      <Checkbox
+        label="Show close button"
+        checked={scratchCardConfig.showCloseButton}
+        onChange={(checked) => setScratchCardConfig({ ...scratchCardConfig, showCloseButton: checked })}
+      />
+      
+      <Divider />
+      
+      <Text as="h4" variant="headingSm">Advanced Settings</Text>
+      
+      <Select
+        label="Display Frequency"
+        options={[
+          { label: "Show once per visitor", value: "once" },
+          { label: "Show once per day", value: "daily" },
+          { label: "Show once per week", value: "weekly" },
+          { label: "Show on every visit", value: "always" },
+        ]}
+        value={scratchCardConfig.frequency}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, frequency: value })}
+        helpText="Control how often the popup appears to the same visitor"
+      />
+      
+      <Checkbox
+        label="Enable exit intent detection"
+        checked={scratchCardConfig.exitIntent}
+        onChange={(checked) => setScratchCardConfig({ ...scratchCardConfig, exitIntent: checked })}
+        helpText="Show popup when user is about to leave the page"
+      />
+      
+      {scratchCardConfig.exitIntent && (
+        <RangeSlider
+          label={`Exit intent delay: ${scratchCardConfig.exitIntentDelay}ms`}
+          value={scratchCardConfig.exitIntentDelay}
+          onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, exitIntentDelay: value })}
+          min={500}
+          max={3000}
+          step={100}
+          helpText="Delay before exit intent triggers"
+        />
+      )}
+      
+      <Box padding="400" background="bg-surface-secondary" borderRadius="200">
+        <BlockStack gap="200">
+          <Text as="h4" variant="headingSm">
+            🎲 Scratch Card Features:
+          </Text>
+          <BlockStack gap="100">
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Interactive canvas-based scratch effect
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Random discount percentages (5%, 10%, 15%, 20%, 25%, 30%)
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Touch and mouse support for all devices
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Email validation with terms agreement checkbox
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Automatic discount code generation
+            </Text>
+          </BlockStack>
+        </BlockStack>
+      </Box>
+    </BlockStack>
+  );
+
   // Render preview panel
   const renderPreviewPanel = () => {
     const config = getCurrentConfig();
     const badgeText = popupType === "email" ? "Email Popup" :
                       popupType === "community" ? "Community Social Popup" :
                       popupType === "timer" ? "Timer Countdown Popup" :
+                      popupType === "scratch-card" ? "Scratch Card Popup" :
                       "Wheel + Email Combo";
     
     return (
@@ -1063,7 +1258,7 @@ export default function PopupConfigurationModal({
                   padding: popupType === "wheel-email" ? "0" : "24px",
                   borderRadius: `${popupType === "email" ? emailConfig.borderRadius : 8}px`,
                   textAlign: "center",
-                  maxWidth: "400px",
+                  maxWidth: "600px",
                   margin: "0 auto",
                   boxShadow: popupType === "wheel-email" ? "none" : "0 4px 12px rgba(0,0,0,0.15)",
                 }}
@@ -1262,6 +1457,101 @@ export default function PopupConfigurationModal({
                         {timerConfig.buttonText}
                       </button>
                     </BlockStack>
+                  ) : popupType === "scratch-card" ? (
+                    // Scratch Card Preview
+                    <BlockStack gap="200">
+                      <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "12px" }}>
+                        {/* Scratch Card */}
+                        <div
+                          style={{
+                            width: "80px",
+                            height: "80px",
+                            background: "linear-gradient(135deg, #4A90E2 0%, #5BA0F2 100%)",
+                            borderRadius: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "white",
+                            fontSize: "10px",
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                            position: "relative",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                            <div style={{ fontSize: "8px", marginBottom: "2px" }}>SCRATCH</div>
+                            <div style={{ fontSize: "8px" }}>HERE</div>
+                            <div style={{ fontSize: "12px", marginTop: "2px" }}>✋</div>
+                          </div>
+                          {/* Hidden discount preview */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              width: "100%",
+                              height: "100%",
+                              background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              opacity: 0.3,
+                              fontSize: "16px",
+                              fontWeight: "900",
+                            }}
+                          >
+                            <div>20%</div>
+                            <div style={{ fontSize: "8px" }}>OFF</div>
+                          </div>
+                        </div>
+                        
+                        {/* Form Preview */}
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              padding: "6px",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                              backgroundColor: "#fff",
+                              color: "#666",
+                              marginBottom: "6px",
+                              fontSize: "10px",
+                            }}
+                          >
+                            {scratchCardConfig.placeholder}
+                          </div>
+                          
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "6px", fontSize: "8px" }}>
+                            <input type="checkbox" style={{ width: "10px", height: "10px" }} />
+                            <span style={{ color: config.textColor }}>I agree to terms</span>
+                          </div>
+                          
+                          <button
+                            style={{
+                              width: "100%",
+                              padding: "6px",
+                              background: "linear-gradient(135deg, #4299e1 0%, #3182ce 100%)",
+                              border: "none",
+                              borderRadius: "4px",
+                              color: "white",
+                              fontSize: "8px",
+                              fontWeight: "bold",
+                              cursor: "pointer",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {scratchCardConfig.buttonText}
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div style={{ fontSize: "8px", color: config.textColor, textAlign: "center", fontStyle: "italic" }}>
+                        Scratch to reveal discount!
+                      </div>
+                    </BlockStack>
                   ) : (
                     // Wheel-Email Combo Preview
                     <div
@@ -1426,26 +1716,40 @@ export default function PopupConfigurationModal({
   };
 
   return (
-    <Modal
-      open={isOpen}
-      onClose={onClose}
-      title="Popup Configuration"
-      size="large"
-      primaryAction={{
-        content: "Save Configuration",
-        onAction: handleSaveConfig,
-        loading: fetcher.state === "submitting",
-      }}
-      secondaryActions={[
-        {
-          content: "Cancel",
-          onAction: onClose,
-        },
-      ]}
-    >
+    <>
+      <style>
+        {`
+          .Polaris-Modal-Dialog--sizeFullScreen {
+            max-width: 95vw !important;
+            width: 95vw !important;
+            margin: 2.5vw auto !important;
+          }
+          .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
+            max-height: 90vh !important;
+            overflow-y: auto !important;
+          }
+        `}
+      </style>
+      <Modal
+        open={isOpen}
+        onClose={onClose}
+        title="Popup Configuration"
+        size="fullScreen"
+        primaryAction={{
+          content: "Save Configuration",
+          onAction: handleSaveConfig,
+          loading: fetcher.state === "submitting",
+        }}
+        secondaryActions={[
+          {
+            content: "Cancel",
+            onAction: onClose,
+          },
+        ]}
+      >
       <Modal.Section>
         <Layout>
-          <Layout.Section>
+          <Layout.Section variant="oneThird">
             <Card>
               <BlockStack gap="500">
                 <BlockStack gap="200">
@@ -1481,11 +1785,12 @@ export default function PopupConfigurationModal({
             </Card>
           </Layout.Section>
           
-          <Layout.Section variant="oneThird">
+          <Layout.Section>
             {renderPreviewPanel()}
           </Layout.Section>
         </Layout>
       </Modal.Section>
     </Modal>
+    </>
   );
 }

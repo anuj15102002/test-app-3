@@ -7,7 +7,7 @@
   let popupShown = false;
   let exitIntentTriggered = false;
   let sessionId = null;
-  let applicationUrl = 'https://childhood-tx-page-thehun.trycloudflare.com';
+  let applicationUrl = 'https://differ-sql-gb-parade.trycloudflare.com';
 
   // Generate session ID for tracking
   sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -458,6 +458,34 @@
       
       // Initialize timer popup
       initializeTimerPopup(config, timerContent);
+    } else if (config.type === 'scratch-card') {
+      // Show scratch card popup layout
+      popup.classList.add('scratch-card-popup');
+      popup.style.background = config.backgroundColor || '#ffffff';
+      popup.style.color = config.textColor || '#000000';
+      popup.style.borderRadius = `${config.borderRadius || 16}px`;
+      popup.style.maxWidth = '600px';
+      popup.style.display = 'block';
+      
+      // Hide other sections for scratch card popup
+      const wheelSection = popup.querySelector('.wheel-section');
+      const formSection = popup.querySelector('.form-section');
+      const communityContent = popup.querySelector('.community-content');
+      const timerContent = popup.querySelector('.timer-content');
+      const scratchCardContent = popup.querySelector('.scratch-card-content');
+      const popupContent = popup.querySelector('.popup-content');
+      
+      wheelSection.style.display = 'none';
+      formSection.style.display = 'none';
+      communityContent.style.display = 'none';
+      timerContent.style.display = 'none';
+      scratchCardContent.style.display = 'block';
+      
+      // Ensure popup content doesn't use flex layout for scratch card popup
+      popupContent.style.display = 'block';
+      
+      // Initialize scratch card popup
+      initializeScratchCardPopup(config, scratchCardContent);
     } else {
       // Show wheel-email combo layout
       popup.classList.remove('email-popup');
@@ -1491,6 +1519,437 @@
 
   // Make timer functions globally accessible
   window.handleTimerSubmit = handleTimerSubmit;
+
+  // Scratch card popup functionality
+  let scratchCanvas = null;
+  let scratchCtx = null;
+  let isScratching = false;
+  let scratchRevealed = false;
+
+  function initializeScratchCardPopup(config, scratchCardContent) {
+    const scratchCardInner = scratchCardContent.querySelector('.scratch-card-popup-inner');
+    
+    // Generate random discount percentage (5%, 10%, 15%, 20%, 25%, 30%)
+    const discountOptions = [5, 10, 15, 20, 25, 30];
+    const randomDiscount = discountOptions[Math.floor(Math.random() * discountOptions.length)];
+    
+    scratchCardInner.innerHTML = `
+      <button class="popup-close" onclick="closePopup()" style="
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        color: ${config.textColor || '#000000'};
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      ">&times;</button>
+      
+      <div class="scratch-card-layout">
+        <div class="scratch-card-left">
+          <div class="scratch-card-container" style="position: relative;">
+            <canvas id="scratch-canvas" width="200" height="200" style="pointer-events: none; opacity: 0.5;"></canvas>
+            <div class="scratch-card-hidden-content" id="hidden-discount" style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 200px;
+              height: 200px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+              color: white;
+              opacity: 0;
+              border-radius: 8px;
+            ">
+              <div class="discount-percentage" style="font-size: 48px; font-weight: bold; margin-bottom: 5px;">${randomDiscount}%</div>
+              <div class="discount-text" style="font-size: 18px; font-weight: 600;">OFF</div>
+            </div>
+          </div>
+          <p class="scratch-instruction" id="scratch-instruction">Enter your email to start scratching!</p>
+        </div>
+        
+        <div class="scratch-card-right">
+          <h2 class="scratch-card-title">${config.title || 'Scratch & Win!'}</h2>
+          <p class="scratch-card-description">${config.description || 'Enter your email first, then scratch the card to reveal your exclusive discount!'}</p>
+          
+          <div class="scratch-card-form" id="scratch-form">
+            <input type="email" id="scratch-email" placeholder="${config.placeholder || 'Enter your email'}" class="scratch-email-input" />
+            <label class="scratch-checkbox-container">
+              <input type="checkbox" id="scratch-terms" class="scratch-checkbox" />
+              <span class="scratch-checkmark"></span>
+              <span class="scratch-checkbox-text">I agree to receive promotional emails</span>
+            </label>
+            <button onclick="enableScratchCard(${randomDiscount})" class="scratch-submit-btn" id="enable-scratch-btn" disabled>
+              Enable Scratching
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Initialize scratch canvas after DOM is ready
+    setTimeout(() => {
+      initializeScratchCanvas(randomDiscount);
+    }, 100);
+  }
+
+  function initializeScratchCanvas(discount) {
+    scratchCanvas = document.getElementById('scratch-canvas');
+    if (!scratchCanvas) return;
+    
+    scratchCtx = scratchCanvas.getContext('2d');
+    
+    // Set canvas size
+    const rect = scratchCanvas.getBoundingClientRect();
+    scratchCanvas.width = 200;
+    scratchCanvas.height = 200;
+    
+    // Create scratch surface (blue background)
+    scratchCtx.fillStyle = '#4A90E2';
+    scratchCtx.fillRect(0, 0, 200, 200);
+    
+    // Add scratch surface pattern/texture
+    scratchCtx.fillStyle = '#5BA0F2';
+    for (let i = 0; i < 200; i += 20) {
+      for (let j = 0; j < 200; j += 20) {
+        if ((i + j) % 40 === 0) {
+          scratchCtx.fillRect(i, j, 10, 10);
+        }
+      }
+    }
+    
+    // Add "SCRATCH HERE" text
+    scratchCtx.fillStyle = '#FFFFFF';
+    scratchCtx.font = 'bold 16px Arial';
+    scratchCtx.textAlign = 'center';
+    scratchCtx.fillText('SCRATCH', 100, 90);
+    scratchCtx.fillText('HERE', 100, 110);
+    
+    // Add small scratch icon
+    scratchCtx.font = '20px Arial';
+    scratchCtx.fillText('✋', 100, 140);
+    
+    // Set up scratch functionality
+    scratchCtx.globalCompositeOperation = 'destination-out';
+    
+    // Mouse events
+    scratchCanvas.addEventListener('mousedown', startScratching);
+    scratchCanvas.addEventListener('mousemove', scratch);
+    scratchCanvas.addEventListener('mouseup', stopScratching);
+    scratchCanvas.addEventListener('mouseleave', stopScratching);
+    
+    // Touch events for mobile
+    scratchCanvas.addEventListener('touchstart', handleTouchStart);
+    scratchCanvas.addEventListener('touchmove', handleTouchMove);
+    scratchCanvas.addEventListener('touchend', stopScratching);
+    
+    // Enable form validation
+    setupScratchFormValidation();
+  }
+
+  function startScratching(e) {
+    // Check if scratching is enabled
+    const canvas = document.getElementById('scratch-canvas');
+    if (canvas.style.pointerEvents === 'none') {
+      return; // Don't allow scratching if disabled
+    }
+    isScratching = true;
+    scratch(e);
+  }
+
+  function scratch(e) {
+    if (!isScratching) return;
+    
+    const rect = scratchCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Scale coordinates to canvas size
+    const scaleX = scratchCanvas.width / rect.width;
+    const scaleY = scratchCanvas.height / rect.height;
+    
+    scratchCtx.beginPath();
+    scratchCtx.arc(x * scaleX, y * scaleY, 15, 0, 2 * Math.PI);
+    scratchCtx.fill();
+    
+    // Check if enough area is scratched
+    checkScratchProgress();
+  }
+
+  function stopScratching() {
+    isScratching = false;
+  }
+
+  function handleTouchStart(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousedown', {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    });
+    scratchCanvas.dispatchEvent(mouseEvent);
+  }
+
+  function handleTouchMove(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousemove', {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    });
+    scratchCanvas.dispatchEvent(mouseEvent);
+  }
+
+  function checkScratchProgress() {
+    if (scratchRevealed) return;
+    
+    const imageData = scratchCtx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height);
+    const pixels = imageData.data;
+    let transparentPixels = 0;
+    
+    // Count transparent pixels
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] === 0) {
+        transparentPixels++;
+      }
+    }
+    
+    const totalPixels = scratchCanvas.width * scratchCanvas.height;
+    const scratchedPercentage = (transparentPixels / totalPixels) * 100;
+    
+    // If 30% or more is scratched, reveal the discount
+    if (scratchedPercentage > 30) {
+      revealDiscount();
+    }
+  }
+
+  function revealDiscount() {
+    if (scratchRevealed) return;
+    
+    scratchRevealed = true;
+    
+    // Clear the entire canvas to reveal the hidden content
+    scratchCtx.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+    
+    // Show hidden content
+    const hiddenContent = document.getElementById('hidden-discount');
+    if (hiddenContent) {
+      hiddenContent.style.opacity = '1';
+    }
+    
+    // Enable the submit button since scratch is now revealed
+    const submitBtn = document.querySelector('.scratch-submit-btn');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+    }
+    
+    // Track scratch reveal event
+    trackEvent('scratch_revealed', {
+      metadata: {
+        popupType: 'scratch-card'
+      }
+    });
+  }
+
+  function setupScratchFormValidation() {
+    const emailInput = document.getElementById('scratch-email');
+    const termsCheckbox = document.getElementById('scratch-terms');
+    const submitBtn = document.querySelector('.scratch-submit-btn');
+    
+    function validateForm() {
+      const emailValid = emailInput.value && emailInput.value.includes('@');
+      const termsChecked = termsCheckbox.checked;
+      
+      // For the initial "Enable Scratching" button, only check email and terms
+      submitBtn.disabled = !(emailValid && termsChecked);
+    }
+    
+    emailInput.addEventListener('input', validateForm);
+    termsCheckbox.addEventListener('change', validateForm);
+  }
+
+  // New function to enable scratch card after email entry
+  function enableScratchCard(discount) {
+    const email = document.getElementById('scratch-email')?.value;
+    const termsChecked = document.getElementById('scratch-terms')?.checked;
+    
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    
+    if (!termsChecked) {
+      alert('Please agree to receive promotional emails.');
+      return;
+    }
+    
+    // Track email entered
+    trackEvent('email_entered', {
+      email: email,
+      metadata: {
+        popupType: 'scratch-card',
+        discount: discount
+      }
+    });
+    
+    // Enable the scratch canvas
+    const canvas = document.getElementById('scratch-canvas');
+    const instruction = document.getElementById('scratch-instruction');
+    const submitBtn = document.getElementById('enable-scratch-btn');
+    
+    canvas.style.pointerEvents = 'auto';
+    canvas.style.opacity = '1';
+    instruction.textContent = 'Now scratch to reveal your discount!';
+    
+    // Change button to claim button (disabled until scratched)
+    submitBtn.textContent = popupConfig.buttonText || 'CLAIM DISCOUNT';
+    submitBtn.onclick = () => handleScratchCardSubmit(discount);
+    submitBtn.disabled = true; // Will be enabled when scratch is revealed
+    
+    // Store email for later use
+    window.scratchCardEmail = email;
+  }
+
+  // Scratch card form submission handler
+  async function handleScratchCardSubmit(discount) {
+    const email = window.scratchCardEmail || document.getElementById('scratch-email')?.value;
+    
+    if (!scratchRevealed) {
+      alert('Please scratch the card first to reveal your discount.');
+      return;
+    }
+    
+    // Use the configured discount code or generate one
+    const discountCode = popupConfig.discountCode || `SCRATCH${discount}`;
+    
+    // Track win event for scratch card
+    trackEvent('win', {
+      email: email,
+      discountCode: discountCode,
+      prizeLabel: `${discount}% OFF`,
+      metadata: {
+        popupType: 'scratch-card',
+        preconfigured: true
+      }
+    });
+    
+    // Show success message
+    showScratchCardSuccess(discount, discountCode);
+  }
+
+  function showScratchCardSuccess(discount, discountCode) {
+    const scratchCardInner = document.querySelector('.scratch-card-popup-inner');
+    
+    scratchCardInner.innerHTML = `
+      <button class="popup-close" onclick="closePopup()" style="
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        color: #000000;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      ">&times;</button>
+      
+      <div class="scratch-card-success" style="
+        text-align: center;
+        padding: 40px 30px;
+        max-width: 500px;
+        margin: 0 auto;
+      ">
+        <h2 style="
+          font-size: 32px;
+          font-weight: 700;
+          margin: 0 0 20px 0;
+          color: #000000;
+        ">Congratulations!</h2>
+        
+        <p style="
+          font-size: 16px;
+          color: #333333;
+          margin: 0 0 30px 0;
+          line-height: 1.5;
+        ">Welcome to our loyalty program! Use the promo code below to get ${discount}% on your next purchase. We're glad to have you with us!</p>
+        
+        <div onclick="copyDiscountCode()" style="
+          background: #ffffff;
+          border: 2px dashed #007bff;
+          border-radius: 8px;
+          padding: 20px;
+          margin: 0 auto 25px auto;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          max-width: 300px;
+        " onmouseover="this.style.borderColor='#0056b3'" onmouseout="this.style.borderColor='#007bff'">
+          <div style="
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+          " id="discount-code">${discountCode}</div>
+          <div style="
+            font-size: 12px;
+            color: #666666;
+            font-style: italic;
+          ">📋 Click to copy</div>
+        </div>
+        
+        <button id="copy-btn" onclick="copyDiscountCode()" style="
+          background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+          border: none;
+          color: white;
+          padding: 12px 30px;
+          border-radius: 25px;
+          font-weight: 600;
+          cursor: pointer;
+          margin: 0 10px 15px 10px;
+          font-size: 14px;
+          transition: all 0.3s ease;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          📋 Copy Code
+        </button>
+        
+        <button onclick="window.closePopup()" style="
+          background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+          border: none;
+          color: white;
+          padding: 12px 30px;
+          border-radius: 25px;
+          font-weight: 600;
+          cursor: pointer;
+          margin: 0 10px;
+          font-size: 14px;
+          transition: all 0.3s ease;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          Continue Shopping
+        </button>
+      </div>
+    `;
+  }
+
+  // Make scratch card functions globally accessible
+  window.handleScratchCardSubmit = handleScratchCardSubmit;
+  window.enableScratchCard = enableScratchCard;
 
   // Embedded function: wheel handler
   function handleWheelSpin() {

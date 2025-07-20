@@ -73,14 +73,42 @@ export const action = async ({ request }) => {
     return { success: false, error: "Missing popup type or configuration" };
   }
   
-  // Generate a default name if not provided
-  const popupName = name || `${type.charAt(0).toUpperCase() + type.slice(1)} Popup - ${new Date().toLocaleDateString()}`;
+  // Debug logging for scratch card
+  if (type === "scratch-card") {
+    console.log("=== SCRATCH CARD DEBUG ===");
+    console.log("Type:", type);
+    console.log("Config received:", config);
+    console.log("PopupId:", popupId);
+    console.log("Config keys:", Object.keys(config));
+    console.log("Exit Intent:", config.exitIntent);
+    console.log("Frequency:", config.frequency);
+    console.log("=========================");
+  }
+  
+  // Validate scratch card configuration
+  if (type === "scratch-card") {
+      const requiredFields = ['title', 'description', 'placeholder', 'buttonText', 'backgroundColor', 'textColor'];
+      const missingFields = requiredFields.filter(field => !config[field]);
+      if (missingFields.length > 0) {
+        console.log("Missing required fields for scratch card:", missingFields);
+        return { success: false, error: `Missing required fields for scratch card: ${missingFields.join(', ')}` };
+      }
+    }
+    
+    // Generate a default name if not provided
+    const popupName = name || `${type.charAt(0).toUpperCase() + type.slice(1)} Popup - ${new Date().toLocaleDateString()}`;
   
   try {
     let savedConfig;
     
     if (popupId) {
       // Update existing popup
+      if (type === "scratch-card") {
+        console.log("=== UPDATING SCRATCH CARD ===");
+        console.log("PopupId:", popupId);
+        console.log("Shop:", session.shop);
+      }
+      
       savedConfig = await db.popupConfig.update({
         where: {
           id: popupId,
@@ -100,8 +128,8 @@ export const action = async ({ request }) => {
           borderRadius: config.borderRadius || 20,
           showCloseButton: config.showCloseButton !== false,
           displayDelay: config.displayDelay || 3000,
-          frequency: config.frequency || "once",
-          exitIntent: config.exitIntent || false,
+          frequency: config.frequency ?? "once",
+          exitIntent: config.exitIntent ?? false,
           exitIntentDelay: config.exitIntentDelay || 1000,
           segments: type === "wheel-email" ? JSON.stringify(config.segments) : null,
           backgroundType: config.backgroundType || null,
@@ -126,8 +154,17 @@ export const action = async ({ request }) => {
           updatedAt: new Date()
         }
       });
+      
+      if (type === "scratch-card") {
+        console.log("=== SCRATCH CARD UPDATED ===");
+        console.log("Updated config:", savedConfig);
+      }
     } else {
       // Create new popup
+      if (type === "scratch-card") {
+        console.log("=== CREATING NEW SCRATCH CARD ===");
+      }
+      
       savedConfig = await db.popupConfig.create({
         data: {
           shop: session.shop,
@@ -144,8 +181,8 @@ export const action = async ({ request }) => {
           borderRadius: config.borderRadius || 20,
           showCloseButton: config.showCloseButton !== false,
           displayDelay: config.displayDelay || 3000,
-          frequency: config.frequency || "once",
-          exitIntent: config.exitIntent || false,
+          frequency: config.frequency ?? "once",
+          exitIntent: config.exitIntent ?? false,
           exitIntentDelay: config.exitIntentDelay || 1000,
           segments: type === "wheel-email" ? JSON.stringify(config.segments) : null,
           backgroundType: config.backgroundType || null,
@@ -170,6 +207,17 @@ export const action = async ({ request }) => {
           isActive: false // New popups start as inactive
         }
       });
+      
+      if (type === "scratch-card") {
+        console.log("=== SCRATCH CARD CREATED ===");
+        console.log("Created config:", savedConfig);
+      }
+    }
+    
+    if (type === "scratch-card") {
+      console.log("=== FINAL RESULT ===");
+      console.log("Success: true");
+      console.log("Config ID:", savedConfig.id);
     }
     
     return {
@@ -178,6 +226,12 @@ export const action = async ({ request }) => {
       message: popupId ? "Popup updated successfully!" : "Popup created successfully!"
     };
   } catch (error) {
+    if (type === "scratch-card") {
+      console.log("=== SCRATCH CARD ERROR ===");
+      console.log("Error:", error);
+      console.log("Error message:", error.message);
+      console.log("Error stack:", error.stack);
+    }
     return { success: false, error: `Failed to save configuration: ${error.message}` };
   }
 };
@@ -214,8 +268,8 @@ export default function PopupCustomizer() {
         borderRadius: existingConfig.borderRadius,
         showCloseButton: existingConfig.showCloseButton,
         displayDelay: existingConfig.displayDelay,
-        frequency: existingConfig.frequency || "once",
-        exitIntent: existingConfig.exitIntent || false,
+        frequency: existingConfig.frequency ?? "once",
+        exitIntent: existingConfig.exitIntent ?? false,
         exitIntentDelay: existingConfig.exitIntentDelay || 1000,
       };
     }
@@ -272,8 +326,8 @@ export default function PopupCustomizer() {
         backgroundType: backgroundType,
         textColor: "#ffffff",
         displayDelay: existingConfig.displayDelay || 3000,
-        frequency: existingConfig.frequency || "once",
-        exitIntent: existingConfig.exitIntent || false,
+        frequency: existingConfig.frequency ?? "once",
+        exitIntent: existingConfig.exitIntent ?? false,
         exitIntentDelay: existingConfig.exitIntentDelay || 1000,
       };
     }
@@ -323,8 +377,8 @@ export default function PopupCustomizer() {
         borderRadius: existingConfig.borderRadius || 12,
         showCloseButton: existingConfig.showCloseButton !== false,
         displayDelay: existingConfig.displayDelay || 3000,
-        frequency: existingConfig.frequency || "once",
-        exitIntent: existingConfig.exitIntent || false,
+        frequency: existingConfig.frequency ?? "once",
+        exitIntent: existingConfig.exitIntent ?? false,
         exitIntentDelay: existingConfig.exitIntentDelay || 1000,
       };
     }
@@ -366,8 +420,8 @@ export default function PopupCustomizer() {
         borderRadius: existingConfig.borderRadius || 16,
         showCloseButton: existingConfig.showCloseButton !== false,
         displayDelay: existingConfig.displayDelay || 3000,
-        frequency: existingConfig.frequency || "once",
-        exitIntent: existingConfig.exitIntent || false,
+        frequency: existingConfig.frequency ?? "once",
+        exitIntent: existingConfig.exitIntent ?? false,
         exitIntentDelay: existingConfig.exitIntentDelay || 1000,
         timerDays: existingConfig.timerDays || 0,
         timerHours: existingConfig.timerHours || 0,
@@ -414,27 +468,115 @@ export default function PopupCustomizer() {
     };
   });
 
-  const handleSaveConfig = useCallback(() => {
-    const config = popupType === "email" ? emailConfig :
-                   popupType === "community" ? communityConfig :
-                   popupType === "timer" ? timerConfig :
-                   wheelEmailConfig;
-    
-    const formData = {
-      popupConfig: JSON.stringify({
-        type: popupType,
-        config,
-        name: popupName || `${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`
-      })
-    };
-    
-    // Include popupId if editing existing popup
-    if (popupId) {
-      formData.popupId = popupId;
+  // Scratch card popup configuration
+  const [scratchCardConfig, setScratchCardConfig] = useState(() => {
+    if (existingConfig && existingConfig.type === "scratch-card") {
+      return {
+        title: existingConfig.title || "Scratch & Win!",
+        description: existingConfig.description || "Scratch the card to reveal your exclusive discount and enter your email to claim it!",
+        placeholder: existingConfig.placeholder || "Enter your email",
+        buttonText: existingConfig.buttonText || "CLAIM DISCOUNT",
+        discountCode: existingConfig.discountCode || "SCRATCH10",
+        backgroundColor: existingConfig.backgroundColor || "#ffffff",
+        textColor: existingConfig.textColor || "#000000",
+        borderRadius: existingConfig.borderRadius || 16,
+        showCloseButton: existingConfig.showCloseButton !== false,
+        displayDelay: existingConfig.displayDelay || 3000,
+        frequency: existingConfig.frequency ?? "once",
+        exitIntent: existingConfig.exitIntent ?? false,
+        exitIntentDelay: existingConfig.exitIntentDelay || 1000,
+      };
     }
-    
-    fetcher.submit(formData, { method: "POST" });
-  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, popupName, popupId, fetcher]);
+    return {
+      title: "Scratch & Win!",
+      description: "Scratch the card to reveal your exclusive discount and enter your email to claim it!",
+      placeholder: "Enter your email",
+      buttonText: "CLAIM DISCOUNT",
+      discountCode: "SCRATCH10",
+      backgroundColor: "#ffffff",
+      textColor: "#000000",
+      borderRadius: 16,
+      showCloseButton: true,
+      displayDelay: 3000,
+      frequency: "once",
+      exitIntent: false,
+      exitIntentDelay: 1000,
+    };
+  });
+
+  // Update scratch card config when existingConfig changes
+  useEffect(() => {
+    if (existingConfig && existingConfig.type === "scratch-card") {
+      console.log("=== UPDATING SCRATCH CARD STATE FROM EXISTING CONFIG ===");
+      console.log("Existing config:", existingConfig);
+      
+      setScratchCardConfig({
+        title: existingConfig.title || "Scratch & Win!",
+        description: existingConfig.description || "Scratch the card to reveal your exclusive discount and enter your email to claim it!",
+        placeholder: existingConfig.placeholder || "Enter your email",
+        buttonText: existingConfig.buttonText || "CLAIM DISCOUNT",
+        discountCode: existingConfig.discountCode || "SCRATCH10",
+        backgroundColor: existingConfig.backgroundColor || "#ffffff",
+        textColor: existingConfig.textColor || "#000000",
+        borderRadius: existingConfig.borderRadius || 16,
+        showCloseButton: existingConfig.showCloseButton !== false,
+        displayDelay: existingConfig.displayDelay || 3000,
+        frequency: existingConfig.frequency ?? "once",
+        exitIntent: existingConfig.exitIntent ?? false,
+        exitIntentDelay: existingConfig.exitIntentDelay || 1000,
+      });
+      
+      console.log("Updated scratch card config state");
+    }
+  }, [existingConfig]);
+
+  const handleSaveConfig = useCallback(() => {
+    try {
+      console.log("=== HANDLE SAVE CONFIG CALLED ===");
+      console.log("Current popup type:", popupType);
+      
+      const config = popupType === "email" ? emailConfig :
+                     popupType === "community" ? communityConfig :
+                     popupType === "timer" ? timerConfig :
+                     popupType === "scratch-card" ? scratchCardConfig :
+                     wheelEmailConfig;
+      
+      console.log("Selected config:", config);
+      
+      // Debug logging for scratch card
+      if (popupType === "scratch-card") {
+        console.log("Scratch Card Config being saved:", config);
+        console.log("Exit Intent:", config.exitIntent);
+        console.log("Frequency:", config.frequency);
+        console.log("Discount Code:", config.discountCode);
+        console.log("All scratch card config keys:", Object.keys(config));
+        console.log("scratchCardConfig state:", scratchCardConfig);
+      }
+      
+      const formData = {
+        popupConfig: JSON.stringify({
+          type: popupType,
+          config,
+          name: popupName || `${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`
+        })
+      };
+      
+      console.log("Form data being submitted:", formData);
+      
+      // Include popupId if editing existing popup
+      if (popupId) {
+        formData.popupId = popupId;
+        console.log("Including popupId:", popupId);
+      }
+      
+      console.log("About to submit form data...");
+      fetcher.submit(formData, { method: "POST" });
+      console.log("Form data submitted!");
+      
+    } catch (error) {
+      console.error("Error in handleSaveConfig:", error);
+    }
+  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, scratchCardConfig, popupName, popupId, fetcher]);
 
   // Handle fetcher response
   useEffect(() => {
@@ -452,6 +594,7 @@ export default function PopupCustomizer() {
     { label: "Wheel + Email Combo", value: "wheel-email" },
     { label: "Community Social Popup", value: "community" },
     { label: "Timer Countdown Popup", value: "timer" },
+    { label: "Scratch Card Popup", value: "scratch-card" },
   ];
 
   const renderEmailConfig = () => (
@@ -1244,14 +1387,155 @@ export default function PopupCustomizer() {
     </BlockStack>
   );
 
+  const renderScratchCardConfig = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">Scratch Card Popup Configuration</Text>
+      
+      <TextField
+        label="Popup Title"
+        value={scratchCardConfig.title}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, title: value })}
+        placeholder="Enter popup title (e.g., Scratch & Win!)"
+      />
+      
+      <TextField
+        label="Description"
+        value={scratchCardConfig.description}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, description: value })}
+        multiline={3}
+        placeholder="Enter popup description"
+      />
+      
+      <TextField
+        label="Email Placeholder"
+        value={scratchCardConfig.placeholder}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, placeholder: value })}
+        placeholder="Email input placeholder"
+      />
+      
+      <TextField
+        label="Button Text"
+        value={scratchCardConfig.buttonText}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, buttonText: value })}
+        placeholder="Button text (e.g., CLAIM DISCOUNT)"
+      />
+      
+      <TextField
+        label="Discount Code"
+        value={scratchCardConfig.discountCode || ""}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, discountCode: value })}
+        placeholder="Discount code to offer (e.g., SCRATCH10)"
+      />
+      
+      <InlineStack gap="400">
+        <Box minWidth="200px">
+          <Text as="p" variant="bodyMd">Background Color</Text>
+          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+            <input
+              type="color"
+              value={scratchCardConfig.backgroundColor}
+              onChange={(e) => setScratchCardConfig({ ...scratchCardConfig, backgroundColor: e.target.value })}
+              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            />
+          </Box>
+        </Box>
+        <Box minWidth="200px">
+          <Text as="p" variant="bodyMd">Text Color</Text>
+          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+            <input
+              type="color"
+              value={scratchCardConfig.textColor}
+              onChange={(e) => setScratchCardConfig({ ...scratchCardConfig, textColor: e.target.value })}
+              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            />
+          </Box>
+        </Box>
+      </InlineStack>
+      
+      <RangeSlider
+        label={`Border Radius: ${scratchCardConfig.borderRadius}px`}
+        value={scratchCardConfig.borderRadius}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, borderRadius: value })}
+        min={0}
+        max={30}
+        step={1}
+      />
+      
+      <RangeSlider
+        label={`Display Delay: ${scratchCardConfig.displayDelay / 1000}s`}
+        value={scratchCardConfig.displayDelay}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, displayDelay: value })}
+        min={0}
+        max={10000}
+        step={500}
+      />
+      
+      <Checkbox
+        label="Show close button"
+        checked={scratchCardConfig.showCloseButton}
+        onChange={(checked) => setScratchCardConfig({ ...scratchCardConfig, showCloseButton: checked })}
+      />
+      
+      <Divider />
+      
+      <Text as="h4" variant="headingSm">Advanced Settings</Text>
+      
+      <Select
+        label="Display Frequency"
+        options={[
+          { label: "Show once per visitor", value: "once" },
+          { label: "Show once per day", value: "daily" },
+          { label: "Show once per week", value: "weekly" },
+          { label: "Show on every visit", value: "always" },
+        ]}
+        value={scratchCardConfig.frequency}
+        onChange={(value) => {
+          console.log("=== FREQUENCY DROPDOWN CHANGED ===");
+          console.log("New value:", value);
+          console.log("Current scratchCardConfig:", scratchCardConfig);
+          setScratchCardConfig({ ...scratchCardConfig, frequency: value });
+          console.log("State should be updated to:", { ...scratchCardConfig, frequency: value });
+        }}
+        helpText="Control how often the popup appears to the same visitor"
+      />
+      
+      <Checkbox
+        label="Enable exit intent detection"
+        checked={scratchCardConfig.exitIntent}
+        onChange={(checked) => {
+          console.log("=== EXIT INTENT CHECKBOX CHANGED ===");
+          console.log("New value:", checked);
+          console.log("Current scratchCardConfig:", scratchCardConfig);
+          setScratchCardConfig({ ...scratchCardConfig, exitIntent: checked });
+          console.log("State should be updated to:", { ...scratchCardConfig, exitIntent: checked });
+        }}
+        helpText="Show popup when user is about to leave the page"
+      />
+      
+      {scratchCardConfig.exitIntent && (
+        <RangeSlider
+          label={`Exit intent delay: ${scratchCardConfig.exitIntentDelay}ms`}
+          value={scratchCardConfig.exitIntentDelay}
+          onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, exitIntentDelay: value })}
+          min={500}
+          max={3000}
+          step={100}
+          helpText="Delay before exit intent triggers"
+        />
+      )}
+    </BlockStack>
+  );
+
   const renderPreview = () => {
     const config = popupType === "email" ? emailConfig :
                    popupType === "community" ? communityConfig :
                    popupType === "timer" ? timerConfig :
+                   popupType === "scratch-card" ? scratchCardConfig :
                    wheelEmailConfig;
     const badgeText = popupType === "email" ? "Email Popup" :
                       popupType === "community" ? "Community Social Popup" :
                       popupType === "timer" ? "Timer Countdown Popup" :
+                      popupType === "scratch-card" ? "Scratch Card Popup" :
                       "Wheel + Email Combo";
     
     return (
@@ -1291,6 +1575,8 @@ export default function PopupCustomizer() {
                         <Text as="span" variant="headingLg">👥</Text>
                       ) : popupType === "timer" ? (
                         <Text as="span" variant="headingLg">{timerConfig.timerIcon}</Text>
+                      ) : popupType === "scratch-card" ? (
+                        <Text as="span" variant="headingLg">🎫</Text>
                       ) : (
                         <Text as="span" variant="headingLg">🎡</Text>
                       )}
@@ -1503,6 +1789,78 @@ export default function PopupCustomizer() {
                           {timerConfig.disclaimer}
                         </div>
                       )}
+                    </div>
+                  </BlockStack>
+                ) : popupType === "scratch-card" ? (
+                  // Scratch Card Popup Preview
+                  <BlockStack gap="200">
+                    <div style={{
+                      background: scratchCardConfig.backgroundColor,
+                      borderRadius: `${scratchCardConfig.borderRadius}px`,
+                      padding: "20px",
+                      color: scratchCardConfig.textColor,
+                      textAlign: "center"
+                    }}>
+                      <div style={{ fontSize: "24px", marginBottom: "10px" }}>🎫</div>
+                      <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "15px" }}>
+                        {scratchCardConfig.title}
+                      </div>
+                      <div style={{ fontSize: "12px", marginBottom: "15px", opacity: 0.9 }}>
+                        {scratchCardConfig.description}
+                      </div>
+                      
+                      {/* Scratch Card Preview */}
+                      <div style={{
+                        width: "200px",
+                        height: "120px",
+                        background: "linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)",
+                        borderRadius: "8px",
+                        margin: "15px auto",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        border: "2px dashed rgba(0,0,0,0.2)",
+                        position: "relative",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+                      }}>
+                        <div style={{
+                          fontSize: "14px",
+                          fontWeight: "bold",
+                          color: "#333",
+                          textAlign: "center"
+                        }}>
+                          <div>🎁</div>
+                          <div style={{ marginTop: "5px" }}>Scratch Here!</div>
+                          <div style={{ fontSize: "10px", opacity: 0.7 }}>
+                            {scratchCardConfig.discountCode}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        padding: "6px 12px",
+                        border: "none",
+                        borderRadius: "20px",
+                        backgroundColor: "rgba(255,255,255,0.9)",
+                        color: "#666",
+                        marginBottom: "8px",
+                        fontSize: "10px",
+                      }}>
+                        {scratchCardConfig.placeholder}
+                      </div>
+                      <button style={{
+                        backgroundColor: "#28a745",
+                        color: "#fff",
+                        padding: "8px 16px",
+                        border: "none",
+                        borderRadius: "20px",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        fontSize: "10px",
+                        textTransform: "uppercase"
+                      }}>
+                        {scratchCardConfig.buttonText}
+                      </button>
                     </div>
                   </BlockStack>
                 ) : (
@@ -2011,6 +2369,7 @@ export default function PopupCustomizer() {
                 {popupType === "email" ? renderEmailConfig() :
                  popupType === "community" ? renderCommunityConfig() :
                  popupType === "timer" ? renderTimerConfig() :
+                 popupType === "scratch-card" ? renderScratchCardConfig() :
                  renderWheelEmailConfig()}
                 
                 <InlineStack gap="300">
