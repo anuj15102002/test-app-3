@@ -173,6 +173,11 @@
       return false;
     }
     
+    // Check page targeting rules
+    if (!shouldShowOnCurrentPage(config)) {
+      return false;
+    }
+    
     switch (config.frequency) {
       case 'once':
         return !shownFlag;
@@ -184,6 +189,153 @@
         return true;
       default:
         return !shownFlag;
+    }
+  };
+
+  const shouldShowOnCurrentPage = (config) => {
+    console.log('=== PAGE TARGETING DEBUG ===');
+    console.log('Current URL:', window.location.href);
+    console.log('Current pathname:', window.location.pathname);
+    console.log('Config targetAllPages:', config.targetAllPages);
+    console.log('Config targetSpecificPages:', config.targetSpecificPages);
+    console.log('Config pageTargeting:', config.pageTargeting);
+    
+    // If targetAllPages is true, show on all pages
+    if (config.targetAllPages === true) {
+      console.log('Showing on all pages (targetAllPages = true)');
+      return true;
+    }
+    
+    // If targetSpecificPages is false, show on all pages (backward compatibility)
+    if (config.targetSpecificPages === false) {
+      console.log('Showing on all pages (targetSpecificPages = false)');
+      return true;
+    }
+    
+    // If no page targeting data, show on all pages (backward compatibility)
+    if (!config.pageTargeting) {
+      console.log('No page targeting data, showing on all pages');
+      return true;
+    }
+    
+    // Parse page targeting data
+    let selectedPages;
+    try {
+      selectedPages = typeof config.pageTargeting === 'string'
+        ? JSON.parse(config.pageTargeting)
+        : config.pageTargeting;
+    } catch (e) {
+      console.warn('Failed to parse page targeting data:', e);
+      return true; // Show on all pages if parsing fails
+    }
+    
+    console.log('Selected pages:', selectedPages);
+    
+    if (!selectedPages || selectedPages.length === 0) {
+      console.log('No specific pages selected, showing on all pages');
+      return true; // Show on all pages if no specific pages selected
+    }
+    
+    // Get current page path
+    const currentPath = window.location.pathname;
+    const currentSearch = window.location.search;
+    const fullPath = currentPath + currentSearch;
+    
+    console.log('Checking page rules for:', { currentPath, fullPath });
+    
+    // Check if current page matches any of the selected pages
+    for (const page of selectedPages) {
+      console.log('Checking rule:', page);
+      const matches = matchesPageRule(fullPath, currentPath, page);
+      console.log('Rule matches:', matches);
+      if (matches) {
+        console.log('Page targeting matched! Showing popup.');
+        return true;
+      }
+    }
+    
+    console.log('No page targeting rules matched. Not showing popup.');
+    return false; // Don't show if no rules match
+  };
+
+  const matchesPageRule = (fullPath, currentPath, pageRule) => {
+    // Handle different page types
+    switch (pageRule.type) {
+      case 'home':
+      case 'homepage':
+        return currentPath === '/' || currentPath === '';
+        
+      case 'collection':
+        return currentPath === `/collections/${pageRule.handle}` ||
+               currentPath.startsWith(`/collections/${pageRule.handle}?`);
+        
+      case 'collections':
+        if (pageRule.handle === 'all') {
+          return currentPath.startsWith('/collections/');
+        }
+        return currentPath === `/collections/${pageRule.handle}` ||
+               currentPath.startsWith(`/collections/${pageRule.handle}?`);
+        
+      case 'product':
+        return currentPath === `/products/${pageRule.handle}` ||
+               currentPath.startsWith(`/products/${pageRule.handle}?`);
+        
+      case 'products':
+        if (pageRule.handle === 'all') {
+          return currentPath.startsWith('/products/');
+        }
+        return currentPath === `/products/${pageRule.handle}` ||
+               currentPath.startsWith(`/products/${pageRule.handle}?`);
+        
+      case 'page':
+      case 'pages':
+        return currentPath === `/pages/${pageRule.handle}` ||
+               currentPath.startsWith(`/pages/${pageRule.handle}?`);
+        
+      case 'blog':
+        if (pageRule.handle === 'all') {
+          return currentPath.startsWith('/blogs/');
+        }
+        return currentPath === `/blogs/${pageRule.handle}` ||
+               currentPath.startsWith(`/blogs/${pageRule.handle}`);
+        
+      case 'cart':
+        return currentPath === '/cart' || currentPath.startsWith('/cart?');
+        
+      case 'search':
+        return currentPath === '/search' || currentPath.startsWith('/search?');
+        
+      case 'account':
+        return currentPath.startsWith('/account');
+        
+      case 'custom':
+        // For custom URLs, do exact match or pattern match
+        if (pageRule.url) {
+          // Support wildcards
+          if (pageRule.url.includes('*')) {
+            const pattern = pageRule.url.replace(/\*/g, '.*');
+            const regex = new RegExp(`^${pattern}$`);
+            return regex.test(fullPath) || regex.test(currentPath);
+          }
+          // Exact match
+          return fullPath === pageRule.url || currentPath === pageRule.url;
+        }
+        return false;
+        
+      default:
+        // Fallback: try to match by value if type doesn't match
+        if (pageRule.value) {
+          if (pageRule.value === '/') {
+            return currentPath === '/' || currentPath === '';
+          }
+          if (pageRule.value.includes('*')) {
+            const pattern = pageRule.value.replace(/\*/g, '.*');
+            const regex = new RegExp(`^${pattern}$`);
+            return regex.test(fullPath) || regex.test(currentPath);
+          }
+          return fullPath === pageRule.value || currentPath === pageRule.value;
+        }
+        return false;
     }
   };
 

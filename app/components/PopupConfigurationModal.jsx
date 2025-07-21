@@ -16,6 +16,10 @@ import {
   Badge,
   Divider,
   Icon,
+  ChoiceList,
+  Combobox,
+  Listbox,
+  AutoSelection,
 } from "@shopify/polaris";
 import { EmailIcon, ClockIcon } from "@shopify/polaris-icons";
 import { useAppBridge } from "@shopify/app-bridge-react";
@@ -47,6 +51,34 @@ export default function PopupConfigurationModal({
   
   // Popup name state - use initialPopupName for new popups, initialConfig.name for editing
   const [popupName, setPopupName] = useState(initialConfig?.name || initialPopupName || "");
+  
+  // Page targeting state
+  const [pageTargeting, setPageTargeting] = useState(() => {
+    if (initialConfig) {
+      return {
+        targetAllPages: initialConfig.targetAllPages !== false,
+        targetSpecificPages: initialConfig.targetSpecificPages || false,
+        selectedPages: initialConfig.pageTargeting ? JSON.parse(initialConfig.pageTargeting) : []
+      };
+    }
+    return {
+      targetAllPages: true,
+      targetSpecificPages: false,
+      selectedPages: []
+    };
+  });
+  
+  // Storefront pages state
+  const [storefrontPages, setStorefrontPages] = useState({
+    collections: [],
+    products: [],
+    pages: [],
+    staticPages: []
+  });
+  const [pagesLoading, setPagesLoading] = useState(false);
+  
+  // Custom URL state
+  const [customUrl, setCustomUrl] = useState('');
   
   // Email popup configuration
   const [emailConfig, setEmailConfig] = useState(() => {
@@ -297,6 +329,32 @@ export default function PopupConfigurationModal({
     };
   });
 
+  // Fetch storefront pages
+  const fetchStorefrontPages = useCallback(async () => {
+    if (pagesLoading || storefrontPages.staticPages.length > 0) return;
+    
+    setPagesLoading(true);
+    try {
+      const response = await fetch('/api/admin/storefront-pages');
+      const data = await response.json();
+      
+      if (data.success) {
+        setStorefrontPages(data.storefrontPages);
+      }
+    } catch (error) {
+      console.error('Error fetching storefront pages:', error);
+    } finally {
+      setPagesLoading(false);
+    }
+  }, [pagesLoading, storefrontPages.staticPages.length]);
+
+  // Load storefront pages when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchStorefrontPages();
+    }
+  }, [isOpen, fetchStorefrontPages]);
+
   // Handle save configuration
   const handleSaveConfig = useCallback(() => {
     const config = popupType === "email" ? emailConfig :
@@ -312,7 +370,12 @@ export default function PopupConfigurationModal({
       popupConfig: JSON.stringify({
         type: popupType,
         config,
-        name: finalPopupName
+        name: finalPopupName,
+        pageTargeting: {
+          targetAllPages: pageTargeting.targetAllPages,
+          targetSpecificPages: pageTargeting.targetSpecificPages,
+          selectedPages: pageTargeting.selectedPages
+        }
       })
     };
     
@@ -325,7 +388,7 @@ export default function PopupConfigurationModal({
     
     // Close modal after save - this will trigger the parent to close both modals
     onClose();
-  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, scratchCardConfig, popupName, initialConfig, fetcher, onClose]);
+  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, scratchCardConfig, popupName, pageTargeting, initialConfig, fetcher, onClose]);
 
   // Handle fetcher response
   useEffect(() => {
@@ -1226,6 +1289,250 @@ export default function PopupConfigurationModal({
     </BlockStack>
   );
 
+  // Render page targeting configuration
+  const renderPageTargeting = () => {
+    const allPages = [
+      ...storefrontPages.staticPages,
+      ...storefrontPages.collections,
+      ...storefrontPages.products,
+      ...storefrontPages.pages
+    ];
+
+    return (
+      <BlockStack gap="400">
+        <Text as="h3" variant="headingMd">Page Targeting</Text>
+        <Text as="p" variant="bodyMd" tone="subdued">
+          Choose where this popup should appear on your storefront
+        </Text>
+        
+        <ChoiceList
+          title="Display Options"
+          choices={[
+            {
+              label: 'Show on all pages',
+              value: 'all',
+              helpText: 'Display this popup on every page of your store'
+            },
+            {
+              label: 'Show on specific pages only',
+              value: 'specific',
+              helpText: 'Choose specific pages where this popup should appear'
+            }
+          ]}
+          selected={pageTargeting.targetAllPages ? ['all'] : ['specific']}
+          onChange={(selected) => {
+            const isAllPages = selected.includes('all');
+            setPageTargeting({
+              ...pageTargeting,
+              targetAllPages: isAllPages,
+              targetSpecificPages: !isAllPages,
+              selectedPages: isAllPages ? [] : pageTargeting.selectedPages
+            });
+          }}
+        />
+
+        {pageTargeting.targetSpecificPages && (
+          <BlockStack gap="300">
+            <Text as="h4" variant="headingSm">Select Pages</Text>
+            
+            {pagesLoading ? (
+              <Box padding="400">
+                <Text as="p" variant="bodyMd" alignment="center">Loading pages...</Text>
+              </Box>
+            ) : (
+              <BlockStack gap="200">
+                {/* Static Pages */}
+                {storefrontPages.staticPages.length > 0 && (
+                  <BlockStack gap="200">
+                    <Text as="h5" variant="headingXs" tone="subdued">Store Pages</Text>
+                    {storefrontPages.staticPages.map(page => (
+                      <Checkbox
+                        key={page.value}
+                        label={page.label}
+                        checked={pageTargeting.selectedPages.some(p => p.value === page.value)}
+                        onChange={(checked) => {
+                          if (checked) {
+                            setPageTargeting({
+                              ...pageTargeting,
+                              selectedPages: [...pageTargeting.selectedPages, page]
+                            });
+                          } else {
+                            setPageTargeting({
+                              ...pageTargeting,
+                              selectedPages: pageTargeting.selectedPages.filter(p => p.value !== page.value)
+                            });
+                          }
+                        }}
+                      />
+                    ))}
+                  </BlockStack>
+                )}
+
+                {/* Collections */}
+                {storefrontPages.collections.length > 0 && (
+                  <BlockStack gap="200">
+                    <Text as="h5" variant="headingXs" tone="subdued">Collections</Text>
+                    {storefrontPages.collections.slice(0, 10).map(page => (
+                      <Checkbox
+                        key={page.value}
+                        label={page.label}
+                        checked={pageTargeting.selectedPages.some(p => p.value === page.value)}
+                        onChange={(checked) => {
+                          if (checked) {
+                            setPageTargeting({
+                              ...pageTargeting,
+                              selectedPages: [...pageTargeting.selectedPages, page]
+                            });
+                          } else {
+                            setPageTargeting({
+                              ...pageTargeting,
+                              selectedPages: pageTargeting.selectedPages.filter(p => p.value !== page.value)
+                            });
+                          }
+                        }}
+                      />
+                    ))}
+                    {storefrontPages.collections.length > 10 && (
+                      <Text as="p" variant="bodyMd" tone="subdued">
+                        And {storefrontPages.collections.length - 10} more collections...
+                      </Text>
+                    )}
+                  </BlockStack>
+                )}
+
+                {/* Products */}
+                {storefrontPages.products.length > 0 && (
+                  <BlockStack gap="200">
+                    <Text as="h5" variant="headingXs" tone="subdued">Products</Text>
+                    {storefrontPages.products.slice(0, 5).map(page => (
+                      <Checkbox
+                        key={page.value}
+                        label={page.label}
+                        checked={pageTargeting.selectedPages.some(p => p.value === page.value)}
+                        onChange={(checked) => {
+                          if (checked) {
+                            setPageTargeting({
+                              ...pageTargeting,
+                              selectedPages: [...pageTargeting.selectedPages, page]
+                            });
+                          } else {
+                            setPageTargeting({
+                              ...pageTargeting,
+                              selectedPages: pageTargeting.selectedPages.filter(p => p.value !== page.value)
+                            });
+                          }
+                        }}
+                      />
+                    ))}
+                    {storefrontPages.products.length > 5 && (
+                      <Text as="p" variant="bodyMd" tone="subdued">
+                        And {storefrontPages.products.length - 5} more products...
+                      </Text>
+                    )}
+                  </BlockStack>
+                )}
+
+                {/* Custom Pages */}
+                {storefrontPages.pages.length > 0 && (
+                  <BlockStack gap="200">
+                    <Text as="h5" variant="headingXs" tone="subdued">Custom Pages</Text>
+                    {storefrontPages.pages.map(page => (
+                      <Checkbox
+                        key={page.value}
+                        label={page.label}
+                        checked={pageTargeting.selectedPages.some(p => p.value === page.value)}
+                        onChange={(checked) => {
+                          if (checked) {
+                            setPageTargeting({
+                              ...pageTargeting,
+                              selectedPages: [...pageTargeting.selectedPages, page]
+                            });
+                          } else {
+                            setPageTargeting({
+                              ...pageTargeting,
+                              selectedPages: pageTargeting.selectedPages.filter(p => p.value !== page.value)
+                            });
+                          }
+                        }}
+                      />
+                    ))}
+                  </BlockStack>
+                )}
+
+                {/* Custom URL Input */}
+                <BlockStack gap="200">
+                  <Text as="h5" variant="headingXs" tone="subdued">Custom URL</Text>
+                  <TextField
+                    label="Add custom URL"
+                    value={customUrl}
+                    onChange={setCustomUrl}
+                    placeholder="/custom-page or /collections/special"
+                    helpText="Enter a custom URL path (e.g., /about-us, /collections/sale). Use * for wildcards (e.g., /blog/*)"
+                    connectedRight={
+                      <Button
+                        onClick={() => {
+                          if (customUrl.trim()) {
+                            const customPage = {
+                              type: 'custom',
+                              label: `Custom: ${customUrl}`,
+                              value: customUrl.trim(),
+                              url: customUrl.trim()
+                            };
+                            
+                            // Check if URL already exists
+                            if (!pageTargeting.selectedPages.some(p => p.value === customUrl.trim())) {
+                              setPageTargeting({
+                                ...pageTargeting,
+                                selectedPages: [...pageTargeting.selectedPages, customPage]
+                              });
+                              setCustomUrl('');
+                            }
+                          }
+                        }}
+                        disabled={!customUrl.trim()}
+                      >
+                        Add
+                      </Button>
+                    }
+                  />
+                </BlockStack>
+
+                {pageTargeting.selectedPages.length > 0 && (
+                  <Box padding="300" background="bg-surface-secondary" borderRadius="200">
+                    <Text as="p" variant="bodyMd">
+                      <strong>Selected pages ({pageTargeting.selectedPages.length}):</strong>
+                    </Text>
+                    <Text as="p" variant="bodyMd" tone="subdued">
+                      {pageTargeting.selectedPages.map(p => p.label).join(', ')}
+                    </Text>
+                    <BlockStack gap="100">
+                      {pageTargeting.selectedPages.map((page, index) => (
+                        <InlineStack key={index} align="space-between">
+                          <Text variant="bodySm">{page.label}</Text>
+                          <Button
+                            size="micro"
+                            onClick={() => {
+                              setPageTargeting({
+                                ...pageTargeting,
+                                selectedPages: pageTargeting.selectedPages.filter((_, i) => i !== index)
+                              });
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </InlineStack>
+                      ))}
+                    </BlockStack>
+                  </Box>
+                )}
+              </BlockStack>
+            )}
+          </BlockStack>
+        )}
+      </BlockStack>
+    );
+  };
+
   // Render preview panel
   const renderPreviewPanel = () => {
     const config = getCurrentConfig();
@@ -1974,9 +2281,11 @@ export default function PopupConfigurationModal({
                 <TextField
                   label="Popup Name"
                   value={popupName}
-                  onChange={setPopupName}
+                  onChange={(value) => setPopupName(value.slice(0, 50))}
                   placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
-                  helpText="Give your popup a descriptive name for easy identification"
+                  maxLength={50}
+                  showCharacterCount
+                  helpText="Give your popup a descriptive name for easy identification (max 50 characters)"
                 />
                 
                 <Select
@@ -1989,6 +2298,10 @@ export default function PopupConfigurationModal({
                 <Divider />
                 
                 {renderConfigurationPanel()}
+                
+                <Divider />
+                
+                {renderPageTargeting()}
               </BlockStack>
             </Card>
           </div>

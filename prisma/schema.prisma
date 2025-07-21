@@ -66,6 +66,9 @@ model PopupConfig {
   successTitle      String?  @default("SUCCESS!")
   successMessage    String?  @db.Text
   disclaimer        String?  @db.Text
+  pageTargeting     String?  @db.Text
+  targetAllPages    Boolean  @default(true)
+  targetSpecificPages Boolean @default(false)
 
   @@index([shop])
   @@index([shop, isActive])

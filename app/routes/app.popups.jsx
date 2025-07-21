@@ -227,25 +227,11 @@ export default function PopupsPage() {
           </Button>
         </InlineStack>
 
-        {/* Promotional Banner */}
-        <Banner
-          title="🎯 Ecomsend Back in Stock Alert"
-          status="info"
-          onDismiss={() => {}}
-        >
-          <Text variant="bodyMd">
-            Win back out-of-stock lost sales with smarter auto email or SMS notifications when restocking.
-          </Text>
-          <Box paddingBlockStart="200">
-            <Button size="slim">Start for free</Button>
-          </Box>
-        </Banner>
+        
 
         {/* Popup Library */}
         <BlockStack gap="400">
-          <Text as="h2" variant="headingMd">
-            Popup library
-          </Text>
+          
           
           {popups.length === 0 ? (
             <Card>
@@ -265,138 +251,134 @@ export default function PopupsPage() {
             </Card>
           ) : (
             <Card>
-              <BlockStack gap="0">
-                {popups.map((popup, index) => (
-                  <div key={popup.id}>
-                    <Box padding="400">
-                      <InlineStack gap="400" align="space-between">
-                        {/* Left side: Thumbnail + Details */}
-                        <InlineStack gap="400" align="center">
-                          <Box minWidth="80px">
-                            <Thumbnail
-                              source={getPopupThumbnail(popup)}
-                              alt={popup.name}
-                              size="large"
-                            />
-                          </Box>
-                          
-                          <BlockStack gap="100">
-                            <Text as="h3" variant="headingSm" fontWeight="semibold">
-                              {popup.name}
-                            </Text>
-                            <Text variant="bodySm" tone="subdued">
-                              Created: {formatDate(popup.createdAt)}
-                            </Text>
-                            <Text variant="bodySm" tone="subdued">
-                              Last saved: {formatDate(popup.updatedAt || popup.createdAt)}
-                            </Text>
-                          </BlockStack>
-                        </InlineStack>
-                        
-                        {/* Center: Stats */}
-                        <InlineStack gap="800" align="center">
-                          <BlockStack gap="050" inlineAlign="center">
-                            <Text variant="bodySm" tone="subdued">Popup views</Text>
-                            <Text variant="bodyMd" fontWeight="semibold">-</Text>
-                          </BlockStack>
-                          <BlockStack gap="050" inlineAlign="center">
-                            <Text variant="bodySm" tone="subdued">Subscribers</Text>
-                            <Text variant="bodyMd" fontWeight="semibold">-</Text>
-                          </BlockStack>
-                          <BlockStack gap="050" inlineAlign="center">
-                            <Text variant="bodySm" tone="subdued">Conversion rate</Text>
-                            <Text variant="bodyMd" fontWeight="semibold">0%</Text>
-                          </BlockStack>
-                        </InlineStack>
-                        
-                        {/* Right side: Toggle + Actions */}
-                        <InlineStack gap="300" align="center">
-                          {/* Toggle Switch */}
-                          <input
-                            type="checkbox"
-                            checked={popup.isActive}
-                            onChange={() => handleToggleActive(popup)}
-                            style={{
-                              width: '44px',
-                              height: '24px',
-                              appearance: 'none',
-                              backgroundColor: popup.isActive ? '#008060' : '#E1E3E5',
-                              borderRadius: '12px',
-                              position: 'relative',
-                              cursor: 'pointer',
-                              transition: 'background-color 0.2s',
-                            }}
-                          />
-                          
-                          {/* Action Buttons */}
-                          <InlineStack gap="200">
-                            <Button
-                              onClick={() => handleEditPopup(popup)}
-                              variant="primary"
-                              size="slim"
-                            >
-                              Customize
-                            </Button>
-                            <Popover
-                              active={activePopover === popup.id}
-                              activator={
-                                <Button
-                                  variant="plain"
-                                  size="slim"
-                                  onClick={() => setActivePopover(activePopover === popup.id ? null : popup.id)}
-                                >
-                                  •••
-                                </Button>
-                              }
-                              onClose={() => setActivePopover(null)}
-                            >
-                              <ActionList
-                                items={[
-                                  {
-                                    content: 'Edit name',
-                                    onAction: () => {
-                                      handleEditName(popup);
-                                      setActivePopover(null);
-                                    }
-                                  },
-                                  {
-                                    content: 'Delete',
-                                    destructive: true,
-                                    onAction: () => {
-                                      handleDeletePopup(popup.id);
-                                      setActivePopover(null);
-                                    }
-                                  }
-                                ]}
-                              />
-                            </Popover>
-                          </InlineStack>
-                        </InlineStack>
-                      </InlineStack>
-                    </Box>
-                    
-                    {/* Divider between items (except last) */}
-                    {index < popups.length - 1 && (
-                      <Box borderBlockEndWidth="025" borderColor="border" />
-                    )}
-                  </div>
-                ))}
+  <BlockStack gap="0">
+    {popups.map((popup, index) => (
+      <div key={popup.id}>
+        <Box padding="200">
+          <InlineStack gap="400" align="space-between" blockAlign="center">
+            
+            {/* ✅ Left: Thumbnail + Details */}
+            <InlineStack gap="300" align="center">
+              <Thumbnail
+                source={getPopupThumbnail(popup)}
+                alt={popup.name}
+                size="large"
+              />
+
+              <BlockStack gap="050">
+                <Text as="h3" variant="headingSm" fontWeight="semibold">
+                  {popup.name && popup.name.length > 30 ? `${popup.name.substring(0, 30)}...` : popup.name}
+                </Text>
+                <Text variant="bodySm" tone="subdued">
+                  Created: {formatDate(popup.createdAt)}
+                </Text>
+                <Text variant="bodySm" tone="subdued">
+                  Last saved: {formatDate(popup.updatedAt || popup.createdAt)}
+                </Text>
               </BlockStack>
-            </Card>
+            </InlineStack>
+
+            {/* ✅ Middle: Stats */}
+            <InlineStack gap="600" align="center">
+              <BlockStack gap="025" inlineAlign="center">
+                <Text variant="bodySm" tone="subdued">Popup views</Text>
+                <Text variant="bodyMd" fontWeight="semibold">-</Text>
+              </BlockStack>
+              <BlockStack gap="025" inlineAlign="center">
+                <Text variant="bodySm" tone="subdued">Subscribers</Text>
+                <Text variant="bodyMd" fontWeight="semibold">-</Text>
+              </BlockStack>
+              <BlockStack gap="025" inlineAlign="center">
+                <Text variant="bodySm" tone="subdued">Conversion rate</Text>
+                <Text variant="bodyMd" fontWeight="semibold">0%</Text>
+              </BlockStack>
+            </InlineStack>
+
+            {/* ✅ Right: Toggle + Actions */}
+            <InlineStack gap="600" align="center">
+              {/* Toggle Switch */}
+              <input
+                type="checkbox"
+                checked={popup.isActive}
+                onChange={() => handleToggleActive(popup)}
+                style={{
+                  width: '40px',
+                  height: '20px',
+                  appearance: 'none',
+                  backgroundColor: popup.isActive ? '#008060' : '#E1E3E5',
+                  borderRadius: '10px',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  transition: '0.2s',
+                }}
+              />
+
+              {/* ✅ Buttons */}
+              <InlineStack gap="100">
+                <Button
+                  onClick={() => handleEditPopup(popup)}
+                  variant="primary"
+                  size="medium"  // ✅ Changed to medium for normal look
+                >
+                  Customize
+                </Button>
+
+                <Popover
+                  active={activePopover === popup.id}
+                  activator={
+                    <Button
+                      variant="plain"
+                      size="medium"
+                      onClick={() =>
+                        setActivePopover(
+                          activePopover === popup.id ? null : popup.id
+                        )
+                      }
+                    >
+                      •••
+                    </Button>
+                  }
+                  onClose={() => setActivePopover(null)}
+                >
+                  <ActionList
+                    items={[
+                      {
+                        content: 'Edit name',
+                        onAction: () => {
+                          handleEditName(popup);
+                          setActivePopover(null);
+                        },
+                      },
+                      {
+                        content: 'Delete',
+                        destructive: true,
+                        onAction: () => {
+                          handleDeletePopup(popup.id);
+                          setActivePopover(null);
+                        },
+                      },
+                    ]}
+                  />
+                </Popover>
+              </InlineStack>
+            </InlineStack>
+          </InlineStack>
+        </Box>
+
+        {/* Divider between items */}
+        {index < popups.length - 1 && (
+          <Box borderBlockEndWidth="025" borderColor="border" />
+        )}
+      </div>
+    ))}
+  </BlockStack>
+</Card>
+
           )}
         </BlockStack>
 
         {/* Footer */}
-        <Box paddingBlockStart="800">
-          <InlineStack align="center" gap="100">
-            <Text variant="bodySm" tone="subdued">
-              Learn more about
-            </Text>
-            <Button variant="plain" size="slim">
-              Channelwill
-            </Button>
-          </InlineStack>
-        </Box>
+        
       </BlockStack>
 
       {/* Create Popup Modal */}
@@ -440,8 +422,11 @@ export default function PopupsPage() {
           <TextField
             label="Popup Name"
             value={editingName}
-            onChange={setEditingName}
+            onChange={(value) => setEditingName(value.slice(0, 50))}
             placeholder="Enter popup name"
+            maxLength={50}
+            showCharacterCount
+            helpText="Maximum 50 characters"
             autoComplete="off"
           />
         </Modal.Section>

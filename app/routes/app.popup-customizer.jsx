@@ -67,7 +67,7 @@ export const action = async ({ request }) => {
     return { success: false, error: "Invalid popup configuration format" };
   }
   
-  const { type, config, name } = popupData;
+  const { type, config, name, pageTargeting } = popupData;
   
   if (!type || !config) {
     return { success: false, error: "Missing popup type or configuration" };
@@ -151,6 +151,10 @@ export const action = async ({ request }) => {
           successTitle: type === "timer" ? config.successTitle || "SUCCESS!" : null,
           successMessage: type === "timer" ? config.successMessage || null : null,
           disclaimer: type === "timer" ? config.disclaimer || null : null,
+          // Page targeting fields
+          pageTargeting: pageTargeting?.selectedPages ? JSON.stringify(pageTargeting.selectedPages) : null,
+          targetAllPages: pageTargeting?.targetAllPages ?? true,
+          targetSpecificPages: pageTargeting?.targetSpecificPages ?? false,
           updatedAt: new Date()
         }
       });
@@ -204,6 +208,10 @@ export const action = async ({ request }) => {
           successTitle: type === "timer" ? config.successTitle || "SUCCESS!" : null,
           successMessage: type === "timer" ? config.successMessage || null : null,
           disclaimer: type === "timer" ? config.disclaimer || null : null,
+          // Page targeting fields
+          pageTargeting: pageTargeting?.selectedPages ? JSON.stringify(pageTargeting.selectedPages) : null,
+          targetAllPages: pageTargeting?.targetAllPages ?? true,
+          targetSpecificPages: pageTargeting?.targetSpecificPages ?? false,
           isActive: false // New popups start as inactive
         }
       });

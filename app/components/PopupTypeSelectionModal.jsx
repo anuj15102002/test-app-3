@@ -27,7 +27,7 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
       description: "Capture emails with discount offers to grow your subscriber list",
       icon: EmailIcon,
       color: "#007ace",
-      features: ["Email capture", "Discount codes", "Customizable design", "Exit intent"]
+      features: ["Email capture", "Discount codes", "Customizable design", "Exit intent"],
     },
     {
       type: "wheel-email",
@@ -63,13 +63,23 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
     }
   ];
 
+  // const handleSelectPopupType = (type) => {
+  //   setSelectedPopupType(type);
+  //   setShowNameInput(true);
+  //   // Generate a default name based on popup type
+  //   const defaultName = `${type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')} Popup - ${new Date().toLocaleDateString()}`;
+  //   setPopupName(`${selectedPopupType.title} - ${new Date().toLocaleString()}`);
+
+  // };
+
   const handleSelectPopupType = (type) => {
-    setSelectedPopupType(type);
-    setShowNameInput(true);
-    // Generate a default name based on popup type
-    const defaultName = `${type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')} Popup - ${new Date().toLocaleDateString()}`;
-    setPopupName(defaultName);
-  };
+  setSelectedPopupType(type);
+
+  const now = new Date();
+  setPopupName(`${type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')} Popup - ${now.toLocaleString()}`); // Default unique name
+
+  setShowNameInput(true);
+};
 
   const handleNameConfirm = () => {
     if (popupName.trim()) {
@@ -130,11 +140,13 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
                         <InlineStack gap="300" align="center">
                           {typeof popup.icon === 'string' ? (
                             <Box
-                              padding="200"
-                              background="bg-surface-secondary"
-                              borderRadius="100"
-                              minWidth="40px"
-                              minHeight="40px"
+                              style={{
+          width: "320px",       // ✅ Fixed width for consistency
+          minWidth: "320px",
+          maxWidth: "320px",
+          margin: "0 auto",     // ✅ Centers the card when single
+        }}
+                              
                             >
                               <Text as="span" variant="headingLg" alignment="center">
                                 {popup.icon}
@@ -252,9 +264,11 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
             <TextField
               label="Popup Name"
               value={popupName}
-              onChange={setPopupName}
+              onChange={(value) => setPopupName(value.slice(0, 50))}
               placeholder={`Enter a name for your ${selectedPopupType ? selectedPopupType.replace('-', ' ') : ''} popup`}
-              helpText="This name will help you identify this popup in your management dashboard"
+              maxLength={50}
+              showCharacterCount
+              helpText="This name will help you identify this popup in your management dashboard (max 50 characters)"
               autoComplete="off"
               autoFocus
             />
