@@ -22,6 +22,7 @@ import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { EmailIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
+import PopupPreview from "../components/PopupPreview";
 
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -1561,471 +1562,31 @@ export default function PopupCustomizer() {
             borderWidth="025"
             borderColor="border"
           >
-            <div
+            <PopupPreview
+              config={config}
+              type={popupType}
+              disableInteractions={true}
               style={{
-                backgroundColor: popupType === "wheel-email" ? "transparent" : config.backgroundColor,
-                color: config.textColor,
-                padding: popupType === "wheel-email" ? "0" : "24px",
-                borderRadius: `${popupType === "email" ? emailConfig.borderRadius : 8}px`,
-                textAlign: "center",
-                maxWidth: "400px",
-                margin: "0 auto",
-                boxShadow: popupType === "wheel-email" ? "none" : "0 4px 12px rgba(0,0,0,0.15)",
+                maxWidth: popupType === 'wheel-email' ? '600px' : '400px',
+                width: popupType === 'wheel-email' ? '90%' : 'auto',
+                margin: '0 auto'
               }}
-            >
-              <BlockStack gap="300">
-                {popupType !== "wheel-email" && (
-                  <>
-                    <InlineStack align="center" gap="200">
-                      {popupType === "email" ? (
-                        <Icon source={EmailIcon} />
-                      ) : popupType === "community" ? (
-                        <Text as="span" variant="headingLg">👥</Text>
-                      ) : popupType === "timer" ? (
-                        <Text as="span" variant="headingLg">{timerConfig.timerIcon}</Text>
-                      ) : popupType === "scratch-card" ? (
-                        <Text as="span" variant="headingLg">🎫</Text>
-                      ) : (
-                        <Text as="span" variant="headingLg">🎡</Text>
-                      )}
-                      <Text as="h4" variant="headingMd" style={{ color: config.textColor }}>
-                        {config.title}
-                      </Text>
-                    </InlineStack>
-                    
-                    <Text as="p" variant="bodyMd" style={{ color: config.textColor }}>
-                      {config.description}
-                    </Text>
-                  </>
-                )}
-                
-                {popupType === "email" ? (
-                  <BlockStack gap="200">
-                    <div
-                      style={{
-                        padding: "8px 12px",
-                        border: "1px solid #ccc",
-                        borderRadius: "4px",
-                        backgroundColor: "#fff",
-                        color: "#666",
-                      }}
-                    >
-                      {emailConfig.placeholder}
-                    </div>
-                    <button
-                      style={{
-                        backgroundColor: emailConfig.buttonColor,
-                        color: "#fff",
-                        padding: "12px 24px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {emailConfig.buttonText}
-                    </button>
-                  </BlockStack>
-                ) : popupType === "community" ? (
-                  // Community Popup Preview
-                  <BlockStack gap="200">
-                    {communityConfig.bannerImage && (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "120px",
-                          backgroundImage: `url(${communityConfig.bannerImage})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                          borderRadius: "8px",
-                          marginBottom: "10px",
-                        }}
-                      />
-                    )}
-                    <div style={{ display: "flex", justifyContent: "center", gap: "15px", margin: "15px 0" }}>
-                      {communityConfig.socialIcons.filter(icon => icon.enabled && icon.url).map((social, index) => (
-                        <div
-                          key={social.platform}
-                          style={{
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%",
-                            backgroundColor: social.platform === 'facebook' ? '#1877f2' :
-                                           social.platform === 'instagram' ? '#E4405F' :
-                                           social.platform === 'linkedin' ? '#0077b5' :
-                                           social.platform === 'x' ? '#000000' : '#666',
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "white",
-                            fontSize: "18px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {social.platform === 'facebook' ? 'f' :
-                           social.platform === 'instagram' ? '📷' :
-                           social.platform === 'linkedin' ? 'in' :
-                           social.platform === 'x' ? 'X' : '?'}
-                        </div>
-                      ))}
-                    </div>
-                    {communityConfig.showAskMeLater && (
-                      <div style={{ textAlign: "center", marginTop: "10px" }}>
-                        <a
-                          href="#"
-                          style={{
-                            color: config.textColor,
-                            textDecoration: "underline",
-                            fontSize: "14px",
-                            opacity: 0.8,
-                          }}
-                        >
-                          {communityConfig.askMeLaterText}
-                        </a>
-                      </div>
-                    )}
-                  </BlockStack>
-                ) : popupType === "timer" ? (
-                  // Timer Popup Preview
-                  <BlockStack gap="200">
-                    <div style={{
-                      background: timerConfig.backgroundColor,
-                      borderRadius: `${timerConfig.borderRadius}px`,
-                      padding: "20px",
-                      color: timerConfig.textColor,
-                      textAlign: "center"
-                    }}>
-                      <div style={{ fontSize: "24px", marginBottom: "10px" }}>{timerConfig.timerIcon}</div>
-                      <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "15px" }}>
-                        {timerConfig.title}
-                      </div>
-                      <div style={{ fontSize: "12px", marginBottom: "15px", opacity: 0.9 }}>
-                        {timerConfig.description}
-                      </div>
-                      
-                      {/* Timer Display Preview */}
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "8px",
-                        marginBottom: "15px",
-                        flexWrap: "wrap"
-                      }}>
-                        {timerConfig.timerDays > 0 && (
-                          <div style={{
-                            background: "rgba(255,255,255,0.15)",
-                            padding: "8px 6px",
-                            borderRadius: "6px",
-                            minWidth: "35px",
-                            fontSize: "10px"
-                          }}>
-                            <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                              {timerConfig.timerDays.toString().padStart(2, '0')}
-                            </div>
-                            <div style={{ opacity: 0.8 }}>DAYS</div>
-                          </div>
-                        )}
-                        <div style={{
-                          background: "rgba(255,255,255,0.15)",
-                          padding: "8px 6px",
-                          borderRadius: "6px",
-                          minWidth: "35px",
-                          fontSize: "10px"
-                        }}>
-                          <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                            {timerConfig.timerHours.toString().padStart(2, '0')}
-                          </div>
-                          <div style={{ opacity: 0.8 }}>HRS</div>
-                        </div>
-                        <div style={{
-                          background: "rgba(255,255,255,0.15)",
-                          padding: "8px 6px",
-                          borderRadius: "6px",
-                          minWidth: "35px",
-                          fontSize: "10px"
-                        }}>
-                          <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                            {timerConfig.timerMinutes.toString().padStart(2, '0')}
-                          </div>
-                          <div style={{ opacity: 0.8 }}>MIN</div>
-                        </div>
-                        <div style={{
-                          background: "rgba(255,255,255,0.15)",
-                          padding: "8px 6px",
-                          borderRadius: "6px",
-                          minWidth: "35px",
-                          fontSize: "10px"
-                        }}>
-                          <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                            {timerConfig.timerSeconds.toString().padStart(2, '0')}
-                          </div>
-                          <div style={{ opacity: 0.8 }}>SEC</div>
-                        </div>
-                      </div>
-                      
-                      <div style={{
-                        padding: "6px 12px",
-                        border: "none",
-                        borderRadius: "20px",
-                        backgroundColor: "rgba(255,255,255,0.9)",
-                        color: "#666",
-                        marginBottom: "8px",
-                        fontSize: "10px",
-                      }}>
-                        {timerConfig.placeholder}
-                      </div>
-                      <button style={{
-                        backgroundColor: "#ff6b6b",
-                        color: "#fff",
-                        padding: "8px 16px",
-                        border: "none",
-                        borderRadius: "20px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        fontSize: "10px",
-                        textTransform: "uppercase"
-                      }}>
-                        {timerConfig.buttonText}
-                      </button>
-                      
-                      {timerConfig.disclaimer && (
-                        <div style={{
-                          fontSize: "8px",
-                          opacity: 0.6,
-                          marginTop: "8px"
-                        }}>
-                          {timerConfig.disclaimer}
-                        </div>
-                      )}
-                    </div>
-                  </BlockStack>
-                ) : popupType === "scratch-card" ? (
-                  // Scratch Card Popup Preview
-                  <BlockStack gap="200">
-                    <div style={{
-                      background: scratchCardConfig.backgroundColor,
-                      borderRadius: `${scratchCardConfig.borderRadius}px`,
-                      padding: "20px",
-                      color: scratchCardConfig.textColor,
-                      textAlign: "center"
-                    }}>
-                      <div style={{ fontSize: "24px", marginBottom: "10px" }}>🎫</div>
-                      <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "15px" }}>
-                        {scratchCardConfig.title}
-                      </div>
-                      <div style={{ fontSize: "12px", marginBottom: "15px", opacity: 0.9 }}>
-                        {scratchCardConfig.description}
-                      </div>
-                      
-                      {/* Scratch Card Preview */}
-                      <div style={{
-                        width: "200px",
-                        height: "120px",
-                        background: "linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)",
-                        borderRadius: "8px",
-                        margin: "15px auto",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        border: "2px dashed rgba(0,0,0,0.2)",
-                        position: "relative",
-                        boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
-                      }}>
-                        <div style={{
-                          fontSize: "14px",
-                          fontWeight: "bold",
-                          color: "#333",
-                          textAlign: "center"
-                        }}>
-                          <div>🎁</div>
-                          <div style={{ marginTop: "5px" }}>Scratch Here!</div>
-                          <div style={{ fontSize: "10px", opacity: 0.7 }}>
-                            {scratchCardConfig.discountCode}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div style={{
-                        padding: "6px 12px",
-                        border: "none",
-                        borderRadius: "20px",
-                        backgroundColor: "rgba(255,255,255,0.9)",
-                        color: "#666",
-                        marginBottom: "8px",
-                        fontSize: "10px",
-                      }}>
-                        {scratchCardConfig.placeholder}
-                      </div>
-                      <button style={{
-                        backgroundColor: "#28a745",
-                        color: "#fff",
-                        padding: "8px 16px",
-                        border: "none",
-                        borderRadius: "20px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        fontSize: "10px",
-                        textTransform: "uppercase"
-                      }}>
-                        {scratchCardConfig.buttonText}
-                      </button>
-                    </div>
-                  </BlockStack>
-                ) : (
-                  // Wheel-Email Combo Preview - Enhanced Size
-                  <div
-                    style={{
-                      background: wheelEmailConfig.backgroundColor || "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
-                      borderRadius: "20px",
-                      overflow: "hidden",
-                      position: "relative",
-                      padding: "20px",
-                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
-                      border: "2px solid rgba(255, 255, 255, 0.2)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        minHeight: "240px",
-                      }}
-                    >
-                      {/* Wheel Section - Larger */}
-                      <div
-                        style={{
-                          width: "280px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          paddingRight: 0,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "160px",
-                            height: "160px",
-                            borderRadius: "50%",
-                            border: "4px solid rgba(255, 255, 255, 0.8)",
-                            position: "relative",
-                            background: `conic-gradient(${wheelEmailConfig.segments.map((segment, index) =>
-                              `${segment.color} ${index * (360 / wheelEmailConfig.segments.length)}deg ${(index + 1) * (360 / wheelEmailConfig.segments.length)}deg`
-                            ).join(", ")})`,
-                            boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
-                            filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))",
-                          }}
-                        >
-                          {/* Wheel pointer - Enhanced */}
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "50%",
-                              right: "-12px",
-                              transform: "translateY(-50%)",
-                              width: 0,
-                              height: 0,
-                              borderTop: "10px solid transparent",
-                              borderBottom: "10px solid transparent",
-                              borderLeft: "18px solid #fbbf24",
-                              zIndex: 10,
-                              filter: "drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3))",
-                            }}
-                          />
-                          {/* Wheel center - Enhanced */}
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                              background: "linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)",
-                              width: "28px",
-                              height: "28px",
-                              borderRadius: "50%",
-                              border: "3px solid rgba(148, 163, 184, 0.3)",
-                              zIndex: 5,
-                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1)",
-                            }}
-                          />
-                        </div>
-                      </div>
-                      
-                      {/* Form Section - Enhanced */}
-                      <div
-                        style={{
-                          flex: 1,
-                          padding: "25px 30px",
-                          color: "#1f2937",
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "center",
-                          background: "linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)",
-                          backdropFilter: "blur(10px)",
-                          borderRadius: "0 20px 20px 0",
-                          boxShadow: "inset 0 0 0 1px rgba(0, 0, 0, 0.05)",
-                        }}
-                      >
-                        <div style={{ fontSize: "16px", fontWeight: "700", marginBottom: "6px", color: "#0f172a", letterSpacing: "-0.5px" }}>
-                          {wheelEmailConfig.title}
-                        </div>
-                        <div style={{ fontSize: "12px", marginBottom: "12px", color: "#475569", lineHeight: "1.4", fontWeight: "500" }}>
-                          {wheelEmailConfig.subtitle}
-                        </div>
-                        <div style={{ fontSize: "10px", marginBottom: "14px", color: "#475569", lineHeight: "1.4" }}>
-                          Enter email & spin to win amazing discounts!
-                        </div>
-                        
-                        <div
-                          style={{
-                            padding: "10px 12px",
-                            border: "2px solid rgba(148, 163, 184, 0.2)",
-                            borderRadius: "8px",
-                            backgroundColor: "rgba(255, 255, 255, 0.8)",
-                            color: "#94a3b8",
-                            marginBottom: "12px",
-                            fontSize: "10px",
-                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-                          }}
-                        >
-                          {wheelEmailConfig.placeholder}
-                        </div>
-                        
-                        <button
-                          style={{
-                            width: "100%",
-                            padding: "12px 16px",
-                            background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-                            border: "none",
-                            borderRadius: "10px",
-                            color: "white",
-                            fontSize: "11px",
-                            fontWeight: "700",
-                            cursor: "pointer",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.8px",
-                            boxShadow: "0 6px 20px rgba(37, 99, 235, 0.4)",
-                          }}
-                        >
-                          {wheelEmailConfig.buttonText}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </BlockStack>
-            </div>
+            />
           </Box>
         </BlockStack>
       </Card>
     );
   };
 
-  // Realtime popup preview component
+  // Realtime popup preview component using PopupPreview
   const renderRealtimePopup = () => {
     if (!showRealtimePreview) return null;
 
-    const config = popupType === "email" ? emailConfig : wheelEmailConfig;
+    const config = popupType === "email" ? emailConfig :
+                   popupType === "community" ? communityConfig :
+                   popupType === "timer" ? timerConfig :
+                   popupType === "scratch-card" ? scratchCardConfig :
+                   wheelEmailConfig;
 
     return (
       <div
@@ -2067,268 +1628,41 @@ export default function PopupCustomizer() {
           `}
         </style>
         
-        {popupType === "email" ? (
-          // Email Popup
-          <div
+        <div style={{ animation: 'popupSlideIn 0.3s ease-out', position: 'relative' }}>
+          <PopupPreview
+            config={config}
+            type={popupType}
+            disableInteractions={false}
             style={{
-              backgroundColor: config.backgroundColor || '#ffffff',
-              color: config.textColor || '#000000',
-              padding: '24px',
-              borderRadius: `${config.borderRadius || 8}px`,
-              textAlign: 'center',
-              maxWidth: '400px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              position: 'relative',
-              animation: 'popupSlideIn 0.3s ease-out',
+              maxWidth: popupType === 'wheel-email' ? '600px' : '400px',
+              width: popupType === 'wheel-email' ? '90%' : 'auto'
             }}
-          >
-            {config.showCloseButton && (
-              <button
-                onClick={() => setShowRealtimePreview(false)}
-                style={{
-                  position: 'absolute',
-                  top: '10px',
-                  right: '10px',
-                  background: 'rgba(0,0,0,0.1)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '24px',
-                  height: '24px',
-                  cursor: 'pointer',
-                  color: config.textColor || '#000000',
-                  fontSize: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                ×
-              </button>
-            )}
-            
-            <div style={{ fontSize: '24px', marginBottom: '10px' }}>📧</div>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', margin: '0 0 15px 0', color: config.textColor || '#000000' }}>
-              {config.title}
-            </h3>
-            <p style={{ marginBottom: '20px', lineHeight: '1.5', color: config.textColor || '#000000' }}>
-              {config.description}
-            </p>
-            <input
-              type="email"
-              placeholder={config.placeholder}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ccc',
-                borderRadius: '6px',
-                marginBottom: '15px',
-                fontSize: '14px',
-                boxSizing: 'border-box'
-              }}
-              readOnly
-            />
-            <button style={{
-              width: '100%',
-              padding: '12px 24px',
-              border: 'none',
-              borderRadius: '6px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontSize: '14px',
-              backgroundColor: config.buttonColor || '#007ace',
-              color: 'white'
-            }}>
-              {config.buttonText}
-            </button>
-          </div>
-        ) : (
-          // Wheel-Email Combo Popup - Enhanced Size
-          <div
+          />
+          
+          {/* Close button overlay */}
+          <button
+            onClick={() => setShowRealtimePreview(false)}
             style={{
-              background: config.backgroundColor || 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
-              borderRadius: '20px',
-              overflow: 'hidden',
-              position: 'relative',
-              padding: '20px',
-              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-              maxWidth: '800px',
-              width: '90%',
+              position: 'absolute',
+              top: '15px',
+              right: '15px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '30px',
+              height: '30px',
+              cursor: 'pointer',
+              color: 'white',
+              fontSize: '18px',
               display: 'flex',
               alignItems: 'center',
-              minHeight: '320px',
-              animation: 'popupSlideIn 0.3s ease-out',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
+              justifyContent: 'center',
+              zIndex: 1000000,
             }}
           >
-            <button
-              onClick={() => setShowRealtimePreview(false)}
-              style={{
-                position: 'absolute',
-                top: '15px',
-                right: '15px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '30px',
-                height: '30px',
-                cursor: 'pointer',
-                color: 'white',
-                fontSize: '18px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              ×
-            </button>
-            
-            {/* Wheel Section - Enhanced */}
-            <div style={{ width: '360px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '25px', overflow: 'hidden' }}>
-              <div
-                style={{
-                  width: '250px',
-                  height: '250px',
-                  borderRadius: '50%',
-                  border: '4px solid rgba(255, 255, 255, 0.8)',
-                  position: 'relative',
-                  background: `conic-gradient(${config.segments.map((segment, index) =>
-                    `${segment.color} ${index * (360 / config.segments.length)}deg ${(index + 1) * (360 / config.segments.length)}deg`
-                  ).join(", ")})`,
-                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                  filter: 'drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15))',
-                }}
-              >
-                {/* Wheel pointer - Enhanced */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    right: '-18px',
-                    transform: 'translateY(-50%)',
-                    width: 0,
-                    height: 0,
-                    borderTop: '16px solid transparent',
-                    borderBottom: '16px solid transparent',
-                    borderLeft: '28px solid #fbbf24',
-                    zIndex: 10,
-                    filter: 'drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4))',
-                  }}
-                />
-                {/* Wheel center - Enhanced */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    background: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    border: '3px solid rgba(148, 163, 184, 0.3)',
-                    zIndex: 5,
-                    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1)',
-                  }}
-                />
-                {/* Wheel segment labels */}
-                {config.segments.map((segment, index) => {
-                  const segmentAngle = (360 / config.segments.length) * index + (360 / config.segments.length) / 2;
-                  const radius = 68; // Adjusted for larger wheel
-                  const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
-                  const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
-                  
-                  return (
-                    <div
-                      key={index}
-                      style={{
-                        position: 'absolute',
-                        left: '50%',
-                        top: '50%',
-                        transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        color: 'white',
-                        textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
-                        pointerEvents: 'none',
-                        textAlign: 'center',
-                        lineHeight: '1.1',
-                        maxWidth: '70px',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '22px',
-                      }}
-                    >
-                      {segment.label}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            
-            {/* Form Section - Enhanced */}
-            <div style={{
-              flex: 1,
-              padding: '30px 35px',
-              color: '#1f2937',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '0 20px 20px 0',
-              boxShadow: 'inset 0 0 0 1px rgba(0, 0, 0, 0.05)'
-            }}>
-              <div style={{ fontSize: '24px', fontWeight: '700', marginBottom: '10px', color: '#0f172a', letterSpacing: '-0.5px' }}>
-                {config.title}
-              </div>
-              <div style={{ fontSize: '16px', marginBottom: '18px', color: '#475569', lineHeight: '1.4', fontWeight: '500' }}>
-                {config.subtitle}
-              </div>
-              <div style={{ fontSize: '13px', marginBottom: '20px', color: '#475569', lineHeight: '1.4' }}>
-                {config.description}
-              </div>
-              
-              <input
-                type="email"
-                placeholder={config.placeholder}
-                style={{
-                  padding: '14px 18px',
-                  border: '2px solid rgba(148, 163, 184, 0.2)',
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                  color: '#1e293b',
-                  marginBottom: '18px',
-                  fontSize: '16px',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
-                }}
-                readOnly
-              />
-              
-              <button
-                style={{
-                  width: '100%',
-                  padding: '18px 24px',
-                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                  border: 'none',
-                  borderRadius: '14px',
-                  color: 'white',
-                  fontSize: '17px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.8px',
-                  boxShadow: '0 8px 25px rgba(37, 99, 235, 0.4)'
-                }}
-              >
-                {config.buttonText}
-              </button>
-            </div>
-          </div>
-        )}
+            ×
+          </button>
+        </div>
       </div>
     );
   };

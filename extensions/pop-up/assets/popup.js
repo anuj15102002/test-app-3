@@ -616,7 +616,18 @@
       popup.style.background = config.backgroundColor || '#ffffff';
       popup.style.color = config.textColor || '#000000';
       popup.style.borderRadius = `${config.borderRadius || 16}px`;
-      popup.style.maxWidth = '600px';
+      
+      // Make responsive based on screen size
+      if (window.innerWidth <= 480) {
+        popup.style.maxWidth = '98vw';
+        popup.style.margin = '8px';
+      } else if (window.innerWidth <= 768) {
+        popup.style.maxWidth = '95vw';
+        popup.style.margin = '15px';
+      } else {
+        popup.style.maxWidth = '600px';
+      }
+      
       popup.style.display = 'block';
       
       // Hide other sections for scratch card popup
@@ -642,7 +653,18 @@
       // Show wheel-email combo layout
       popup.classList.remove('email-popup');
       popup.style.background = config.backgroundColor || 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
-      popup.style.maxWidth = '600px';
+      
+      // Make responsive based on screen size
+      if (window.innerWidth <= 480) {
+        popup.style.maxWidth = '98vw';
+        popup.style.margin = '8px';
+      } else if (window.innerWidth <= 768) {
+        popup.style.maxWidth = '95vw';
+        popup.style.margin = '15px';
+      } else {
+        popup.style.maxWidth = '600px';
+      }
+      
       popup.style.display = 'flex';
       
       // Show wheel section for wheel-email popup
@@ -701,7 +723,26 @@
       // Create segment labels with horizontal text positioned within wheel
       const segmentLabels = segments.map((segment, index) => {
         const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
-        const radius = 75; // Adjusted radius for larger wheel (220px)
+        
+        // Responsive radius and font size based on screen size
+        let radius, fontSize, maxWidth, height;
+        if (window.innerWidth <= 480) {
+          radius = 50; // For 140px wheel
+          fontSize = '9px';
+          maxWidth = '45px';
+          height = '20px';
+        } else if (window.innerWidth <= 768) {
+          radius = 60; // For 180px wheel
+          fontSize = '11px';
+          maxWidth = '60px';
+          height = '22px';
+        } else {
+          radius = 75; // For 220px wheel
+          fontSize = '13px';
+          maxWidth = '75px';
+          height = '24px';
+        }
+        
         const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
         const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
         
@@ -711,19 +752,19 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%) translate(${x}px, ${y}px);
-            font-size: 13px;
+            font-size: ${fontSize};
             font-weight: 800;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 2px rgba(0,0,0,0.8);
             pointer-events: none;
             text-align: center;
             line-height: 1.1;
-            max-width: 75px;
+            max-width: ${maxWidth};
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 24px;
+            height: ${height};
             letter-spacing: 0.5px;
           ">
             ${segment.label}
@@ -1685,6 +1726,22 @@
     const discountOptions = [5, 10, 15, 20, 25, 30];
     const randomDiscount = discountOptions[Math.floor(Math.random() * discountOptions.length)];
     
+    // Responsive canvas size based on screen size
+    let canvasSize, discountFontSize, discountTextSize;
+    if (window.innerWidth <= 480) {
+      canvasSize = 160;
+      discountFontSize = '36px';
+      discountTextSize = '18px';
+    } else if (window.innerWidth <= 768) {
+      canvasSize = 160;
+      discountFontSize = '40px';
+      discountTextSize = '20px';
+    } else {
+      canvasSize = 200;
+      discountFontSize = '48px';
+      discountTextSize = '18px';
+    }
+    
     scratchCardInner.innerHTML = `
       <button class="popup-close" onclick="closePopup()" style="
         position: absolute;
@@ -1707,13 +1764,13 @@
       <div class="scratch-card-layout">
         <div class="scratch-card-left">
           <div class="scratch-card-container" style="position: relative;">
-            <canvas id="scratch-canvas" width="200" height="200" style="pointer-events: none; opacity: 0.5;"></canvas>
+            <canvas id="scratch-canvas" width="${canvasSize}" height="${canvasSize}" style="pointer-events: none; opacity: 0.5;"></canvas>
             <div class="scratch-card-hidden-content" id="hidden-discount" style="
               position: absolute;
               top: 0;
               left: 0;
-              width: 200px;
-              height: 200px;
+              width: ${canvasSize}px;
+              height: ${canvasSize}px;
               display: flex;
               flex-direction: column;
               align-items: center;
@@ -1723,8 +1780,8 @@
               opacity: 0;
               border-radius: 8px;
             ">
-              <div class="discount-percentage" style="font-size: 48px; font-weight: bold; margin-bottom: 5px;">${randomDiscount}%</div>
-              <div class="discount-text" style="font-size: 18px; font-weight: 600;">OFF</div>
+              <div class="discount-percentage" style="font-size: ${discountFontSize}; font-weight: bold; margin-bottom: 5px;">${randomDiscount}%</div>
+              <div class="discount-text" style="font-size: ${discountTextSize}; font-weight: 600;">OFF</div>
             </div>
           </div>
           <p class="scratch-instruction" id="scratch-instruction">Enter your email to start scratching!</p>
@@ -1761,35 +1818,44 @@
     
     scratchCtx = scratchCanvas.getContext('2d');
     
-    // Set canvas size
-    const rect = scratchCanvas.getBoundingClientRect();
-    scratchCanvas.width = 200;
-    scratchCanvas.height = 200;
+    // Get responsive canvas size from the canvas element
+    const canvasSize = scratchCanvas.width; // This will be set by the responsive HTML
+    
+    // Responsive font sizes based on canvas size
+    let fontSize, iconSize;
+    if (canvasSize <= 160) {
+      fontSize = '14px';
+      iconSize = '18px';
+    } else {
+      fontSize = '16px';
+      iconSize = '20px';
+    }
     
     // Create scratch surface (blue background)
     scratchCtx.fillStyle = '#4A90E2';
-    scratchCtx.fillRect(0, 0, 200, 200);
+    scratchCtx.fillRect(0, 0, canvasSize, canvasSize);
     
     // Add scratch surface pattern/texture
     scratchCtx.fillStyle = '#5BA0F2';
-    for (let i = 0; i < 200; i += 20) {
-      for (let j = 0; j < 200; j += 20) {
-        if ((i + j) % 40 === 0) {
-          scratchCtx.fillRect(i, j, 10, 10);
+    const patternSize = Math.floor(canvasSize / 10);
+    for (let i = 0; i < canvasSize; i += patternSize) {
+      for (let j = 0; j < canvasSize; j += patternSize) {
+        if ((i + j) % (patternSize * 2) === 0) {
+          scratchCtx.fillRect(i, j, patternSize / 2, patternSize / 2);
         }
       }
     }
     
     // Add "SCRATCH HERE" text
     scratchCtx.fillStyle = '#FFFFFF';
-    scratchCtx.font = 'bold 16px Arial';
+    scratchCtx.font = `bold ${fontSize} Arial`;
     scratchCtx.textAlign = 'center';
-    scratchCtx.fillText('SCRATCH', 100, 90);
-    scratchCtx.fillText('HERE', 100, 110);
+    scratchCtx.fillText('SCRATCH', canvasSize / 2, canvasSize / 2 - 10);
+    scratchCtx.fillText('HERE', canvasSize / 2, canvasSize / 2 + 10);
     
     // Add small scratch icon
-    scratchCtx.font = '20px Arial';
-    scratchCtx.fillText('✋', 100, 140);
+    scratchCtx.font = `${iconSize} Arial`;
+    scratchCtx.fillText('✋', canvasSize / 2, canvasSize / 2 + 35);
     
     // Set up scratch functionality
     scratchCtx.globalCompositeOperation = 'destination-out';
@@ -1830,8 +1896,11 @@
     const scaleX = scratchCanvas.width / rect.width;
     const scaleY = scratchCanvas.height / rect.height;
     
+    // Responsive scratch radius based on canvas size
+    const scratchRadius = scratchCanvas.width <= 160 ? 12 : 15;
+    
     scratchCtx.beginPath();
-    scratchCtx.arc(x * scaleX, y * scaleY, 15, 0, 2 * Math.PI);
+    scratchCtx.arc(x * scaleX, y * scaleY, scratchRadius, 0, 2 * Math.PI);
     scratchCtx.fill();
     
     // Check if enough area is scratched

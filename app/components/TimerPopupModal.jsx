@@ -17,6 +17,7 @@ import {
   Icon,
 } from "@shopify/polaris";
 import { ClockIcon, XIcon } from "@shopify/polaris-icons";
+import PopupPreview from "./PopupPreview";
 import "../styles/timer-popup-modal.css";
 
 /**
@@ -416,7 +417,7 @@ export default function TimerPopupModal({
     </Card>
   );
 
-  // Render right panel - Live Preview
+  // Render right panel - Live Preview using PopupPreview component
   const renderPreviewPanel = () => (
     <Card>
       <BlockStack gap="400">
@@ -432,173 +433,15 @@ export default function TimerPopupModal({
           borderWidth="025"
           borderColor="border"
         >
-          <div style={{
-            background: timerConfig.backgroundColor,
-            borderRadius: `${timerConfig.borderRadius}px`,
-            padding: "20px",
-            color: timerConfig.textColor,
-            textAlign: "center",
-            maxWidth: "400px",
-            margin: "0 auto",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-            position: "relative",
-            overflow: "hidden"
-          }}>
-            {/* Close button preview */}
-            {timerConfig.showCloseButton && (
-              <div style={{
-                position: "absolute",
-                top: "15px",
-                right: "15px",
-                background: "rgba(255,255,255,0.2)",
-                borderRadius: "50%",
-                width: "24px",
-                height: "24px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "16px",
-                color: timerConfig.textColor
-              }}>
-                ×
-              </div>
-            )}
-
-            <BlockStack gap="300">
-              {/* Icon and Title */}
-              <div style={{ fontSize: "32px", marginBottom: "10px" }}>
-                {timerConfig.timerIcon}
-              </div>
-              
-              <Text as="h4" variant="headingMd" style={{ 
-                color: timerConfig.textColor,
-                fontSize: "20px",
-                fontWeight: "700",
-                margin: "0 0 10px 0"
-              }}>
-                {timerConfig.title}
-              </Text>
-              
-              <Text as="p" variant="bodyMd" style={{ 
-                color: timerConfig.textColor,
-                opacity: 0.9,
-                fontSize: "14px",
-                lineHeight: "1.5",
-                marginBottom: "20px"
-              }}>
-                {timerConfig.description}
-              </Text>
-
-              {/* Timer Display Preview */}
-              <div style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "10px",
-                marginBottom: "20px",
-                flexWrap: "wrap"
-              }}>
-                {timerConfig.timerDays > 0 && (
-                  <div style={{
-                    background: "rgba(255,255,255,0.15)",
-                    backdropFilter: "blur(10px)",
-                    padding: "12px 10px",
-                    borderRadius: "8px",
-                    minWidth: "50px",
-                    fontSize: "10px"
-                  }}>
-                    <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "4px" }}>
-                      {timerConfig.timerDays.toString().padStart(2, '0')}
-                    </div>
-                    <div style={{ opacity: 0.8, fontSize: "10px" }}>DAYS</div>
-                  </div>
-                )}
-                <div style={{
-                  background: "rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(10px)",
-                  padding: "12px 10px",
-                  borderRadius: "8px",
-                  minWidth: "50px",
-                  fontSize: "10px"
-                }}>
-                  <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "4px" }}>
-                    {timerConfig.timerHours.toString().padStart(2, '0')}
-                  </div>
-                  <div style={{ opacity: 0.8, fontSize: "10px" }}>HOURS</div>
-                </div>
-                <div style={{
-                  background: "rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(10px)",
-                  padding: "12px 10px",
-                  borderRadius: "8px",
-                  minWidth: "50px",
-                  fontSize: "10px"
-                }}>
-                  <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "4px" }}>
-                    {timerConfig.timerMinutes.toString().padStart(2, '0')}
-                  </div>
-                  <div style={{ opacity: 0.8, fontSize: "10px" }}>MIN</div>
-                </div>
-                <div style={{
-                  background: "rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(10px)",
-                  padding: "12px 10px",
-                  borderRadius: "8px",
-                  minWidth: "50px",
-                  fontSize: "10px"
-                }}>
-                  <div style={{ fontWeight: "bold", fontSize: "18px", marginBottom: "4px" }}>
-                    {timerConfig.timerSeconds.toString().padStart(2, '0')}
-                  </div>
-                  <div style={{ opacity: 0.8, fontSize: "10px" }}>SEC</div>
-                </div>
-              </div>
-
-              {/* Email Input Preview */}
-              <div style={{
-                padding: "12px 16px",
-                border: "none",
-                borderRadius: "25px",
-                backgroundColor: "rgba(255,255,255,0.9)",
-                color: "#666",
-                marginBottom: "15px",
-                fontSize: "14px",
-                width: "100%",
-                boxSizing: "border-box"
-              }}>
-                {timerConfig.placeholder}
-              </div>
-
-              {/* CTA Button Preview */}
-              <button style={{
-                backgroundColor: "#ff6b6b",
-                color: "#fff",
-                padding: "14px 24px",
-                border: "none",
-                borderRadius: "25px",
-                cursor: "pointer",
-                fontWeight: "700",
-                fontSize: "14px",
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-                width: "100%",
-                boxShadow: "0 4px 15px rgba(255,107,107,0.4)"
-              }}>
-                {timerConfig.buttonText}
-              </button>
-
-              {/* Disclaimer Preview */}
-              {timerConfig.disclaimer && (
-                <div style={{
-                  fontSize: "11px",
-                  opacity: 0.7,
-                  marginTop: "15px",
-                  color: timerConfig.textColor
-                }}>
-                  {timerConfig.disclaimer}
-                </div>
-              )}
-            </BlockStack>
-          </div>
+          <PopupPreview
+            config={timerConfig}
+            type="timer"
+            disableInteractions={true}
+            style={{
+              maxWidth: "400px",
+              margin: "0 auto"
+            }}
+          />
         </Box>
 
         {/* Preview Tips */}
