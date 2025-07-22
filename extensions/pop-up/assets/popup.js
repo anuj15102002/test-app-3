@@ -394,58 +394,53 @@
 
     // emailPopup starts from here
     
-    if (config.type === "email") {
-      // Show traditional email popup layout
-      popup.classList.add("email-popup");
-      popup.style.background = config.backgroundColor || "#ffffff";
-      popup.style.color = config.textColor || "#000000";
-      popup.style.borderRadius = `${config.borderRadius || 8}px`;
+ if (config.type === "email") {
+  popup.classList.add("email-popup");
+  popup.style.background = config.backgroundColor || "#ffffff";
+  popup.style.color = config.textColor || "#000000";
+  popup.style.borderRadius = `${config.borderRadius || 8}px`;
 
-      // Hide wheel section for email popup
-      const wheelSection = popup.querySelector(".wheel-section");
-      const formSection = popup.querySelector(".form-section");
-      const communityContent = popup.querySelector(".community-content");
-      const popupContent = popup.querySelector(".popup-content");
+  const wheelSection = popup.querySelector(".wheel-section");
+  const formSection = popup.querySelector(".form-section");
+  const communityContent = popup.querySelector(".community-content");
+  const popupContent = popup.querySelector(".popup-content");
 
-      wheelSection.style.display = "none";
-      communityContent.style.display = "none";
-      formSection.style.display = "block";
-      formSection.style.color = config.textColor || "#000000";
+  wheelSection.style.display = "none";
+  communityContent.style.display = "none";
+  formSection.style.display = "block";
 
-      // Ensure popup content doesn't use flex layout for email popup
-      popupContent.style.display = "block";
+  // Default image fallback
+  const defaultImage = window.defaultBannerAsset || "{{ 'banner.svg' | asset_url }}";
+  const imageUrl = config.bannerImage || defaultImage;
 
-      // Update form section content for email popup
-      formSection.innerHTML = `
-        <button class="popup-close" onclick="closePopup()" style="color: ${config.textColor || "#000000"};">&times;</button>
-        <div style="text-align: center;">
-          <div style="font-size: 24px; margin-bottom: 10px; color: ${config.textColor || "#000000"};">📧</div>
-          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 15px 0; color: ${config.textColor || "#000000"};">
-            ${config.title}
-          </h3>
-          <p style="margin-bottom: 20px; line-height: 1.5; color: ${config.textColor || "#000000"};">
-            ${config.description}
-          </p>
-          <input type="email" id="popup-email" placeholder="${config.placeholder}" style="
-            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px;
-            margin-bottom: 15px; font-size: 14px; box-sizing: border-box;
-          " />
-          <button onclick="handleEmailSubmit()" style="
-            width: 100%; padding: 12px 24px; border: none; border-radius: 6px;
-            font-weight: 600; cursor: pointer; font-size: 14px;
-            background-color: ${config.buttonColor || "#007ace"}; color: white;
-          ">
-            ${config.buttonText}
-          </button>
-        </div>
-      `;
+  // ✅ Full structured layout: left image + right content
+  popupContent.innerHTML = `
+    <button class="popup-close" onclick="closePopup()" style="
+      position: absolute; top: 10px; right: 10px; z-index: 10;
+      background: rgba(0,0,0,0.1); border: none; border-radius: 50%;
+      width: 28px; height: 28px; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: ${config.textColor || "#000000"};
+    ">&times;</button>
 
-      // email popup ends here
-
-
-      // community popup starts from here
-
-    } else if (config.type === "community") {
+    <div class="email-popup-wrapper">
+      <div class="email-popup-image">
+        <img src="${imageUrl}" alt="Popup" onerror="this.style.display='none'" />
+      </div>
+      <div class="email-popup-content">
+        <h3 class="email-popup-title">${config.title || "GET 15% OFF"}</h3>
+        <p class="email-popup-subtitle">${config.subtitle || "Your first order"}</p>
+        <p class="email-popup-desc">${config.description || "Stay updated with our latest products"}</p>
+        <input type="email" id="popup-email" placeholder="${config.placeholder || "Enter your email"}" />
+        <button onclick="handleEmailSubmit()" class="email-popup-button" style="background-color: ${config.buttonColor || '#1b1e21ff'}; border: none; color: white;">
+          ${config.buttonText || "SUBSCRIBE"}
+        </button>
+        <p class="email-popup-note">No thanks, I’ll pay full price</p>
+      </div>
+    </div>
+  `;
+}
+ else if (config.type === "community") {
       // Show community popup layout
       popup.classList.add("community-popup");
       popup.style.background = config.backgroundColor || "#ffffff";

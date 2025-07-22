@@ -1,3 +1,7 @@
+/* ========================================
+   GLOBAL POPUP STYLES
+   ======================================== */
+
 #custom-popup-overlay {
   position: fixed;
   top: 0;
@@ -30,18 +34,39 @@
   border: none;
 }
 
-/* Default wheel-email popup styles */
-.custom-popup:not(.email-popup):not(.community-popup):not(.timer-popup) {
-  max-height: 450px !important;
-  min-height: 350px !important;
-  max-width: 700px !important;
+.popup-content {
+  padding: 0;
+  text-align: center;
+  display: flex;
+  width: 100%;
+  min-height: 300px;
+  max-height: none;
+  height: auto;
 }
 
-.custom-popup:not(.email-popup):not(.community-popup):not(.timer-popup) .popup-content {
-  min-height: 330px !important;
-  max-height: 430px !important;
+.popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  color: white;
 }
 
+.popup-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Global animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -58,14 +83,20 @@
   }
 }
 
-.popup-content {
-  padding: 0;
-  text-align: center;
-  display: flex;
-  width: 100%;
-  min-height: 300px;
-  max-height: none;
-  height: auto;
+/* ========================================
+   WHEEL POPUP STYLES
+   ======================================== */
+
+/* Default wheel-email popup styles */
+.custom-popup:not(.email-popup):not(.community-popup):not(.timer-popup):not(.scratch-card-popup) {
+  max-height: 450px !important;
+  min-height: 350px !important;
+  max-width: 700px !important;
+}
+
+.custom-popup:not(.email-popup):not(.community-popup):not(.timer-popup):not(.scratch-card-popup) .popup-content {
+  min-height: 330px !important;
+  max-height: 430px !important;
 }
 
 .wheel-section {
@@ -108,26 +139,20 @@
   font-weight: 500;
 }
 
-
-/* .email-input {
-  width: 100%;
-  padding: 12px 15px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  margin-bottom: 18px;
-  background: #f9fafb;
-  font-size: 14px;
-  color: #0a2a43;
-  transition: all 0.3s ease;
-} */
-
+.form-description {
+  font-size: 12px;
+  margin-bottom: 15px;
+  color: #64748b;
+  line-height: 1.3;
+  font-weight: 400;
+}
 
 .email-input {
   width: 100%;
   padding: 14px 18px;
   border: 2px solid rgba(148, 163, 184, 0.2);
   border-radius: 12px;
-  margin-bottom: px;
+  margin-bottom: 15px;
   font-size: 16px;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.8);
@@ -143,27 +168,16 @@
   transform: translateY(-1px);
 }
 
+.email-input::placeholder {
+  color: #94a3b8;
+}
 
 .popup-form {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Adjust: 6px, 8px, or 10px for a premium look */
+  gap: 10px;
   padding: 0;
   margin: 0;
-}
-
-
-/* .email-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-  transform: translateY(-1px);
-}
-*/ */
-
-.email-input::placeholder {
-  color: #94a3b8;
 }
 
 .spin-button {
@@ -234,96 +248,7 @@
   line-height: 1.3;
 }
 
-.popup-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 15px;
-  position: relative;
-}
-
-.popup-icon {
-  font-size: 24px;
-}
-
-.popup-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.popup-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-  color: white;
-}
-
-.popup-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.form-description {
-  font-size: 12px;
-  margin-bottom: 15px;
-  color: #64748b;
-  line-height: 1.3;
-  font-weight: 400;
-}
-
-.popup-description {
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.popup-input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-.popup-button {
-  width: 100%;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 14px;
-  transition: opacity 0.2s ease;
-}
-
-.popup-button:hover {
-  opacity: 0.9;
-}
-
-/* 
-.spinning-wheel {
-  border: 4px solid rgba(255, 255, 255, 0.15); 
-  box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.6),
-    inset 0 2px 4px rgba(255, 255, 255, 0.1);
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-}
-*/
-
-
+/* Spinning wheel styles */
 .spinning-wheel {
   width: 280px;
   height: 280px;
@@ -382,10 +307,6 @@
   border-left: 22px solid #f1f5f9;
 }
 
-
-
-
-
 .wheel-segment-label {
   font-family: "Arial", sans-serif;
   font-weight: bold;
@@ -395,6 +316,92 @@
   word-break: break-word;
 }
 
+/* Wheel animations */
+.spinning-wheel.spinning {
+  animation: wheelSpin 4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes wheelSpin {
+  0% {
+    transform: rotate(0deg);
+    filter: blur(0px);
+  }
+  20% {
+    filter: blur(0.5px);
+  }
+  80% {
+    filter: blur(0.5px);
+  }
+  100% {
+    filter: blur(0px);
+  }
+}
+
+.wheel-segment-label {
+  transition: all 0.3s ease;
+}
+
+.spinning-wheel::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1), rgba(236, 72, 153, 0.1));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.spinning-wheel:hover::before {
+  opacity: 1;
+}
+
+.spinning-wheel:hover {
+  animation: wheelHoverSpin 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  cursor: pointer;
+}
+
+@keyframes wheelHoverSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  60% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.wheel-pointer {
+  animation: pointerPulse 2s ease-in-out infinite;
+}
+
+@keyframes pointerPulse {
+  0%, 100% {
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.05);
+  }
+}
+
+.wheel-center::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  z-index: -1;
+}
+
+/* Wheel popup mobile responsive */
 @media (max-width: 768px) {
   .custom-popup {
     max-width: 95vw;
@@ -418,10 +425,6 @@
     padding: 25px 20px 15px;
     border-radius: 20px 20px 0 0;
   }
-  
-
-
-
 
   .spinning-wheel {
     width: 180px;
@@ -522,306 +525,180 @@
     font-size: 10px;
   }
 }
-/* Wheel Popup styles ends here */
+/* Wheel popup styles end here */
 
+/* ========================================
+   EMAIL POPUP STYLES
+   ======================================== */
 
-
-/* Email popup specific styles */
 .custom-popup.email-popup {
-  max-width: 400px !important;
+  max-width: 600px !important;
   display: block !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .custom-popup.email-popup .popup-content {
-  display: block !important;
-  min-height: auto !important;
-}
-
-.custom-popup.email-popup .wheel-section {
-  display: none !important;
-}
-
-.custom-popup.email-popup .form-section {
-  flex: none !important;
-  width: 100% !important;
-  padding: 24px !important;
-}
-
-
-
-
-
-/* Email popup styles ends here
-
-/* Community popup specific styles */
-.custom-popup.community-popup {
-  max-width: 450px !important;
-  width: 90% !important;
-  max-height: 90vh !important;
-  height: auto !important;
-  display: block !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
-  border-radius: 12px !important;
-  overflow: visible !important;
-  position: relative !important;
-}
-
-.custom-popup.community-popup .popup-content {
-  display: block !important;
-  min-height: auto !important;
-  max-height: none !important;
-  height: auto !important;
-  position: relative !important;
-  overflow: visible !important;
-}
-
-.custom-popup.community-popup .wheel-section {
-  display: none !important;
-}
-
-.custom-popup.community-popup .form-section {
-  display: none !important;
-}
-
-.custom-popup.community-popup .community-content {
-  display: block !important;
-  width: 100% !important;
-  padding: 0 !important;
-  position: relative !important;
-  height: auto !important;
-  overflow: visible !important;
-}
-
-.community-content-inner {
-  padding: 24px 24px 24px !important;
-}
-
-.community-content {
-  position: relative;
-  text-align: center;
-}
-
-.community-content .popup-close {
-  position: absolute !important;
-  top: 15px !important;
-  right: 15px !important;
-  background: rgba(0,0,0,0.1) !important;
-  border: none !important;
-  border-radius: 50% !important;
-  width: 30px !important;
-  height: 30px !important;
-  cursor: pointer !important;
-  font-size: 18px !important;
   display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  z-index: 10 !important;
-  transition: background-color 0.2s ease !important;
-  color: inherit !important;
-}
-
-.community-content .popup-close:hover {
-  background: rgba(0,0,0,0.2) !important;
-}
-
-.community-banner {
-  width: 100% !important;
-  height: 140px !important;
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  margin: 0 !important;
+  align-items: stretch !important;
   padding: 0 !important;
-  border-radius: 12px 12px 0 0 !important;
-  display: block !important;
-  position: relative !important;
-  overflow: hidden !important;
-  border: none !important;
+  min-height: 320px !important;
 }
 
-.community-title {
-  font-size: 22px;
-  font-weight: 600;
-  margin: 0 0 15px 0;
+.email-popup-wrapper {
+  display: flex;
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Left image */
+.email-popup-image {
+  flex: 1;
+  max-width: 50%;
+  overflow: hidden;
+}
+
+.email-popup-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Right content */
+.email-popup-content {
+  flex: 1;
+  background: #f9f9f9;
+  padding: 40px 30px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+}
+
+.email-popup-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: #000;
+  text-transform: uppercase;
+}
+
+.email-popup-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 10px 0;
+  color: #555;
+}
+
+.email-popup-desc {
+  font-size: 13px;
+  margin-bottom: 18px;
+  color: #777;
+  line-height: 1.4;
+}
+
+.email-popup-content input[type="email"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.email-popup-content input[type="email"]:focus {
+  border-color: #007ace;
+}
+
+.email-popup-button {
+  width: 100%;
+  padding: 12px;
+  background: #007ace;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  transition: background 0.2s ease-in-out;
+}
+
+.email-popup-button:hover {
+  background: #005f99;
+}
+
+.email-popup-note {
+  font-size: 11px;
+  margin-top: 8px;
+  color: #999;
   text-align: center;
 }
 
-.community-description {
-  font-size: 15px;
-  line-height: 1.5;
-  margin-bottom: 22px;
-  text-align: center;
+/* Close button */
+.custom-popup.email-popup .popup-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  z-index: 10;
 }
 
-.social-icons {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 12px !important;
-  margin: 20px 0 !important;
-  flex-wrap: wrap !important;
+.custom-popup.email-popup .popup-close:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 
-.social-icon {
-  display: inline-block !important;
-  width: 38px !important;
-  height: 38px !important;
-  cursor: pointer !important;
-  transition: transform 0.2s ease !important;
-  margin: 0 8px !important;
-}
-
-.social-icon:hover {
-  transform: scale(1.1) !important;
-}
-
-.social-icon img {
-  width: 38px !important;
-  height: 38px !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  display: block !important;
-}
-
-.ask-me-later {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.ask-me-later a {
-  text-decoration: underline !important;
-  font-size: 13px !important;
-  opacity: 0.7 !important;
-  transition: opacity 0.2s ease !important;
-}
-
-.ask-me-later a:hover {
-  opacity: 1 !important;
-}
-
+/* ✅ Responsive */
 @media (max-width: 480px) {
-  .custom-popup.community-popup {
-    max-width: 95vw;
-    margin: 10px;
+  .custom-popup.email-popup {
+    max-width: 95vw !important;
   }
-  
-  .community-title {
+
+  .custom-popup.email-popup .popup-content {
+    flex-direction: column !important;
+  }
+
+  .email-popup-wrapper {
+    flex-direction: column !important;
+  }
+
+  .email-popup-image {
+    max-width: 100% !important;
+    height: 150px !important;
+  }
+
+  .email-popup-content {
+    padding: 25px 20px;
+    text-align: center;
+  }
+
+  .email-popup-title {
     font-size: 20px;
   }
-  
-  .community-description {
-    font-size: 14px;
-  }
-  
-  .social-icons {
-    gap: 10px;
-  }
-  
-  .social-icon {
-    width: 45px;
-    height: 45px;
-    line-height: 45px;
-    font-size: 18px;
-  }
-}
-/* Community popup styles ends here */
-
-/* Discount code styles */
-.discount-display {
-  text-align: center;
-  padding: 20px 0;
 }
 
-.discount-success {
-  font-size: 18px;
-  font-weight: 600;
-  color: #28a745;
-  margin-bottom: 15px;
-}
+/* Community popup styles end here */
 
-.discount-code-container {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border: 2px dashed #28a745;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 15px;
-  position: relative;
-  transition: all 0.3s ease;
-}
+/* ========================================
+   TIMER POPUP STYLES
+   ======================================== */
 
-.discount-code-container:hover {
-  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
-}
-
-.discount-code-text {
-  font-size: 28px;
-  font-weight: bold;
-  color: #28a745;
-  margin-bottom: 8px;
-  letter-spacing: 2px;
-  cursor: pointer;
-  user-select: all;
-  font-family: 'Courier New', monospace;
-}
-
-.discount-code-hint {
-  font-size: 14px;
-  color: #6c757d;
-  font-style: italic;
-}
-
-.copy-button {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  border: none;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-}
-
-.copy-button:hover {
-  background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-}
-
-.copy-button.copied {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  animation: pulse 0.6s ease-in-out;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.close-button {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.close-button:hover {
-  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
-  transform: translateY(-1px);
-}
-/* Dicount code styles ends here */
-
-
-
-/* Timer popup specific styles */
 .custom-popup.timer-popup {
   max-width: 420px !important;
   width: 90% !important;
@@ -1104,7 +981,32 @@
   font-style: italic !important;
 }
 
-/* Mobile responsive styles for timer popup */
+/* Timer animation effects */
+.timer-unit.flash {
+  animation: timerFlash 0.5s ease-in-out !important;
+}
+
+@keyframes timerFlash {
+  0%, 100% { background: rgba(255, 255, 255, 0.15); }
+  50% { background: rgba(255, 255, 255, 0.3); }
+}
+
+.timer-urgent {
+  animation: timerUrgent 1s ease-in-out infinite !important;
+}
+
+@keyframes timerUrgent {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+    transform: scale(1.02);
+  }
+}
+
+/* Timer popup mobile responsive */
 @media (max-width: 768px) {
   .custom-popup.timer-popup {
     max-width: 95vw !important;
@@ -1150,100 +1052,6 @@
     padding: 14px 24px !important;
     font-size: 14px !important;
   }
-}
-/* Timer popup style ends here */
-
-
-
-
-/* Enhanced wheel spinning animations */
-.spinning-wheel.spinning {
-  animation: wheelSpin 4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-@keyframes wheelSpin {
-  0% {
-    transform: rotate(0deg);
-    filter: blur(0px);
-  }
-  20% {
-    filter: blur(0.5px);
-  }
-  80% {
-    filter: blur(0.5px);
-  }
-  100% {
-    filter: blur(0px);
-  }
-}
-
-/* Wheel segment hover effects */
-.wheel-segment-label {
-  transition: all 0.3s ease;
-}
-
-/* Premium wheel glow effect */
-.spinning-wheel::before {
-  content: '';
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  right: -5px;
-  bottom: -5px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1), rgba(236, 72, 153, 0.1));
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.spinning-wheel:hover::before {
-  opacity: 1;
-}
-
-/* Wheel hover spin effect */
-.spinning-wheel:hover {
-  animation: wheelHoverSpin 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  cursor: pointer;
-}
-
-@keyframes wheelHoverSpin {
-  0% {
-    transform: rotate(0deg);
-  }
-  60% {
-    transform: rotate(360deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Enhanced pointer animation */
-.wheel-pointer {
-  animation: pointerPulse 2s ease-in-out infinite;
-}
-
-@keyframes pointerPulse {
-  0%, 100% {
-    transform: translateY(-50%) scale(1);
-  }
-  50% {
-    transform: translateY(-50%) scale(1.05);
-  }
-}
-
-/* Wheel center enhancement */
-.wheel-center::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-  z-index: -1;
 }
 
 @media (max-width: 480px) {
@@ -1301,33 +1109,12 @@
     border-radius: 20px !important;
   }
 }
+/* Timer popup styles end here */
 
-/* Timer animation effects */
-.timer-unit.flash {
-  animation: timerFlash 0.5s ease-in-out !important;
-}
+/* ========================================
+   SCRATCH CARD POPUP STYLES
+   ======================================== */
 
-@keyframes timerFlash {
-  0%, 100% { background: rgba(255, 255, 255, 0.15); }
-  50% { background: rgba(255, 255, 255, 0.3); }
-}
-
-.timer-urgent {
-  animation: timerUrgent 1s ease-in-out infinite !important;
-}
-
-@keyframes timerUrgent {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
-    transform: scale(1.02);
-  }
-}
-
-/* Scratch card popup specific styles */
 .custom-popup.scratch-card-popup {
   max-width: 600px !important;
   width: 90% !important;
@@ -1575,7 +1362,7 @@
   box-shadow: none !important;
 }
 
-/* Success state styles */
+/* Scratch card success styles */
 .scratch-card-success {
   text-align: center !important;
   padding: 40px 20px !important;
@@ -1602,91 +1389,7 @@
   }
 }
 
-.success-title {
-  font-size: 32px !important;
-  font-weight: 700 !important;
-  color: #1a202c !important;
-  margin: 0 0 15px 0 !important;
-}
-
-.success-message {
-  font-size: 18px !important;
-  color: #4a5568 !important;
-  margin: 0 0 30px 0 !important;
-  line-height: 1.5 !important;
-}
-
-.success-discount-code {
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%) !important;
-  border: 2px dashed #28a745 !important;
-  border-radius: 12px !important;
-  padding: 25px !important;
-  margin: 0 0 20px 0 !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-}
-
-.success-discount-code:hover {
-  background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2) !important;
-}
-
-.success-discount-text {
-  font-size: 32px !important;
-  font-weight: 900 !important;
-  color: #28a745 !important;
-  margin: 0 0 8px 0 !important;
-  letter-spacing: 2px !important;
-  font-family: 'Courier New', monospace !important;
-}
-
-.success-discount-hint {
-  font-size: 14px !important;
-  color: #6c757d !important;
-  font-style: italic !important;
-}
-
-.success-copy-btn {
-  width: 100% !important;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
-  border: none !important;
-  color: white !important;
-  padding: 14px 24px !important;
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  margin-bottom: 15px !important;
-  font-size: 16px !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3) !important;
-}
-
-.success-copy-btn:hover {
-  background: linear-gradient(135deg, #218838 0%, #1ea085 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4) !important;
-}
-
-.success-close-btn {
-  width: 100% !important;
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
-  border: none !important;
-  color: white !important;
-  padding: 12px 20px !important;
-  border-radius: 6px !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  font-size: 14px !important;
-  transition: all 0.3s ease !important;
-}
-
-.success-close-btn:hover {
-  background: linear-gradient(135deg, #5a6268 0%, #495057 100%) !important;
-  transform: translateY(-1px) !important;
-}
-
-/* Mobile responsive styles for scratch card popup */
+/* Scratch card mobile responsive */
 @media (max-width: 768px) {
   .custom-popup.scratch-card-popup {
     max-width: 95vw !important;
@@ -1748,8 +1451,7 @@
   .scratch-instruction {
     font-size: 13px !important;
   }
-}/* Mobile responsive styles for scratch card popup for 720px ends here */
-
+}
 
 @media (max-width: 480px) {
   .custom-popup.scratch-card-popup {
@@ -1777,12 +1479,155 @@
   .scratch-card-title {
     font-size: 20px !important;
   }
-  
-  .success-title {
-    font-size: 24px !important;
-  }
-  
-  .success-discount-text {
-    font-size: 24px !important;
-  }
-}/* Mobile responsive styles for scratch card popup for 720px ends here */
+}
+/* Scratch card popup styles end here */
+
+/* ========================================
+   SHARED DISCOUNT CODE STYLES
+   ======================================== */
+
+.discount-display {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.discount-success {
+  font-size: 18px;
+  font-weight: 600;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+.discount-code-container {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px dashed #28a745;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.discount-code-container:hover {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.discount-code-text {
+  font-size: 28px;
+  font-weight: bold;
+  color: #28a745;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  user-select: all;
+  font-family: 'Courier New', monospace;
+}
+
+.discount-code-hint {
+  font-size: 14px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.copy-button {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.copy-button:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.copy-button.copied {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  animation: pulse 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.close-button {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-1px);
+}
+/* Shared discount code styles end here */
+
+/* ========================================
+   SHARED UTILITY STYLES
+   ======================================== */
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.popup-icon {
+  font-size: 24px;
+}
+
+.popup-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.popup-description {
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.popup-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.popup-button {
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s ease;
+}
+
+.popup-button:hover {
+  opacity: 0.9;
+}
+/* Shared utility styles end here */

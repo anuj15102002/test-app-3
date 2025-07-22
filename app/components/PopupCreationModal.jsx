@@ -69,6 +69,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
         placeholder: existingConfig.placeholder,
         buttonText: existingConfig.buttonText,
         discountCode: existingConfig.discountCode,
+        bannerImage: existingConfig.bannerImage || "",
         backgroundColor: existingConfig.backgroundColor,
         textColor: existingConfig.textColor,
         buttonColor: existingConfig.buttonColor,
@@ -86,6 +87,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
       placeholder: "Enter your email address",
       buttonText: "Get Discount",
       discountCode: "WELCOME10",
+      bannerImage: "",
       backgroundColor: "#ffffff",
       textColor: "#000000",
       buttonColor: "#007ace",
@@ -317,6 +319,14 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
         value={emailConfig.discountCode}
         onChange={(value) => setEmailConfig({ ...emailConfig, discountCode: value })}
         placeholder="Discount code to offer"
+      />
+      
+      <TextField
+        label="Banner Image URL"
+        value={emailConfig.bannerImage}
+        onChange={(value) => setEmailConfig({ ...emailConfig, bannerImage: value })}
+        placeholder="Enter banner image URL (optional)"
+        helpText="Upload your image to a hosting service and paste the URL here. This image will be displayed on the left side of the popup."
       />
       
       <InlineStack gap="400">

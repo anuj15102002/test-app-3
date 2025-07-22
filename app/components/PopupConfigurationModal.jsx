@@ -492,6 +492,14 @@ export default function PopupConfigurationModal({
         placeholder="Discount code to offer"
       />
       
+      <TextField
+        label="Banner Image URL"
+        value={emailConfig.bannerImage}
+        onChange={(value) => setEmailConfig({ ...emailConfig, bannerImage: value })}
+        placeholder="Enter banner image URL (optional)"
+        helpText="Upload your image to a hosting service and paste the URL here. This image will be displayed on the left side of the popup."
+      />
+      
       <InlineStack gap="400">
         <Box minWidth="200px">
           <Text as="p" variant="bodyMd">Background Color</Text>
