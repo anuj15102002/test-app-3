@@ -121,13 +121,13 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
         buttonText: existingConfig.buttonText || "TRY YOUR LUCK",
         discountCode: existingConfig.discountCode || "SAVE5",
         segments: existingConfig.segments ? JSON.parse(existingConfig.segments) : [
-          { label: '5% DISCOUNT', color: '#ff6b6b', code: 'SAVE5' },
-          { label: 'NO PRIZE', color: '#1e3c72', code: null },
-          { label: 'UNLUCKY', color: '#4ecdc4', code: null },
-          { label: '5% DISCOUNT', color: '#96ceb4', code: 'SAVE5' },
-          { label: 'NO PRIZE', color: '#ff6b6b', code: null },
-          { label: 'NEXT TIME', color: '#feca57', code: null }
-        ],
+        { label: "5% OFF", color: "#0a2a43", value: "5" },      // Dark navy
+  { label: "10% OFF", color: "#133b5c", value: "10" },    // Deep steel blue
+  { label: "15% OFF", color: "#0a2a43", value: "15" },
+  { label: "20% OFF", color: "#133b5c", value: "20" },
+  { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping" },
+  { label: "TRY AGAIN", color: "#133b5c", value: null },
+      ],
         backgroundColor: backgroundColor,
         backgroundType: backgroundType,
         textColor: "#ffffff",
@@ -145,12 +145,12 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
       buttonText: "TRY YOUR LUCK",
       discountCode: "SAVE5",
       segments: [
-        { label: '5% DISCOUNT', color: '#ff6b6b', code: 'SAVE5' },
-        { label: 'NO PRIZE', color: '#1e3c72', code: null },
-        { label: 'UNLUCKY', color: '#4ecdc4', code: null },
-        { label: '5% DISCOUNT', color: '#96ceb4', code: 'SAVE5' },
-        { label: 'NO PRIZE', color: '#ff6b6b', code: null },
-        { label: 'NEXT TIME', color: '#feca57', code: null }
+        { label: "5% OFF", color: "#0a2a43", value: "5" },      // Dark navy
+  { label: "10% OFF", color: "#133b5c", value: "10" },    // Deep steel blue
+  { label: "15% OFF", color: "#0a2a43", value: "15" },
+  { label: "20% OFF", color: "#133b5c", value: "20" },
+  { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping" },
+  { label: "TRY AGAIN", color: "#133b5c", value: null },
       ],
       backgroundColor: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
       backgroundType: "gradient",

@@ -122,7 +122,7 @@ export default function PopupConfigurationModal({
   // Wheel-Email combo configuration
   const [wheelEmailConfig, setWheelEmailConfig] = useState(() => {
     if (initialConfig && initialConfig.type === "wheel-email") {
-      const backgroundColor = initialConfig.backgroundColor || "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)";
+      const backgroundColor = initialConfig.backgroundColor || "linear-gradient(135deg, #09090aff 0%, #2a5298 100%)";
       let backgroundType = "gradient";
       
       if (backgroundColor.includes("linear-gradient") || backgroundColor.includes("radial-gradient")) {
@@ -135,18 +135,18 @@ export default function PopupConfigurationModal({
       
       return {
         title: initialConfig.title || "GET YOUR CHANCE TO WIN",
-        subtitle: "AMAZING DISCOUNTS!",
+        subtitle: initialConfig.subtitle || "AMAZING DISCOUNTS!",
         description: initialConfig.description || "Enter your email below and spin the wheel to see if you're our next lucky winner!",
-        placeholder: initialConfig.placeholder || "Your email",
+        placeholder: initialConfig.placeholder || "Enter your email",
         buttonText: initialConfig.buttonText || "TRY YOUR LUCK",
         discountCode: initialConfig.discountCode || "SAVE5",
         segments: initialConfig.segments ? JSON.parse(initialConfig.segments) : [
-          { label: '5% OFF', color: '#ff6b6b', code: 'SAVE5' },
-          { label: '10% OFF', color: '#4ecdc4', code: 'SAVE10' },
-          { label: '15% OFF', color: '#45b7d1', code: 'SAVE15' },
-          { label: '20% OFF', color: '#feca57', code: 'SAVE20' },
-          { label: 'FREE SHIPPING', color: '#ff9ff3', code: 'FREESHIP' },
-          { label: 'TRY AGAIN', color: '#54a0ff', code: null }
+          { label: '5% OFF', color: '#0a2a43', code: 'SAVE5' },
+          { label: '10% OFF', color: '#133b5c', code: 'SAVE10' },
+          { label: '15% OFF', color: '#0a2a43', code: 'SAVE15' },
+          { label: '20% OFF', color: '#133b5c', code: 'SAVE20' },
+          { label: 'FREE SHIPPING', color: '#0a2a43', code: 'FREESHIP' },
+          { label: 'TRY AGAIN', color: '#133b5c', code: null }
         ],
         backgroundColor: backgroundColor,
         backgroundType: backgroundType,
@@ -155,30 +155,40 @@ export default function PopupConfigurationModal({
         frequency: initialConfig.frequency || "once",
         exitIntent: initialConfig.exitIntent || false,
         exitIntentDelay: initialConfig.exitIntentDelay || 1000,
+        houseRules: initialConfig.houseRules || [
+          "Winnings through cheating will not be processed.",
+          "Only one spin allowed"
+        ],
+        showHouseRules: initialConfig.showHouseRules !== false,
       };
     }
     return {
       title: "GET YOUR CHANCE TO WIN",
       subtitle: "AMAZING DISCOUNTS!",
       description: "Enter your email below and spin the wheel to see if you're our next lucky winner!",
-      placeholder: "Enter your email address",
+      placeholder: "Enter your email",
       buttonText: "TRY YOUR LUCK",
       discountCode: "SAVE10",
       segments: [
-        { label: '5% OFF', color: '#ff6b6b', code: 'SAVE5' },
-        { label: '10% OFF', color: '#4ecdc4', code: 'SAVE10' },
-        { label: '15% OFF', color: '#45b7d1', code: 'SAVE15' },
-        { label: '20% OFF', color: '#feca57', code: 'SAVE20' },
-        { label: 'FREE SHIPPING', color: '#ff9ff3', code: 'FREESHIP' },
-        { label: 'TRY AGAIN', color: '#54a0ff', code: null }
+        { label: '5% OFF', color: '#0a2a43', code: 'SAVE5' },
+        { label: '10% OFF', color: '#133b5c', code: 'SAVE10' },
+        { label: '15% OFF', color: '#0a2a43', code: 'SAVE15' },
+        { label: '20% OFF', color: '#133b5c', code: 'SAVE20' },
+        { label: 'FREE SHIPPING', color: '#0a2a43', code: 'FREESHIP' },
+        { label: 'TRY AGAIN', color: '#133b5c', code: null }
       ],
-      backgroundColor: "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
+      backgroundColor: "linear-gradient(135deg, #09090aff 0%, #2a5298 100%)",
       backgroundType: "gradient",
       textColor: "#ffffff",
       displayDelay: 3000,
       frequency: "once",
       exitIntent: false,
       exitIntentDelay: 1000,
+      houseRules: [
+        "Winnings through cheating will not be processed.",
+        "Only one spin allowed"
+      ],
+      showHouseRules: true,
     };
   });
 
@@ -669,6 +679,54 @@ export default function PopupConfigurationModal({
           </InlineStack>
         ))}
       </BlockStack>
+      
+      <Text as="h4" variant="headingSm">House Rules</Text>
+      <Checkbox
+        label="Show house rules section"
+        checked={wheelEmailConfig.showHouseRules}
+        onChange={(checked) => setWheelEmailConfig({ ...wheelEmailConfig, showHouseRules: checked })}
+        helpText="Display rules and terms at the bottom of the popup"
+      />
+      
+      {wheelEmailConfig.showHouseRules && (
+        <BlockStack gap="200">
+          {wheelEmailConfig.houseRules.map((rule, index) => (
+            <InlineStack key={index} gap="200" align="center">
+              <Box minWidth="400px">
+                <TextField
+                  value={rule}
+                  onChange={(value) => {
+                    const newRules = [...wheelEmailConfig.houseRules];
+                    newRules[index] = value;
+                    setWheelEmailConfig({ ...wheelEmailConfig, houseRules: newRules });
+                  }}
+                  placeholder={`House rule ${index + 1}`}
+                />
+              </Box>
+              <Button
+                onClick={() => {
+                  const newRules = wheelEmailConfig.houseRules.filter((_, i) => i !== index);
+                  setWheelEmailConfig({ ...wheelEmailConfig, houseRules: newRules });
+                }}
+                variant="plain"
+                tone="critical"
+                disabled={wheelEmailConfig.houseRules.length <= 1}
+              >
+                Remove
+              </Button>
+            </InlineStack>
+          ))}
+          <Button
+            onClick={() => {
+              const newRules = [...wheelEmailConfig.houseRules, ""];
+              setWheelEmailConfig({ ...wheelEmailConfig, houseRules: newRules });
+            }}
+            variant="plain"
+          >
+            Add Rule
+          </Button>
+        </BlockStack>
+      )}
       
       <RangeSlider
         label={`Display Delay: ${wheelEmailConfig.displayDelay / 1000}s`}

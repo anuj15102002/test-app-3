@@ -390,7 +390,10 @@
         exitIntent: config.exitIntent,
       },
     });
+    
 
+    // emailPopup starts from here
+    
     if (config.type === "email") {
       // Show traditional email popup layout
       popup.classList.add("email-popup");
@@ -436,6 +439,12 @@
           </button>
         </div>
       `;
+
+      // email popup ends here
+
+
+      // community popup starts from here
+
     } else if (config.type === "community") {
       // Show community popup layout
       popup.classList.add("community-popup");
@@ -635,6 +644,9 @@
           }
         </div>
       `;
+        // Community popup ends here
+
+
     } else if (config.type === "timer") {
       // Show timer popup layout
       popup.classList.add("timer-popup");
@@ -702,12 +714,16 @@
 
       // Initialize scratch card popup
       initializeScratchCardPopup(config, scratchCardContent);
+
+      // scratch popup ends here 
+
+      // WHEEL POPUP Starts from here
     } else {
       // Show wheel-email combo layout
       popup.classList.remove("email-popup");
       popup.style.background =
-        config.backgroundColor ||
-        "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)";
+        // config.backgroundColor ||
+        "linear-gradient(135deg, #09090aff 0%, #2a5298 100%)";
 
       // Make responsive based on screen size
       if (window.innerWidth <= 480) {
@@ -755,13 +771,13 @@
       `;
 
       // Use vibrant, eye-catching colors for segments
-      const segments = config.segments || [
-        { label: "5% OFF", color: "#ff6b6b", value: "5" },
-        { label: "10% OFF", color: "#4ecdc4", value: "10" },
-        { label: "15% OFF", color: "#45b7d1", value: "15" },
-        { label: "20% OFF", color: "#feca57", value: "20" },
-        { label: "FREE SHIPPING", color: "#ff9ff3", value: "shipping" },
-        { label: "TRY AGAIN", color: "#54a0ff", value: null },
+      const segments = /*config.segments || */[
+        { label: "5% OFF", color: "#0a2a43", value: "5" },      // Dark navy
+  { label: "10% OFF", color: "#133b5c", value: "10" },    // Deep steel blue
+  { label: "15% OFF", color: "#0a2a43", value: "15" },
+  { label: "20% OFF", color: "#133b5c", value: "20" },
+  { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping" },
+  { label: "TRY AGAIN", color: "#133b5c", value: null },
       ];
 
       const angle = 360 / segments.length;
@@ -779,59 +795,36 @@
 
       // Create segment labels with horizontal text positioned within wheel
       const segmentLabels = segments
-        .map((segment, index) => {
-          const segmentAngle =
-            (360 / segments.length) * index + 360 / segments.length / 2;
+  .map((segment, index) => {
+    const segmentAngle = (360 / segments.length) * index + 360 / segments.length / 2;
 
-          // Responsive radius and font size based on screen size
-          let radius, fontSize, maxWidth, height;
-          if (window.innerWidth <= 480) {
-            radius = 50; // For 140px wheel
-            fontSize = "9px";
-            maxWidth = "45px";
-            height = "20px";
-          } else if (window.innerWidth <= 768) {
-            radius = 60; // For 180px wheel
-            fontSize = "11px";
-            maxWidth = "60px";
-            height = "22px";
-          } else {
-            radius = 75; // For 220px wheel
-            fontSize = "13px";
-            maxWidth = "75px";
-            height = "24px";
-          }
+    let radius = window.innerWidth <= 480 ? 55 : window.innerWidth <= 768 ? 70 : 90;
+    let fontSize = window.innerWidth <= 480 ? "10px" : window.innerWidth <= 768 ? "12px" : "14px";
 
-          const x = Math.cos(((segmentAngle - 90) * Math.PI) / 180) * radius;
-          const y = Math.sin(((segmentAngle - 90) * Math.PI) / 180) * radius;
+    const x = Math.cos(((segmentAngle - 90) * Math.PI) / 180) * radius;
+    const y = Math.sin(((segmentAngle - 90) * Math.PI) / 180) * radius;
 
-          return `
-          <div class="wheel-segment-label" style="
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%) translate(${x}px, ${y}px);
-            font-size: ${fontSize};
-            font-weight: 800;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 2px rgba(0,0,0,0.8);
-            pointer-events: none;
-            text-align: center;
-            line-height: 1.1;
-            max-width: ${maxWidth};
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: ${height};
-            letter-spacing: 0.5px;
-          ">
-            ${segment.label}
-          </div>
-        `;
-        })
-        .join("");
-
+    return `
+      <div class="wheel-segment-label" style="
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${segmentAngle}deg);
+        font-size: ${fontSize};
+        font-weight: bold;
+        text-transform: uppercase;
+        color: white;
+        letter-spacing: 0.5px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        max-width: 60px;
+        text-align: center;
+        pointer-events: none;
+      ">
+        ${segment.label}
+      </div>
+    `;
+  })
+  .join("");
       // Create the wheel with premium styling
       wheelContainer.innerHTML = `
         <div class="spinning-wheel" id="spinning-wheel" style="
@@ -849,7 +842,7 @@
               transform: translate(-50%, -50%);
               width: 8px;
               height: 8px;
-              background: #64748b;
+              background: #08162aff;
               border-radius: 50%;
               box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
             "></div>
@@ -860,12 +853,21 @@
 
       // Create the form
       const formElement = formSection.querySelector(".popup-form");
-      formElement.innerHTML = `
-        <input type="email" class="email-input" id="popup-email" placeholder="${config.placeholder || "Your email"}" />
-        <button class="spin-button" onclick="handleEmailAndSpin()">
-          ${config.buttonText || "TRY YOUR LUCK"}
-        </button>
-      `;
+    formElement.innerHTML = `
+ <input type="email" class="email-input" id="popup-email" placeholder="Enter your email" />
+  <button class="spin-button" onclick="handleEmailAndSpin()" style="
+    background: linear-gradient(45deg, #0a2a43, #133b5c);
+    color: white;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+  ">
+    ${config.buttonText || "TRY YOUR LUCK"}
+  </button>
+`;
     }
 
     // Set localStorage - but not for "always" frequency

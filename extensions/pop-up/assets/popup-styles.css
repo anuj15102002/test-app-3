@@ -108,12 +108,26 @@
   font-weight: 500;
 }
 
+
+/* .email-input {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 18px;
+  background: #f9fafb;
+  font-size: 14px;
+  color: #0a2a43;
+  transition: all 0.3s ease;
+} */
+
+
 .email-input {
   width: 100%;
   padding: 14px 18px;
   border: 2px solid rgba(148, 163, 184, 0.2);
   border-radius: 12px;
-  margin-bottom: 18px;
+  margin-bottom: px;
   font-size: 16px;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.8);
@@ -124,11 +138,29 @@
 
 .email-input:focus {
   outline: none;
+  border-color: #133b5c;
+  box-shadow: 0 0 5px rgba(19, 59, 92, 0.4);
+  transform: translateY(-1px);
+}
+
+
+.popup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Adjust: 6px, 8px, or 10px for a premium look */
+  padding: 0;
+  margin: 0;
+}
+
+
+/* .email-input:focus {
+  outline: none;
   border-color: #3b82f6;
   background: rgba(255, 255, 255, 1);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   transform: translateY(-1px);
 }
+*/ */
 
 .email-input::placeholder {
   color: #94a3b8;
@@ -281,19 +313,29 @@
   opacity: 0.9;
 }
 
+/* 
 .spinning-wheel {
-  width: 220px;
-  height: 220px;
+  border: 4px solid rgba(255, 255, 255, 0.15); 
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+*/
+
+
+.spinning-wheel {
+  width: 280px;
+  height: 280px;
   border-radius: 50%;
-  border: 4px solid rgba(255, 255, 255, 0.9);
+  border: 4px solid rgba(255, 255, 255, 0.15); 
   position: relative;
   transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
   transform: rotate(0deg);
   box-shadow:
-    0 10px 35px rgba(0, 0, 0, 0.2),
-    0 4px 15px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
+    0 8px 25px rgba(0, 0, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
   margin: 0 auto;
 }
 
@@ -340,10 +382,17 @@
   border-left: 22px solid #f1f5f9;
 }
 
+
+
+
+
 .wheel-segment-label {
-  font-family: Arial, sans-serif;
-  user-select: none;
-  z-index: 1;
+  font-family: "Arial", sans-serif;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+  white-space: normal;
+  word-break: break-word;
 }
 
 @media (max-width: 768px) {
@@ -370,6 +419,10 @@
     border-radius: 20px 20px 0 0;
   }
   
+
+
+
+
   .spinning-wheel {
     width: 180px;
     height: 180px;
@@ -493,6 +546,9 @@
   width: 100% !important;
   padding: 24px !important;
 }
+
+
+
 
 
 /* Email popup styles ends here
@@ -1692,7 +1748,8 @@
   .scratch-instruction {
     font-size: 13px !important;
   }
-}
+}/* Mobile responsive styles for scratch card popup for 720px ends here */
+
 
 @media (max-width: 480px) {
   .custom-popup.scratch-card-popup {
@@ -1728,4 +1785,4 @@
   .success-discount-text {
     font-size: 24px !important;
   }
-}
+}/* Mobile responsive styles for scratch card popup for 720px ends here */

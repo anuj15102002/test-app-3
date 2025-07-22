@@ -196,28 +196,26 @@ function createEmailPopupContent(config) {
  */
 function createWheelEmailPopupContent(config) {
   const segments = config.segments || [
-    { label: '5% OFF', color: '#ff6b6b', code: 'SAVE5' },
-    { label: '10% OFF', color: '#4ecdc4', code: 'SAVE10' },
-    { label: '15% OFF', color: '#45b7d1', code: 'SAVE15' },
-    { label: '20% OFF', color: '#feca57', code: 'SAVE20' },
-    { label: 'FREE SHIPPING', color: '#ff9ff3', code: 'FREESHIP' },
-    { label: 'TRY AGAIN', color: '#54a0ff', code: null }
+    { label: "5% OFF", color: "#0a2a43", value: "5" },
+    { label: "10% OFF", color: "#133b5c", value: "10" },
+    { label: "15% OFF", color: "#0a2a43", value: "15" },
+    { label: "20% OFF", color: "#133b5c", value: "20" },
+    { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping" },
+    { label: "TRY AGAIN", color: "#133b5c", value: null },
   ];
 
-  // Create gradient for wheel
   const gradient = segments.map((s, i) => {
     const startAngle = i * (360 / segments.length);
-    const endAngle = (i + 1) * (360 / segments.length);
+    const endAngle = (i + 1) * (360 / segments.length) + 0.2; // tiny overlap
     return `${s.color} ${startAngle}deg ${endAngle}deg`;
-  }).join(', ');
+  }).join(", ");
 
-  // Create segment labels
   const segmentLabels = segments.map((segment, index) => {
     const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
     const radius = 95;
     const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
     const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
-    
+
     return `
       <div class="wheel-segment-label" style="
         position: absolute;
@@ -227,90 +225,64 @@ function createWheelEmailPopupContent(config) {
         font-size: 13px;
         font-weight: 800;
         color: white;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 1px 1px 2px rgba(0,0,0,0.8);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
         pointer-events: none;
         text-align: center;
-        line-height: 1.1;
+        line-height: 1.2;
         max-width: 75px;
         overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 24px;
-        letter-spacing: 0.5px;
       ">
         ${segment.label}
       </div>
     `;
-  }).join('');
+  }).join("");
 
   return `
     <div class="wheel-email-popup-container" style="
-      background: ${config.backgroundColor || 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'};
+      background: #0b1220;
       border-radius: 20px;
       overflow: hidden;
       position: relative;
-      padding: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      border: 2px solid rgba(255, 255, 255, 0.2);
+      padding: 25px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
       display: flex;
       align-items: center;
-      min-height: 240px;
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto;
     ">
-      ${config.showCloseButton !== false ? `
-        <button class="popup-close" style="
-          position: absolute;
-          top: 15px;
-          right: 15px;
-          background: rgba(255, 255, 255, 0.2);
-          border: none;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          font-size: 18px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-        ">&times;</button>
-      ` : ''}
-      
       <!-- Wheel Section -->
       <div class="wheel-section" style="
-        width: 320px;
+        width: 300px;
         display: flex;
         align-items: center;
         justify-content: center;
         padding-right: 0;
-        overflow: hidden;
       ">
         <div class="popup-wheel-container">
           <div class="spinning-wheel" style="
-            width: 220px;
-            height: 220px;
+            width: 250px;
+            height: 250px;
             border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.8);
+            border: 4px solid rgba(10, 20, 40, 0.7);
             position: relative;
             background: conic-gradient(${gradient});
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2), 0 4px 15px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4),
+                        0 4px 15px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
             margin: 0 auto;
           ">
             <div class="wheel-pointer" style="
               position: absolute;
               top: 50%;
-              right: -18px;
+              right: -20px;
               transform: translateY(-50%);
               width: 0;
               height: 0;
               border-top: 16px solid transparent;
               border-bottom: 16px solid transparent;
               border-left: 28px solid #fbbf24;
-              z-index: 10;
-              filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+              filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
             "></div>
             <div class="wheel-center" style="
               position: absolute;
@@ -318,12 +290,13 @@ function createWheelEmailPopupContent(config) {
               left: 50%;
               transform: translate(-50%, -50%);
               background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-              width: 40px;
-              height: 40px;
+              width: 45px;
+              height: 45px;
               border-radius: 50%;
               border: 3px solid rgba(148, 163, 184, 0.3);
               z-index: 5;
-              box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+              box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2),
+                          inset 0 1px 0 rgba(255, 255, 255, 0.8);
             ">
               <div style="
                 position: absolute;
@@ -345,29 +318,25 @@ function createWheelEmailPopupContent(config) {
       <!-- Form Section -->
       <div class="form-section" style="
         flex: 1;
-        padding: 25px 30px;
+        padding: 0 30px;
         color: #1f2937;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-        backdrop-filter: blur(10px);
+        background: #ffffff;
         border-radius: 0 20px 20px 0;
-        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
       ">
         <div class="form-title" style="
           font-size: 20px;
           font-weight: 700;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
           color: #0f172a;
-          letter-spacing: -0.3px;
         ">${config.title || 'GET YOUR CHANCE TO WIN'}</div>
         
         <div class="form-subtitle" style="
           font-size: 14px;
-          margin-bottom: 15px;
+          margin-bottom: 12px;
           color: #475569;
-          line-height: 1.3;
           font-weight: 500;
         ">${config.subtitle || 'AMAZING DISCOUNTS!'}</div>
         
@@ -375,66 +344,66 @@ function createWheelEmailPopupContent(config) {
           font-size: 12px;
           margin-bottom: 15px;
           color: #64748b;
-          line-height: 1.3;
-          font-weight: 400;
         ">${config.description || 'Enter your email below and spin the wheel to see if you are our next lucky winner!'}</p>
         
         <div class="popup-form">
-          <input type="email" class="email-input" placeholder="${config.placeholder || 'Your email'}" style="
+          <input type="email" class="email-input" placeholder="${config.placeholder || 'Enter your email'}" style="
             width: 100%;
             padding: 14px 18px;
             border: 2px solid rgba(148, 163, 184, 0.2);
             border-radius: 12px;
-            margin-bottom: 18px;
+            margin-bottom: 10px;
             font-size: 16px;
-            box-sizing: border-box;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             color: #1e293b;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
           " readonly />
           <button class="spin-button" style="
             width: 100%;
             padding: 14px 20px;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: linear-gradient(45deg, #0a2a43, #133b5c);
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             color: white;
             font-size: 15px;
             font-weight: 700;
-            cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 0.6px;
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
           ">
             ${config.buttonText || 'TRY YOUR LUCK'}
           </button>
         </div>
         
-        <div class="house-rules" style="
-          margin-top: 12px;
-          font-size: 10px;
-          color: #64748b;
-          text-align: left;
-        ">
-          <h4 style="
-            margin: 0 0 4px 0;
-            font-size: 11px;
-            color: #475569;
-            font-weight: 600;
-          ">The House rules:</h4>
-          <ul style="
-            margin: 0;
-            padding-left: 15px;
-            list-style-type: disc;
+        ${config.showHouseRules !== false ? `
+          <div class="house-rules" style="
+            margin-top: 10px;
+            font-size: 10px;
+            color: #64748b;
           ">
-            <li style="margin-bottom: 4px; line-height: 1.3;">Winnings through cheating will not be processed.</li>
-            <li style="margin-bottom: 4px; line-height: 1.3;">Only one spin allowed</li>
-          </ul>
-        </div>
+            <h4 style="
+              margin: 0 0 4px 0;
+              font-size: 11px;
+              color: #475569;
+              font-weight: 600;
+            ">The House rules:</h4>
+            <ul style="
+              margin: 0;
+              padding-left: 15px;
+              list-style-type: disc;
+            ">
+              ${(config.houseRules || [
+                "Winnings through cheating will not be processed.",
+                "Only one spin allowed"
+              ]).map(rule => `<li style="margin-bottom: 4px;">${rule}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
       </div>
     </div>
   `;
 }
+
 
 /**
  * Community popup content - exact match with storefront implementation
