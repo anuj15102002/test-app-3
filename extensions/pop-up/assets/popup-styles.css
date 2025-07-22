@@ -469,6 +469,9 @@
     font-size: 10px;
   }
 }
+/* Wheel Popup styles ends here */
+
+
 
 /* Email popup specific styles */
 .custom-popup.email-popup {
@@ -490,6 +493,9 @@
   width: 100% !important;
   padding: 24px !important;
 }
+
+
+/* Email popup styles ends here
 
 /* Community popup specific styles */
 .custom-popup.community-popup {
@@ -662,6 +668,7 @@
     font-size: 18px;
   }
 }
+/* Community popup styles ends here */
 
 /* Discount code styles */
 .discount-display {
@@ -754,6 +761,9 @@
   background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
   transform: translateY(-1px);
 }
+/* Dicount code styles ends here */
+
+
 
 /* Timer popup specific styles */
 .custom-popup.timer-popup {
@@ -1085,6 +1095,10 @@
     font-size: 14px !important;
   }
 }
+/* Timer popup style ends here */
+
+
+
 
 /* Enhanced wheel spinning animations */
 .spinning-wheel.spinning {
