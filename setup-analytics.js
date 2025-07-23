@@ -17,7 +17,7 @@ try {
 }
 
 // Check if migration file exists
-const migrationPath = path.join(__dirname, 'prisma/migrations/20250712142000_add_popup_analytics/migration.sql');
+const migrationPath = path.join(__dirname, 'prisma/migratgitions/20250712142000_add_popup_analytics/migration.sql');
 if (fs.existsSync(migrationPath)) {
   console.log('✅ Analytics migration file found');
 } else {

@@ -1,17 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * PopupPreview - A reusable React component that renders the exact same UI as the storefront popup
- * 
- * This component extracts the actual popup rendering logic from the storefront popup.js
- * and makes it available as a React component with props-based configuration.
- * 
- * Features:
- * - Uses the same CSS and JS logic as the live storefront popup
- * - Accepts all configuration via props
- * - Updates in real-time when configuration changes
- * - Disables interactive logic while maintaining 100% visual consistency
- * - Supports all popup types: email, wheel-email, community, timer, scratch-card
+ * PopupPreview - A reusable React component that renders pixel-perfect previews of storefront popups
+ *
+ * This component is the heart of the live preview system in the popup configuration modal.
+ * It takes popup configuration data and renders the exact same HTML/CSS that would appear
+ * on the actual storefront, but in a safe preview environment.
+ *
+ * Key Features:
+ * - 100% Visual Consistency: Uses identical HTML structure and CSS as storefront popups
+ * - Real-time Updates: Automatically re-renders when configuration props change
+ * - All Popup Types: Supports email, wheel-email, community, timer, and scratch-card popups
+ * - Interactive Control: Can disable interactions for safe preview mode
+ * - Responsive Design: Adapts to different container sizes while maintaining proportions
+ * - Performance Optimized: Efficiently handles frequent configuration updates
+ *
+ * Technical Implementation:
+ * - Extracts rendering logic from storefront popup.js into reusable functions
+ * - Uses React refs to directly manipulate DOM for complex popup types
+ * - Maintains separation between preview logic and actual storefront functionality
+ * - Handles cleanup to prevent memory leaks during frequent re-renders
+ *
+ * Props:
+ * @param {object} config - Complete popup configuration object
+ * @param {string} type - Popup type ('email', 'wheel-email', 'community', 'timer', 'scratch-card')
+ * @param {string} className - Additional CSS classes for styling
+ * @param {object} style - Inline styles for the preview container
+ * @param {boolean} disableInteractions - Whether to disable interactive elements (default: true)
  */
 export default function PopupPreview({ 
   config, 
@@ -20,10 +35,18 @@ export default function PopupPreview({
   style = {},
   disableInteractions = true 
 }) {
-  const popupRef = useRef(null);
-  const [isRendered, setIsRendered] = useState(false);
+  // ============================================================================
+  // COMPONENT STATE AND REFS
+  // ============================================================================
+  
+  const popupRef = useRef(null); // Direct DOM reference for popup container
+  const [isRendered, setIsRendered] = useState(false); // Track rendering state
 
-  // Initialize popup rendering when config changes
+  // ============================================================================
+  // MAIN RENDERING EFFECT
+  // ============================================================================
+  
+  // Re-render popup whenever configuration changes
   useEffect(() => {
     if (!config || !popupRef.current) return;
 
@@ -42,6 +65,10 @@ export default function PopupPreview({
     };
   }, [config, type, disableInteractions]);
 
+  // ============================================================================
+  // COMPONENT RENDER
+  // ============================================================================
+  
   return (
     <div 
       ref={popupRef}
@@ -56,9 +83,21 @@ export default function PopupPreview({
   );
 }
 
+// ============================================================================
+// CORE RENDERING FUNCTIONS
+// ============================================================================
+
 /**
- * Renders the actual storefront popup using the same logic as popup.js
- * This function extracts and adapts the popup rendering logic from the storefront
+ * Main popup rendering function - orchestrates the entire popup creation process
+ *
+ * This function replicates the exact rendering logic used in the storefront popup.js
+ * but adapts it for the React preview environment. It handles:
+ * - HTML structure generation
+ * - CSS styling application
+ * - Type-specific functionality initialization
+ *
+ * @param {HTMLElement} container - DOM element to render popup into
+ * @param {object} options - Rendering options (type, config, disableInteractions)
  */
 function renderStorefrontPopup(container, { type, config, disableInteractions }) {
   // Create the popup structure using the same HTML as the storefront
@@ -75,7 +114,15 @@ function renderStorefrontPopup(container, { type, config, disableInteractions })
 }
 
 /**
- * Creates the popup HTML structure identical to the storefront popup
+ * HTML Structure Generator - creates the base popup container and content
+ *
+ * This function generates the foundational HTML structure that all popup types share.
+ * It ensures consistency with the storefront implementation while providing the
+ * flexibility needed for different popup types.
+ *
+ * @param {string} type - Popup type identifier
+ * @param {object} config - Popup configuration object
+ * @returns {string} Complete HTML string for the popup
  */
 function createPopupHTML(type, config) {
   const baseHTML = `
@@ -90,7 +137,15 @@ function createPopupHTML(type, config) {
 }
 
 /**
- * Generates type-specific popup content using the same logic as popup.js
+ * Content Router - directs to appropriate content generator based on popup type
+ *
+ * This function acts as a router, calling the appropriate content generation
+ * function based on the popup type. Each popup type has its own specialized
+ * content generator that handles the unique requirements of that type.
+ *
+ * @param {string} type - Popup type identifier
+ * @param {object} config - Popup configuration object
+ * @returns {string} Type-specific HTML content
  */
 function getPopupTypeContent(type, config) {
   switch (type) {
@@ -109,8 +164,25 @@ function getPopupTypeContent(type, config) {
   }
 }
 
+// ============================================================================
+// POPUP TYPE-SPECIFIC CONTENT GENERATORS
+// ============================================================================
+
 /**
- * Email popup content - exact match with storefront implementation
+ * Email Popup Content Generator
+ *
+ * Creates the HTML structure for simple email capture popups. This type focuses
+ * on collecting email addresses in exchange for discount codes or newsletter signups.
+ *
+ * Features Generated:
+ * - Clean, centered layout with customizable colors
+ * - Email input field with validation styling
+ * - Call-to-action button with hover effects
+ * - Optional close button
+ * - Responsive design for all screen sizes
+ *
+ * @param {object} config - Email popup configuration
+ * @returns {string} Complete HTML for email popup
  */
 function createEmailPopupContent(config) {
   return `
@@ -192,7 +264,26 @@ function createEmailPopupContent(config) {
 }
 
 /**
- * Wheel-Email popup content - exact match with storefront implementation
+ * Wheel-Email Combo Content Generator
+ *
+ * Creates the most complex popup type combining a spinning wheel game with email capture.
+ * This popup type is highly engaging and includes sophisticated visual elements.
+ *
+ * Features Generated:
+ * - Interactive spinning wheel with customizable segments
+ * - Conic gradient backgrounds for wheel segments
+ * - Precise mathematical positioning of segment labels
+ * - Two-panel layout (wheel + form)
+ * - House rules section with customizable terms
+ * - Advanced styling with gradients and shadows
+ *
+ * Technical Details:
+ * - Uses conic-gradient CSS for wheel segments
+ * - Calculates segment positions using trigonometry
+ * - Implements responsive sizing for different screen sizes
+ *
+ * @param {object} config - Wheel-email popup configuration
+ * @returns {string} Complete HTML for wheel-email popup
  */
 function createWheelEmailPopupContent(config) {
   const segments = config.segments || [
@@ -404,9 +495,27 @@ function createWheelEmailPopupContent(config) {
   `;
 }
 
-
 /**
- * Community popup content - exact match with storefront implementation
+ * Community Social Popup Content Generator
+ *
+ * Creates social media follow popups designed to grow social media presence.
+ * This popup type emphasizes visual appeal with banner images and social icons.
+ *
+ * Features Generated:
+ * - Banner image section at the top
+ * - Customizable social media icons with platform-specific styling
+ * - Dynamic icon generation based on enabled platforms
+ * - "Ask me later" functionality for user-friendly dismissal
+ * - Responsive layout that works on all devices
+ *
+ * Social Platforms Supported:
+ * - Facebook (with brand colors)
+ * - Instagram (with gradient background)
+ * - LinkedIn (with brand colors)
+ * - X/Twitter (with brand colors)
+ *
+ * @param {object} config - Community popup configuration
+ * @returns {string} Complete HTML for community popup
  */
 function createCommunityPopupContent(config) {
   const socialIcons = config.socialIcons || [
@@ -567,7 +676,28 @@ function createCommunityPopupContent(config) {
 }
 
 /**
- * Timer popup content - exact match with storefront implementation
+ * Timer Countdown Popup Content Generator
+ *
+ * Creates urgency-driven popups with countdown timers to encourage immediate action.
+ * This popup type is highly effective for limited-time offers and flash sales.
+ *
+ * Features Generated:
+ * - Customizable countdown timer with days, hours, minutes, seconds
+ * - Dynamic timer display that adapts based on duration
+ * - Gradient backgrounds for visual appeal
+ * - Email capture form integrated with timer
+ * - Configurable expiration behavior
+ * - Success and expired state messaging
+ * - Disclaimer text for legal compliance
+ *
+ * Timer Features:
+ * - Responsive timer units that hide when zero
+ * - Professional styling with glassmorphism effects
+ * - Customizable icons and colors
+ * - Multiple expiration handling options
+ *
+ * @param {object} config - Timer popup configuration
+ * @returns {string} Complete HTML for timer popup
  */
 function createTimerPopupContent(config) {
   return `
@@ -771,7 +901,27 @@ function createTimerPopupContent(config) {
 }
 
 /**
- * Scratch card popup content - exact match with storefront implementation
+ * Scratch Card Popup Content Generator
+ *
+ * Creates interactive scratch-to-reveal discount popups that gamify the discount
+ * discovery process. This popup type provides high engagement through interactivity.
+ *
+ * Features Generated:
+ * - Canvas-based scratch card with realistic scratch effects
+ * - Responsive sizing based on screen dimensions
+ * - Hidden discount reveal with dynamic percentages
+ * - Two-panel layout (scratch card + form)
+ * - Email capture with terms agreement checkbox
+ * - Progressive disclosure of discount information
+ *
+ * Technical Implementation:
+ * - Responsive canvas sizing for different devices
+ * - Layered design with scratch overlay and hidden content
+ * - Dynamic discount percentage generation
+ * - Touch and mouse interaction support
+ *
+ * @param {object} config - Scratch card popup configuration
+ * @returns {string} Complete HTML for scratch card popup
  */
 function createScratchCardPopupContent(config) {
   // Generate random discount percentage (5%, 10%, 15%, 20%, 25%, 30%)
@@ -963,8 +1113,25 @@ function createScratchCardPopupContent(config) {
   `;
 }
 
+// ============================================================================
+// STYLING AND INTERACTION FUNCTIONS
+// ============================================================================
+
 /**
- * Apply popup styling - matches storefront CSS
+ * Popup Styling Applicator
+ *
+ * Applies base styling that's consistent across all popup types. This ensures
+ * that all popups have the same foundational appearance and typography that
+ * matches the storefront implementation.
+ *
+ * Applied Styles:
+ * - System font stack for cross-platform consistency
+ * - Base font size and line height
+ * - Consistent spacing and layout principles
+ *
+ * @param {HTMLElement} container - Popup container element
+ * @param {string} type - Popup type for type-specific styling
+ * @param {object} config - Configuration for dynamic styling
  */
 function applyPopupStyling(container, type, config) {
   // Add base popup styles that match the storefront
@@ -977,7 +1144,31 @@ function applyPopupStyling(container, type, config) {
 }
 
 /**
- * Initialize popup type-specific functionality (disabled for preview)
+ * Interactive Functionality Controller
+ *
+ * This function would normally initialize all the interactive features of popups
+ * such as wheel spinning, timer countdowns, scratch card interactions, and form
+ * submissions. However, for preview mode, these interactions are disabled to
+ * provide a safe, non-functional preview environment.
+ *
+ * Interactive Features (Disabled in Preview):
+ * - Wheel spinning animations and result calculation
+ * - Live countdown timer updates
+ * - Canvas-based scratch card interactions
+ * - Form validation and submission
+ * - Close button functionality
+ * - Exit intent detection
+ *
+ * Preview Mode Behavior:
+ * - All buttons become non-interactive
+ * - Input fields are set to readonly
+ * - Animations are paused or simplified
+ * - No network requests are made
+ *
+ * @param {HTMLElement} container - Popup container element
+ * @param {string} type - Popup type for type-specific initialization
+ * @param {object} config - Configuration for interactive features
+ * @param {boolean} disableInteractions - Whether to disable all interactions
  */
 function initializePopupType(container, type, config, disableInteractions) {
   // This function would normally initialize interactive features like:

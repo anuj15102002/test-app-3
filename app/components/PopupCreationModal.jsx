@@ -1,3 +1,17 @@
+/**
+ * PopupCreationModal Component
+ *
+ * This is the main popup creation and editing interface. It provides a comprehensive
+ * configuration panel for all popup types with live preview functionality.
+ *
+ * Key Features:
+ * - Two-panel layout: Configuration settings on left, live preview on right
+ * - Supports multiple popup types: email, wheel-email, community, timer, scratch-card
+ * - Real-time preview updates as user changes settings
+ * - Page targeting configuration for controlling where popups appear
+ * - Advanced settings for display frequency, exit intent, etc.
+ */
+
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useFetcher } from "@remix-run/react";
 import {
@@ -23,16 +37,27 @@ import { EmailIcon } from "@shopify/polaris-icons";
 import PopupPreview from "./PopupPreview";
 
 export default function PopupCreationModal({ active, onClose, existingConfig, initialPopupType }) {
-  const fetcher = useFetcher();
-  const shopify = useAppBridge();
+  // ============================================================================
+  // HOOKS AND STATE MANAGEMENT
+  // ============================================================================
+  
+  const fetcher = useFetcher(); // For submitting form data to server
+  const shopify = useAppBridge(); // For showing toast notifications
   
   // Initialize popup type from props, existing config, or default to wheel-email
   const [popupType, setPopupType] = useState(initialPopupType || existingConfig?.type || "wheel-email");
   
-  // State for realtime preview
+  // State for controlling the full-screen realtime preview overlay
   const [showRealtimePreview, setShowRealtimePreview] = useState(false);
   
-  // Page targeting state
+  // ============================================================================
+  // PAGE TARGETING STATE
+  // ============================================================================
+  
+  // Controls where the popup appears on the storefront
+  // - targetAllPages: Show popup on every page of the store
+  // - targetSpecificPages: Show popup only on selected pages
+  // - selectedPages: Array of specific pages where popup should appear
   const [pageTargeting, setPageTargeting] = useState(() => {
     if (existingConfig) {
       return {
@@ -48,7 +73,8 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     };
   });
   
-  // Storefront pages state
+  // Stores all available pages from the Shopify store for page targeting
+  // Fetched from the API and includes collections, products, custom pages, etc.
   const [storefrontPages, setStorefrontPages] = useState({
     collections: [],
     products: [],
@@ -57,10 +83,18 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
   });
   const [pagesLoading, setPagesLoading] = useState(false);
   
-  // Custom URL state
+  // For adding custom URL patterns in page targeting
   const [customUrl, setCustomUrl] = useState('');
   
-  // Email popup configuration
+  // ============================================================================
+  // POPUP CONFIGURATION STATE
+  // ============================================================================
+  
+  // EMAIL POPUP CONFIGURATION
+  // Contains all settings for email capture popups including:
+  // - Visual appearance (colors, text, images)
+  // - Behavior settings (delays, frequency, exit intent)
+  // - Content (title, description, button text, discount codes)
   const [emailConfig, setEmailConfig] = useState(() => {
     if (existingConfig && existingConfig.type === "email") {
       return {
@@ -100,7 +134,11 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     };
   });
 
-  // Wheel-Email combo configuration
+  // WHEEL-EMAIL COMBO CONFIGURATION
+  // Contains settings for spinning wheel popups with email capture including:
+  // - Wheel segments (prizes, colors, discount codes)
+  // - Background styling (gradients, solid colors, custom CSS)
+  // - Game mechanics and prize distribution
   const [wheelEmailConfig, setWheelEmailConfig] = useState(() => {
     if (existingConfig && existingConfig.type === "wheel-email") {
       const backgroundColor = existingConfig.backgroundColor || "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)";
@@ -164,7 +202,11 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     };
   });
 
-  // Community popup configuration
+  // COMMUNITY SOCIAL POPUP CONFIGURATION
+  // Contains settings for social media follow popups including:
+  // - Social platform links (Facebook, Instagram, LinkedIn, X/Twitter)
+  // - Banner images and branding
+  // - "Ask me later" functionality for non-intrusive user experience
   const [communityConfig, setCommunityConfig] = useState(() => {
     if (existingConfig && existingConfig.type === "community") {
       return {
@@ -214,7 +256,12 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     };
   });
 
-  // Fetch storefront pages
+  // ============================================================================
+  // API FUNCTIONS
+  // ============================================================================
+  
+  // Fetches all available pages from the Shopify store for page targeting
+  // This includes collections, products, custom pages, and static pages
   const fetchStorefrontPages = useCallback(async () => {
     if (pagesLoading || storefrontPages.staticPages.length > 0) return;
     
@@ -240,6 +287,12 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     }
   }, [active, fetchStorefrontPages]);
 
+  // ============================================================================
+  // SAVE AND SUBMIT FUNCTIONS
+  // ============================================================================
+  
+  // Handles saving the popup configuration to the server
+  // Combines the current popup type config with page targeting settings
   const handleSaveConfig = useCallback(() => {
     const config = popupType === "email" ? emailConfig : (popupType === "community" ? communityConfig : wheelEmailConfig);
     
@@ -260,7 +313,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     );
   }, [popupType, emailConfig, wheelEmailConfig, communityConfig, pageTargeting, fetcher]);
 
-  // Handle fetcher response
+  // Handle server response after saving configuration
   useEffect(() => {
     if (fetcher.data) {
       if (fetcher.data.success) {
@@ -272,12 +325,19 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     }
   }, [fetcher.data, shopify, onClose]);
 
+  // ============================================================================
+  // RENDER FUNCTIONS - CONFIGURATION PANELS
+  // ============================================================================
+  
+  // Available popup types for the dropdown selector
   const popupTypeOptions = [
     { label: "Email Discount Popup", value: "email" },
     { label: "Wheel + Email Combo", value: "wheel-email" },
     { label: "Community Social Popup", value: "community" },
   ];
 
+  // EMAIL POPUP CONFIGURATION PANEL
+  // Renders all form fields for configuring email capture popups
   const renderEmailConfig = () => (
     <BlockStack gap="400">
       <Text as="h3" variant="headingMd">Email Popup Configuration</Text>
@@ -427,6 +487,8 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     </BlockStack>
   );
 
+  // WHEEL-EMAIL COMBO CONFIGURATION PANEL
+  // Renders form fields for spinning wheel popups including segment configuration
   const renderWheelEmailConfig = () => (
     <BlockStack gap="400">
       <Text as="h3" variant="headingMd">Wheel + Email Combo Configuration</Text>
@@ -630,6 +692,8 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     </BlockStack>
   );
 
+  // COMMUNITY SOCIAL POPUP CONFIGURATION PANEL
+  // Renders form fields for social media follow popups with platform links
   const renderCommunityConfig = () => (
     <BlockStack gap="400">
       <Text as="h3" variant="headingMd">Community Social Popup Configuration</Text>
@@ -789,6 +853,12 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     </BlockStack>
   );
 
+  // ============================================================================
+  // RENDER FUNCTIONS - PREVIEW AND UTILITIES
+  // ============================================================================
+  
+  // LIVE PREVIEW PANEL
+  // Shows a real-time preview of the popup as user configures settings
   const renderPreview = () => {
     const config = popupType === "email" ? emailConfig : (popupType === "community" ? communityConfig : wheelEmailConfig);
     const badgeText = popupType === "email" ? "Email Popup" : (popupType === "community" ? "Community Social Popup" : "Wheel + Email Combo");
@@ -819,7 +889,8 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     );
   };
 
-  // Realtime popup preview component using PopupPreview
+  // FULL-SCREEN REALTIME PREVIEW OVERLAY
+  // Shows popup in full-screen overlay to simulate real user experience
   const renderRealtimePopup = () => {
     if (!showRealtimePreview) return null;
 
@@ -904,7 +975,8 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     );
   };
 
-  // Render page targeting configuration
+  // PAGE TARGETING CONFIGURATION PANEL
+  // Allows users to choose where popups appear (all pages vs specific pages)
   const renderPageTargeting = () => {
     return (
       <BlockStack gap="400">
@@ -1141,8 +1213,13 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
     );
   };
 
+  // ============================================================================
+  // MAIN COMPONENT RENDER
+  // ============================================================================
+  
   return (
     <>
+      {/* Custom CSS for full-screen modal layout */}
       <style>
         {`
           .Polaris-Modal-Dialog--sizeFullScreen {
@@ -1178,6 +1255,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
           }
         `}
       </style>
+      {/* Main Configuration Modal */}
       <Modal
         open={active}
         onClose={onClose}
@@ -1200,7 +1278,9 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
         size="fullScreen"
       >
       <Modal.Section>
+        {/* Two-panel layout: Settings on left, Preview on right */}
         <div className="popup-config-layout">
+          {/* Left Panel: Configuration Settings */}
           <div className="popup-config-settings">
             <Card>
               <BlockStack gap="500">
@@ -1233,6 +1313,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
             </Card>
           </div>
           
+          {/* Right Panel: Live Preview */}
           <div className="popup-config-preview">
             <BlockStack gap="500">
               {renderPreview()}
@@ -1263,7 +1344,7 @@ export default function PopupCreationModal({ active, onClose, existingConfig, in
         </div>
       </Modal.Section>
 
-      {/* Realtime Popup Preview */}
+      {/* Full-screen overlay preview when user clicks "Show Realtime Preview" */}
       {renderRealtimePopup()}
     </Modal>
     </>

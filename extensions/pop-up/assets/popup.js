@@ -1,4 +1,4 @@
-(() => {
+ (() => {
   // Prevent duplicate loading
   if (window.__popupAlreadyLoaded) return;
   window.__popupAlreadyLoaded = true;

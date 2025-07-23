@@ -28,13 +28,27 @@ import "../styles/timer-popup-modal.css";
 
 /**
  * PopupConfigurationModal - Universal modal that contains the entire popup customizer interface
- * 
- * Features:
- * - Two-panel layout (Configuration + Live Preview)
- * - Supports all popup types (email, wheel-email, community, timer)
- * - Real-time configuration updates
- * - Shopify-like UX with Polaris components
- * - Mobile responsive design
+ *
+ * This is the main configuration modal that provides a comprehensive interface for customizing
+ * all types of popups. It features a two-panel layout with configuration settings on the left
+ * and a live preview on the right.
+ *
+ * Key Features:
+ * - Two-panel layout (Configuration Settings + Live Preview)
+ * - Supports all popup types (email, wheel-email, community, timer, scratch-card)
+ * - Real-time configuration updates with instant preview
+ * - Page targeting system for controlling where popups appear
+ * - Shopify Polaris UI components for consistent design
+ * - Mobile responsive design with adaptive layouts
+ * - Form validation and error handling
+ * - Save/cancel functionality with loading states
+ *
+ * Props:
+ * @param {boolean} isOpen - Controls modal visibility
+ * @param {function} onClose - Callback when modal is closed
+ * @param {object} initialConfig - Existing popup configuration for editing
+ * @param {string} initialPopupType - Default popup type to display
+ * @param {string} initialPopupName - Default name for the popup
  */
 export default function PopupConfigurationModal({
   isOpen,
@@ -43,45 +57,62 @@ export default function PopupConfigurationModal({
   initialPopupType = "wheel-email",
   initialPopupName = ""
 }) {
-  const fetcher = useFetcher();
-  const shopify = useAppBridge();
-  const navigate = useNavigate();
+  // ============================================================================
+  // HOOKS AND CORE STATE MANAGEMENT
+  // ============================================================================
   
-  // Initialize popup type from props or default
+  const fetcher = useFetcher(); // Remix fetcher for form submissions
+  const shopify = useAppBridge(); // Shopify App Bridge for toast notifications
+  const navigate = useNavigate(); // Navigation hook for redirects
+  
+  // ============================================================================
+  // POPUP TYPE AND BASIC CONFIGURATION STATE
+  // ============================================================================
+  
+  // Current popup type (email, wheel-email, community, timer, scratch-card)
   const [popupType, setPopupType] = useState(initialPopupType);
   
-  // Popup name state - use initialPopupName for new popups, initialConfig.name for editing
+  // Popup name for identification in the admin interface
   const [popupName, setPopupName] = useState(initialConfig?.name || initialPopupName || "");
   
-  // Page targeting state
+  // ============================================================================
+  // PAGE TARGETING SYSTEM STATE
+  // ============================================================================
+  
+  // Page targeting configuration - controls where the popup appears on the storefront
   const [pageTargeting, setPageTargeting] = useState(() => {
     if (initialConfig) {
       return {
-        targetAllPages: initialConfig.targetAllPages !== false,
-        targetSpecificPages: initialConfig.targetSpecificPages || false,
-        selectedPages: initialConfig.pageTargeting ? JSON.parse(initialConfig.pageTargeting) : []
+        targetAllPages: initialConfig.targetAllPages !== false, // Show on all pages by default
+        targetSpecificPages: initialConfig.targetSpecificPages || false, // Show on specific pages only
+        selectedPages: initialConfig.pageTargeting ? JSON.parse(initialConfig.pageTargeting) : [] // Array of selected pages
       };
     }
     return {
-      targetAllPages: true,
+      targetAllPages: true, // Default: show on all pages
       targetSpecificPages: false,
       selectedPages: []
     };
   });
   
-  // Storefront pages state
+  // Storefront pages data fetched from Shopify Admin API
   const [storefrontPages, setStorefrontPages] = useState({
-    collections: [],
-    products: [],
-    pages: [],
-    staticPages: []
+    collections: [], // Collection pages
+    products: [], // Product pages
+    pages: [], // Custom pages
+    staticPages: [] // Static pages (home, cart, etc.)
   });
-  const [pagesLoading, setPagesLoading] = useState(false);
+  const [pagesLoading, setPagesLoading] = useState(false); // Loading state for page fetching
   
-  // Custom URL state
+  // Custom URL input for manual page targeting
   const [customUrl, setCustomUrl] = useState('');
   
-  // Email popup configuration
+  // ============================================================================
+  // POPUP TYPE-SPECIFIC CONFIGURATION STATES
+  // ============================================================================
+  
+  // EMAIL POPUP CONFIGURATION
+  // Simple email capture popup with discount offer
   const [emailConfig, setEmailConfig] = useState(() => {
     if (initialConfig && initialConfig.type === "email") {
       return {
@@ -119,7 +150,8 @@ export default function PopupConfigurationModal({
     };
   });
 
-  // Wheel-Email combo configuration
+  // WHEEL-EMAIL COMBO CONFIGURATION
+  // Interactive spinning wheel combined with email capture
   const [wheelEmailConfig, setWheelEmailConfig] = useState(() => {
     if (initialConfig && initialConfig.type === "wheel-email") {
       const backgroundColor = initialConfig.backgroundColor || "linear-gradient(135deg, #09090aff 0%, #2a5298 100%)";
@@ -192,7 +224,8 @@ export default function PopupConfigurationModal({
     };
   });
 
-  // Community popup configuration
+  // COMMUNITY SOCIAL POPUP CONFIGURATION
+  // Social media follow popup with banner image and social icons
   const [communityConfig, setCommunityConfig] = useState(() => {
     if (initialConfig && initialConfig.type === "community") {
       return {
@@ -242,7 +275,8 @@ export default function PopupConfigurationModal({
     };
   });
 
-  // Timer popup configuration
+  // TIMER COUNTDOWN POPUP CONFIGURATION
+  // Urgency-driven popup with countdown timer and email capture
   const [timerConfig, setTimerConfig] = useState(() => {
     if (initialConfig && initialConfig.type === "timer") {
       return {
@@ -304,7 +338,8 @@ export default function PopupConfigurationModal({
     };
   });
 
-  // Scratch card popup configuration
+  // SCRATCH CARD POPUP CONFIGURATION
+  // Interactive scratch-to-reveal discount popup with email capture
   const [scratchCardConfig, setScratchCardConfig] = useState(() => {
     if (initialConfig && initialConfig.type === "scratch-card") {
       return {
@@ -342,7 +377,12 @@ export default function PopupConfigurationModal({
     };
   });
 
-  // Fetch storefront pages
+  // ============================================================================
+  // API FUNCTIONS AND DATA FETCHING
+  // ============================================================================
+  
+  // Fetch available storefront pages from Shopify Admin API
+  // This populates the page targeting options with actual store pages
   const fetchStorefrontPages = useCallback(async () => {
     if (pagesLoading || storefrontPages.staticPages.length > 0) return;
     
@@ -368,7 +408,11 @@ export default function PopupConfigurationModal({
     }
   }, [isOpen, fetchStorefrontPages]);
 
-  // Handle save configuration
+  // ============================================================================
+  // SAVE AND FORM SUBMISSION HANDLERS
+  // ============================================================================
+  
+  // Main save handler - processes all configuration data and submits to backend
   const handleSaveConfig = useCallback(() => {
     const config = popupType === "email" ? emailConfig :
                    popupType === "community" ? communityConfig :
@@ -403,7 +447,7 @@ export default function PopupConfigurationModal({
     onClose();
   }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, scratchCardConfig, popupName, pageTargeting, initialConfig, fetcher, onClose]);
 
-  // Handle fetcher response
+  // Handle API response after form submission
   useEffect(() => {
     if (fetcher.data) {
       if (fetcher.data.success) {
@@ -418,6 +462,11 @@ export default function PopupConfigurationModal({
     }
   }, [fetcher.data, shopify, navigate]);
 
+  // ============================================================================
+  // UTILITY FUNCTIONS AND HELPERS
+  // ============================================================================
+  
+  // Available popup types for the dropdown selector
   const popupTypeOptions = [
     { label: "Email Discount Popup", value: "email" },
     { label: "Wheel + Email Combo", value: "wheel-email" },
@@ -426,7 +475,7 @@ export default function PopupConfigurationModal({
     { label: "Scratch Card Popup", value: "scratch-card" },
   ];
 
-  // Get current config based on popup type
+  // Get current configuration object based on selected popup type
   const getCurrentConfig = () => {
     switch (popupType) {
       case "email": return emailConfig;
@@ -437,7 +486,11 @@ export default function PopupConfigurationModal({
     }
   };
 
-  // Render configuration panel based on popup type
+  // ============================================================================
+  // RENDER FUNCTIONS FOR DIFFERENT POPUP TYPES
+  // ============================================================================
+  
+  // Main configuration panel renderer - switches between popup types
   const renderConfigurationPanel = () => {
     switch (popupType) {
       case "email":
@@ -453,7 +506,11 @@ export default function PopupConfigurationModal({
     }
   };
 
-  // Email popup configuration
+  // ============================================================================
+  // EMAIL POPUP CONFIGURATION RENDERER
+  // ============================================================================
+  
+  // Renders configuration options specific to email capture popups
   const renderEmailConfig = () => (
     <BlockStack gap="400">
       <Text as="h3" variant="headingMd">Email Popup Configuration</Text>
@@ -600,7 +657,11 @@ export default function PopupConfigurationModal({
     </BlockStack>
   );
 
-  // Wheel-Email combo configuration
+  // ============================================================================
+  // WHEEL-EMAIL COMBO CONFIGURATION RENDERER
+  // ============================================================================
+  
+  // Renders configuration options for the spinning wheel + email capture combo
   const renderWheelEmailConfig = () => (
     <BlockStack gap="400">
       <Text as="h3" variant="headingMd">Wheel + Email Combo Configuration</Text>
@@ -785,7 +846,11 @@ export default function PopupConfigurationModal({
     </BlockStack>
   );
 
-  // Community popup configuration
+  // ============================================================================
+  // COMMUNITY SOCIAL POPUP CONFIGURATION RENDERER
+  // ============================================================================
+  
+  // Renders configuration options for social media follow popups
   const renderCommunityConfig = () => (
     <BlockStack gap="400">
       <Text as="h3" variant="headingMd">Community Social Popup Configuration</Text>
@@ -945,7 +1010,11 @@ export default function PopupConfigurationModal({
     </BlockStack>
   );
 
-  // Timer popup configuration
+  // ============================================================================
+  // TIMER COUNTDOWN POPUP CONFIGURATION RENDERER
+  // ============================================================================
+  
+  // Renders configuration options for countdown timer popups
   const renderTimerConfig = () => (
     <BlockStack gap="400">
       <Text as="h3" variant="headingMd">Timer Countdown Popup Configuration</Text>
@@ -1205,7 +1274,11 @@ export default function PopupConfigurationModal({
     </BlockStack>
   );
 
-  // Scratch card popup configuration
+  // ============================================================================
+  // SCRATCH CARD POPUP CONFIGURATION RENDERER
+  // ============================================================================
+  
+  // Renders configuration options for interactive scratch card popups
   const renderScratchCardConfig = () => (
     <BlockStack gap="400">
       <Text as="h3" variant="headingMd">Scratch Card Popup Configuration</Text>
@@ -1377,7 +1450,11 @@ export default function PopupConfigurationModal({
     </BlockStack>
   );
 
-  // Render page targeting configuration
+  // ============================================================================
+  // PAGE TARGETING CONFIGURATION RENDERER
+  // ============================================================================
+  
+  // Renders the page targeting interface for controlling where popups appear
   const renderPageTargeting = () => {
     const allPages = [
       ...storefrontPages.staticPages,
@@ -1621,7 +1698,11 @@ export default function PopupConfigurationModal({
     );
   };
 
-  // Render preview panel using PopupPreview component
+  // ============================================================================
+  // LIVE PREVIEW PANEL RENDERER
+  // ============================================================================
+  
+  // Renders the live preview panel showing real-time popup appearance
   const renderPreviewPanel = () => {
     const config = getCurrentConfig();
     const badgeText = popupType === "email" ? "Email Popup" :
@@ -1684,10 +1765,16 @@ export default function PopupConfigurationModal({
     );
   };
 
+  // ============================================================================
+  // MAIN COMPONENT RENDER
+  // ============================================================================
+  
   return (
     <>
+      {/* Custom CSS for full-screen modal layout optimization */}
       <style>
         {`
+          /* Full-screen modal styling for optimal space usage */
           .Polaris-Modal-Dialog--sizeFullScreen {
             max-width: 95vw !important;
             width: 95vw !important;
@@ -1699,17 +1786,23 @@ export default function PopupConfigurationModal({
             display: flex !important;
             flex-direction: column !important;
           }
+          
+          /* Two-panel layout: Configuration (left) + Preview (right) */
           .popup-config-layout {
             display: flex !important;
             height: 85vh !important;
             overflow: hidden !important;
           }
+          
+          /* Left panel: Configuration settings with scrolling */
           .popup-config-settings {
             flex: 1 !important;
             overflow-y: auto !important;
             padding-right: 16px !important;
             max-height: 85vh !important;
           }
+          
+          /* Right panel: Fixed-width preview panel */
           .popup-config-preview {
             width: 800px !important;
             flex-shrink: 0 !important;
@@ -1721,6 +1814,8 @@ export default function PopupConfigurationModal({
           }
         `}
       </style>
+      
+      {/* Main Modal Component */}
       <Modal
         open={isOpen}
         onClose={onClose}
@@ -1738,56 +1833,68 @@ export default function PopupConfigurationModal({
           },
         ]}
       >
-      <Modal.Section>
-        <div className="popup-config-layout">
-          <div className="popup-config-settings">
-            <Card>
-              <BlockStack gap="500">
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Popup Configuration
-                  </Text>
-                  <Text variant="bodyMd" as="p">
-                    Customize your popup to engage visitors and boost conversions. Choose between different popup types and configure all settings.
-                  </Text>
+        <Modal.Section>
+          {/* Two-Panel Layout Container */}
+          <div className="popup-config-layout">
+            
+            {/* LEFT PANEL: Configuration Settings */}
+            <div className="popup-config-settings">
+              <Card>
+                <BlockStack gap="500">
+                  
+                  {/* Header Section */}
+                  <BlockStack gap="200">
+                    <Text as="h2" variant="headingMd">
+                      Popup Configuration
+                    </Text>
+                    <Text variant="bodyMd" as="p">
+                      Customize your popup to engage visitors and boost conversions. Choose between different popup types and configure all settings.
+                    </Text>
+                  </BlockStack>
+                  
+                  <Divider />
+                  
+                  {/* Basic Configuration */}
+                  <TextField
+                    label="Popup Name"
+                    value={popupName}
+                    onChange={(value) => setPopupName(value.slice(0, 50))}
+                    placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
+                    maxLength={50}
+                    showCharacterCount
+                    helpText="Give your popup a descriptive name for easy identification (max 50 characters)"
+                  />
+                  
+                  {/* Popup Type Selector */}
+                  <Select
+                    label="Popup Type"
+                    options={popupTypeOptions}
+                    value={popupType}
+                    onChange={setPopupType}
+                  />
+                  
+                  <Divider />
+                  
+                  {/* Type-Specific Configuration Panel */}
+                  {renderConfigurationPanel()}
+                  
+                  <Divider />
+                  
+                  {/* Page Targeting Configuration */}
+                  {renderPageTargeting()}
+                  
                 </BlockStack>
-                
-                <Divider />
-                
-                <TextField
-                  label="Popup Name"
-                  value={popupName}
-                  onChange={(value) => setPopupName(value.slice(0, 50))}
-                  placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
-                  maxLength={50}
-                  showCharacterCount
-                  helpText="Give your popup a descriptive name for easy identification (max 50 characters)"
-                />
-                
-                <Select
-                  label="Popup Type"
-                  options={popupTypeOptions}
-                  value={popupType}
-                  onChange={setPopupType}
-                />
-                
-                <Divider />
-                
-                {renderConfigurationPanel()}
-                
-                <Divider />
-                
-                {renderPageTargeting()}
-              </BlockStack>
-            </Card>
+              </Card>
+            </div>
+            
+            {/* RIGHT PANEL: Live Preview */}
+            <div className="popup-config-preview">
+              {renderPreviewPanel()}
+            </div>
+            
           </div>
-          
-          <div className="popup-config-preview">
-            {renderPreviewPanel()}
-          </div>
-        </div>
-      </Modal.Section>
-    </Modal>
+        </Modal.Section>
+      </Modal>
     </>
   );
 }
