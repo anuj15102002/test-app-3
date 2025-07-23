@@ -65,7 +65,7 @@ export const loader = async ({ request }) => {
       error: error.message,
       appEmbedEnabled: false,
       themeId: null,
-      enableUrl: `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/popup-customizer`
+      enableUrl: `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/popup-displays`   //here we have changed it from the popup-customizer to pupup-display
     });
   }
 };
