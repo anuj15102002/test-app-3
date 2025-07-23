@@ -123,6 +123,7 @@ export const action = async ({ request }) => {
           placeholder: config.placeholder || "",
           buttonText: config.buttonText || (type === "community" ? "Follow Us" : ""),
           discountCode: config.discountCode || "",
+          scratchDiscountPercentage: type === "scratch-card" ? config.scratchDiscountPercentage || 15 : null,
           backgroundColor: config.backgroundColor,
           textColor: config.textColor,
           buttonColor: config.buttonColor || "#007ace",
@@ -180,6 +181,7 @@ export const action = async ({ request }) => {
           placeholder: config.placeholder || "",
           buttonText: config.buttonText || (type === "community" ? "Follow Us" : ""),
           discountCode: config.discountCode || "",
+          scratchDiscountPercentage: type === "scratch-card" ? config.scratchDiscountPercentage || 15 : null,
           backgroundColor: config.backgroundColor,
           textColor: config.textColor,
           buttonColor: config.buttonColor || "#007ace",
@@ -486,6 +488,7 @@ export default function PopupCustomizer() {
         placeholder: existingConfig.placeholder || "Enter your email",
         buttonText: existingConfig.buttonText || "CLAIM DISCOUNT",
         discountCode: existingConfig.discountCode || "SCRATCH10",
+        scratchDiscountPercentage: existingConfig.scratchDiscountPercentage || existingConfig.discountPercentage || 15,
         backgroundColor: existingConfig.backgroundColor || "#ffffff",
         textColor: existingConfig.textColor || "#000000",
         borderRadius: existingConfig.borderRadius || 16,
@@ -502,6 +505,7 @@ export default function PopupCustomizer() {
       placeholder: "Enter your email",
       buttonText: "CLAIM DISCOUNT",
       discountCode: "SCRATCH10",
+      scratchDiscountPercentage: 15,
       backgroundColor: "#ffffff",
       textColor: "#000000",
       borderRadius: 16,
@@ -525,6 +529,7 @@ export default function PopupCustomizer() {
         placeholder: existingConfig.placeholder || "Enter your email",
         buttonText: existingConfig.buttonText || "CLAIM DISCOUNT",
         discountCode: existingConfig.discountCode || "SCRATCH10",
+        scratchDiscountPercentage: existingConfig.scratchDiscountPercentage || existingConfig.discountPercentage || 15,
         backgroundColor: existingConfig.backgroundColor || "#ffffff",
         textColor: existingConfig.textColor || "#000000",
         borderRadius: existingConfig.borderRadius || 16,
@@ -566,7 +571,12 @@ export default function PopupCustomizer() {
         popupConfig: JSON.stringify({
           type: popupType,
           config,
-          name: popupName || `${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`
+          name: popupName || `${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`,
+          pageTargeting: {
+            targetAllPages: true,
+            targetSpecificPages: false,
+            selectedPages: []
+          }
         })
       };
       
@@ -1434,6 +1444,17 @@ export default function PopupCustomizer() {
         value={scratchCardConfig.discountCode || ""}
         onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, discountCode: value })}
         placeholder="Discount code to offer (e.g., SCRATCH10)"
+      />
+      
+      <TextField
+        label="Discount Percentage"
+        type="number"
+        value={scratchCardConfig.scratchDiscountPercentage?.toString() || "15"}
+        onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, scratchDiscountPercentage: parseInt(value) || 15 })}
+        placeholder="15"
+        min={1}
+        max={100}
+        helpText="The percentage discount that will be revealed when users scratch the card (1-100%)"
       />
       
       <InlineStack gap="400">

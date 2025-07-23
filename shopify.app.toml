@@ -3,7 +3,7 @@
 client_id = "0249c9ec8c24958292aa21be203e2b38"
 name = "testAPp"
 handle = "testapp-4139"
-application_url = "https://catherine-erp-auditor-mozambique.trycloudflare.com"
+application_url = "https://academy-jet-congress-fi.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-07"
 scopes = "write_products,write_customers,write_discounts,write_price_rules,read_themes,write_themes,write_app_proxy"
 
 [auth]
-redirect_urls = ["https://catherine-erp-auditor-mozambique.trycloudflare.com/auth/callback", "https://catherine-erp-auditor-mozambique.trycloudflare.com/auth/shopify/callback", "https://catherine-erp-auditor-mozambique.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://academy-jet-congress-fi.trycloudflare.com/auth/callback", "https://academy-jet-congress-fi.trycloudflare.com/auth/shopify/callback", "https://academy-jet-congress-fi.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

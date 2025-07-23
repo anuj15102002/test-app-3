@@ -1,0 +1,35 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="subtle-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="1.5" fill="rgba(102, 126, 234, 0.1)"/>
+    </pattern>
+    <pattern id="subtle-lines" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M0,40 L80,40" stroke="rgba(118, 75, 162, 0.05)" stroke-width="1"/>
+      <path d="M40,0 L40,80" stroke="rgba(118, 75, 162, 0.05)" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="subtle-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Base gradient -->
+  <rect width="400" height="400" fill="url(#subtle-gradient)"/>
+  
+  <!-- Subtle pattern overlay -->
+  <rect width="400" height="400" fill="url(#subtle-lines)" opacity="0.3"/>
+  <rect width="400" height="400" fill="url(#subtle-dots)" opacity="0.5"/>
+  
+  <!-- Soft geometric shapes for visual interest -->
+  <circle cx="100" cy="100" r="60" fill="rgba(102, 126, 234, 0.03)"/>
+  <circle cx="300" cy="150" r="40" fill="rgba(255, 119, 198, 0.03)"/>
+  <circle cx="200" cy="300" r="50" fill="rgba(120, 219, 226, 0.03)"/>
+  <circle cx="350" cy="320" r="35" fill="rgba(102, 126, 234, 0.03)"/>
+  
+  <!-- Subtle corner accents -->
+  <path d="M0,0 Q50,0 50,50 Q0,50 0,0" fill="rgba(102, 126, 234, 0.02)"/>
+  <path d="M400,0 Q350,0 350,50 Q400,50 400,0" fill="rgba(118, 75, 162, 0.02)"/>
+  <path d="M0,400 Q50,400 50,350 Q0,350 0,400" fill="rgba(120, 219, 226, 0.02)"/>
+  <path d="M400,400 Q350,400 350,350 Q400,350 400,400" fill="rgba(255, 119, 198, 0.02)"/>
+</svg>

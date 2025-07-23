@@ -67,6 +67,17 @@
 <!-- Load popup styles -->
 {{ 'popup-styles.css' | asset_url | stylesheet_tag }}
 
+<!-- Set CSS custom properties for background images -->
+<style>
+:root {
+  --gamified-bg-image: url('{{ "gamified.jpg" | asset_url }}');
+  --default-pattern-bg: url('{{ "default-pattern.svg" | asset_url }}');
+  --custom-bg-image: var(--gamified-bg-image);
+  --custom-bg-position: center;
+  --custom-bg-size: cover;
+}
+</style>
+
 <!-- Load popup JavaScript -->
 <script src="{{ 'popup.js' | asset_url }}" defer></script>
 
@@ -79,10 +90,14 @@
     twitter: "{{ 'twitter.png' | asset_url }}"
   };
   window.defaultBannerAsset = "{{ 'banner.svg' | asset_url }}";
+  window.gamifiedBackgroundAsset = "{{ 'gamified.jpg' | asset_url }}";
+  window.defaultPatternAsset = "{{ 'default-pattern.svg' | asset_url }}";
   
   // Debug log to check if assets are loading
   console.log('Social Icon Assets:', window.socialIconAssets);
   console.log('Default Banner Asset:', window.defaultBannerAsset);
+  console.log('Gamified Background Asset:', window.gamifiedBackgroundAsset);
+  console.log('Default Pattern Asset:', window.defaultPatternAsset);
 </script>
 
 <!-- App URL meta tag for API communication -->
@@ -90,7 +105,7 @@
   This meta tag helps the JavaScript find the correct app URL for API calls
   Uses the app_url setting from the App Embed configuration
 {% endcomment %}
-<meta name="shopify-app-url" content="https://catherine-erp-auditor-mozambique.trycloudflare.com">
+<meta name="shopify-app-url" content="https://academy-jet-congress-fi.trycloudflare.com">
 
 {% schema %}
 {
@@ -108,7 +123,7 @@
       "type": "text",
       "id": "app_url",
       "label": "App URL",
-      "default": "https://catherine-erp-auditor-mozambique.trycloudflare.com",
+      "default": "https://academy-jet-congress-fi.trycloudflare.com",
       "info": "Your app's URL for API communication"
     }
   ]

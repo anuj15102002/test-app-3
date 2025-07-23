@@ -69,6 +69,7 @@ model PopupConfig {
   pageTargeting     String?  @db.Text
   targetAllPages    Boolean  @default(true)
   targetSpecificPages Boolean @default(false)
+  scratchDiscountPercentage Int? @default(15)
 
   @@index([shop])
   @@index([shop, isActive])

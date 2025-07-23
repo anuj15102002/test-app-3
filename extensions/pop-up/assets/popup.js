@@ -673,19 +673,25 @@
     } else if (config.type === "scratch-card") {
       // Show scratch card popup layout
       popup.classList.add("scratch-card-popup");
-      popup.style.background = config.backgroundColor || "#ffffff";
       popup.style.color = config.textColor || "#000000";
-      popup.style.borderRadius = `${config.borderRadius || 16}px`;
+      popup.style.borderRadius = `${config.borderRadius || 20}px`;
+
+      // Apply custom background image configuration
+      applyCustomBackground(config);
 
       // Make responsive based on screen size
       if (window.innerWidth <= 480) {
         popup.style.maxWidth = "98vw";
-        popup.style.margin = "8px";
-      } else if (window.innerWidth <= 768) {
+        popup.style.margin = "10px";
+      } else if (window.innerWidth <= 767) {
         popup.style.maxWidth = "95vw";
         popup.style.margin = "15px";
+      } else if (window.innerWidth <= 1023) {
+        popup.style.maxWidth = "700px";
+        popup.style.margin = "20px";
       } else {
-        popup.style.maxWidth = "600px";
+        popup.style.maxWidth = "800px";
+        popup.style.margin = "auto";
       }
 
       popup.style.display = "block";
@@ -878,6 +884,40 @@
     }
     // For "always" frequency, don't set any localStorage flags
   };// show popup ends
+
+  // Function to apply custom background configuration
+  function applyCustomBackground(config) {
+    const root = document.documentElement;
+    
+    // Set custom background image if provided
+    if (config.backgroundImageUrl) {
+      root.style.setProperty('--custom-bg-image', `url('${config.backgroundImageUrl}')`);
+    } else {
+      // Use default gamified background
+      root.style.setProperty('--custom-bg-image', 'var(--gamified-bg-image)');
+    }
+    
+    // Set background position if provided
+    if (config.backgroundImagePosition) {
+      root.style.setProperty('--custom-bg-position', config.backgroundImagePosition);
+    } else {
+      root.style.setProperty('--custom-bg-position', 'center');
+    }
+    
+    // Set background size if provided
+    if (config.backgroundImageSize) {
+      root.style.setProperty('--custom-bg-size', config.backgroundImageSize);
+    } else {
+      root.style.setProperty('--custom-bg-size', 'cover');
+    }
+    
+    // Apply overlay opacity for content legibility
+    const overlayOpacity = config.overlayOpacity || 0.75;
+    const popup = document.getElementById("custom-popup");
+    if (popup) {
+      popup.style.setProperty('--overlay-opacity', overlayOpacity);
+    }
+  }
 
   // Make closePopup globally accessible
   window.closePopup = () => {
@@ -1825,10 +1865,23 @@
       ".scratch-card-popup-inner",
     );
 
-    // Generate random discount percentage (5%, 10%, 15%, 20%, 25%, 30%)
-    const discountOptions = [5, 10, 15, 20, 25, 30];
-    const randomDiscount =
-      discountOptions[Math.floor(Math.random() * discountOptions.length)];
+    // Use merchant-configurable discount percentage
+    const discountValue = parseInt(config.scratchDiscountPercentage) || parseInt(config.discountPercentage) || 15;
+    
+    // Color and emoji mapping based on discount value for better UX
+    const getDiscountTheme = (value) => {
+      if (value >= 30) return { color: "#54a0ff", emoji: "🏆" }; // Premium - Blue
+      if (value >= 25) return { color: "#ff9ff3", emoji: "💎" }; // High - Pink
+      if (value >= 20) return { color: "#feca57", emoji: "⭐" }; // Good - Yellow
+      if (value >= 15) return { color: "#45b7d1", emoji: "🎉" }; // Standard - Light Blue
+      if (value >= 10) return { color: "#4ecdc4", emoji: "🎊" }; // Basic - Teal
+      return { color: "#ff6b6b", emoji: "🎯" }; // Entry - Red
+    };
+
+    const selectedDiscount = {
+      value: discountValue,
+      ...getDiscountTheme(discountValue)
+    };
 
     // Responsive canvas size based on screen size
     let canvasSize, discountFontSize, discountTextSize;
@@ -1846,29 +1899,152 @@
       discountTextSize = "18px";
     }
 
+    // Background image is now handled in CSS, but we can still override with config if needed
+    const popup = document.getElementById("custom-popup");
+    if (config.scratchCardBackgroundImage) {
+      popup.style.backgroundImage = `url('${config.scratchCardBackgroundImage}')`;
+      popup.style.backgroundSize = "cover";
+      popup.style.backgroundPosition = "center";
+      popup.style.backgroundRepeat = "no-repeat";
+    }
+
     scratchCardInner.innerHTML = `
       <button class="popup-close" onclick="closePopup()" style="
         position: absolute;
         top: 15px;
         right: 15px;
-        background: rgba(0, 0, 0, 0.1);
+        background: rgba(0, 0, 0, 0.2);
         border: none;
         border-radius: 50%;
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         cursor: pointer;
-        color: ${config.textColor || "#000000"};
+        color: white;
         font-size: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 10;
-      ">&times;</button>
+        backdrop-filter: blur(4px);
+        transition: all 0.3s ease;
+      " onmouseover="this.style.background='rgba(0,0,0,0.4)'" onmouseout="this.style.background='rgba(0,0,0,0.2)'">&times;</button>
+      
+      <!-- Step Progress Indicator -->
+      <div class="scratch-progress-steps" style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 0 20px;
+      ">
+        <div class="step-indicator active" id="step-1" style="
+          display: flex;
+          align-items: center;
+          color: #28a745;
+          font-weight: 600;
+          font-size: 14px;
+        ">
+          <div style="
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #28a745;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-size: 12px;
+          ">1</div>
+          Enter Email
+        </div>
+        <div style="
+          width: 40px;
+          height: 2px;
+          background: #e9ecef;
+          margin: 0 15px;
+          position: relative;
+        ">
+          <div id="progress-line-1" style="
+            width: 0%;
+            height: 100%;
+            background: #28a745;
+            transition: width 0.5s ease;
+          "></div>
+        </div>
+        <div class="step-indicator" id="step-2" style="
+          display: flex;
+          align-items: center;
+          color: #6c757d;
+          font-weight: 600;
+          font-size: 14px;
+        ">
+          <div style="
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-size: 12px;
+          ">2</div>
+          Scratch Card
+        </div>
+        <div style="
+          width: 40px;
+          height: 2px;
+          background: #e9ecef;
+          margin: 0 15px;
+        ">
+          <div id="progress-line-2" style="
+            width: 0%;
+            height: 100%;
+            background: #28a745;
+            transition: width 0.5s ease;
+          "></div>
+        </div>
+        <div class="step-indicator" id="step-3" style="
+          display: flex;
+          align-items: center;
+          color: #6c757d;
+          font-weight: 600;
+          font-size: 14px;
+        ">
+          <div style="
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-size: 12px;
+          ">3</div>
+          Claim Prize
+        </div>
+      </div>
       
       <div class="scratch-card-layout">
         <div class="scratch-card-left">
-          <div class="scratch-card-container" style="position: relative;">
-            <canvas id="scratch-canvas" width="${canvasSize}" height="${canvasSize}" style="pointer-events: none; opacity: 0.5;"></canvas>
+          <div class="scratch-card-container" style="
+            position: relative;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+          ">
+            <canvas id="scratch-canvas" width="${canvasSize}" height="${canvasSize}" style="
+              pointer-events: none;
+              opacity: 0.7;
+              position: relative;
+              z-index: 2;
+            "></canvas>
             <div class="scratch-card-hidden-content" id="hidden-discount" style="
               position: absolute;
               top: 0;
@@ -1879,40 +2055,96 @@
               flex-direction: column;
               align-items: center;
               justify-content: center;
-              background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+              background: linear-gradient(135deg, ${selectedDiscount.color} 0%, ${selectedDiscount.color}dd 100%);
               color: white;
               opacity: 0;
-              border-radius: 8px;
+              border-radius: 16px;
+              box-shadow: inset 0 0 30px rgba(255,255,255,0.3);
+              z-index: 1;
             ">
-              <div class="discount-percentage" style="font-size: ${discountFontSize}; font-weight: bold; margin-bottom: 5px;">${randomDiscount}%</div>
-              <div class="discount-text" style="font-size: ${discountTextSize}; font-weight: 600;">OFF</div>
+              <div class="winner-emoji" style="font-size: 32px; margin-bottom: 8px; animation: bounce 1s infinite;">${selectedDiscount.emoji}</div>
+              <div class="discount-percentage" style="font-size: ${discountFontSize}; font-weight: 900; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${selectedDiscount.value}%</div>
+              <div class="discount-text" style="font-size: ${discountTextSize}; font-weight: 700; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">OFF</div>
+              <div class="winner-text" style="font-size: 14px; margin-top: 8px; opacity: 0.9;">WINNER!</div>
             </div>
           </div>
-          <p class="scratch-instruction" id="scratch-instruction">Enter your email to start scratching!</p>
+          <p class="scratch-instruction" id="scratch-instruction" style="
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 16px;
+          ">Enter your email to start scratching!</p>
         </div>
         
         <div class="scratch-card-right">
-          <h2 class="scratch-card-title">${config.title || "Scratch & Win!"}</h2>
-          <p class="scratch-card-description">${config.description || "Enter your email first, then scratch the card to reveal your exclusive discount!"}</p>
+          <h2 class="scratch-card-title" style="
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          ">${config.title || "🎮 Scratch & Win!"}</h2>
+          <p class="scratch-card-description" style="
+            font-size: 16px;
+            line-height: 1.6;
+            color: #6c757d;
+            margin-bottom: 25px;
+          ">${config.description || `Enter your email first, then scratch the card to reveal your ${selectedDiscount.value}% discount!`}</p>
           
           <div class="scratch-card-form" id="scratch-form">
-            <input type="email" id="scratch-email" placeholder="${config.placeholder || "Enter your email"}" class="scratch-email-input" />
-            <label class="scratch-checkbox-container">
+            <input type="email" id="scratch-email" placeholder="${config.placeholder || "Enter your email"}" class="scratch-email-input" style="
+              width: 100%;
+              padding: 14px 16px;
+              border: 2px solid #e9ecef;
+              border-radius: 12px;
+              font-size: 16px;
+              margin-bottom: 15px;
+              transition: all 0.3s ease;
+              background: #f8f9fa;
+            " />
+            <label class="scratch-checkbox-container" style="
+              display: flex;
+              align-items: center;
+              margin-bottom: 20px;
+              cursor: pointer;
+              font-size: 14px;
+              color: #6c757d;
+            ">
               <input type="checkbox" id="scratch-terms" class="scratch-checkbox" />
               <span class="scratch-checkmark"></span>
               <span class="scratch-checkbox-text">I agree to receive promotional emails</span>
             </label>
-            <button onclick="enableScratchCard(${randomDiscount})" class="scratch-submit-btn" id="enable-scratch-btn" disabled>
-              Enable Scratching
+            <button onclick="enableScratchCard(${selectedDiscount.value})" class="scratch-submit-btn" id="enable-scratch-btn" disabled style="
+              width: 100%;
+              padding: 16px;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              border: none;
+              border-radius: 12px;
+              color: white;
+              font-size: 16px;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+              🎯 Enable Scratching
             </button>
           </div>
         </div>
       </div>
     `;
 
+    // Store selected discount for later use
+    window.selectedScratchDiscount = selectedDiscount;
+
     // Initialize scratch canvas after DOM is ready
     setTimeout(() => {
-      initializeScratchCanvas(randomDiscount);
+      initializeScratchCanvas(selectedDiscount.value);
     }, 100);
   }//initializeScratchCardPopup ends 
 
@@ -1935,48 +2167,134 @@
       iconSize = "20px";
     }
 
-    // Create scratch surface (blue background)
-    scratchCtx.fillStyle = "#4A90E2";
-    scratchCtx.fillRect(0, 0, canvasSize, canvasSize);
-
-    // Add scratch surface pattern/texture
-    scratchCtx.fillStyle = "#5BA0F2";
-    const patternSize = Math.floor(canvasSize / 10);
-    for (let i = 0; i < canvasSize; i += patternSize) {
-      for (let j = 0; j < canvasSize; j += patternSize) {
-        if ((i + j) % (patternSize * 2) === 0) {
-          scratchCtx.fillRect(i, j, patternSize / 2, patternSize / 2);
+    // Create enhanced gamified scratch surface that matches the background
+    const createScratchSurface = () => {
+      // Always use the gamified gradient as base (fallback)
+      const gradient = scratchCtx.createLinearGradient(0, 0, canvasSize, canvasSize);
+      gradient.addColorStop(0, "#667eea");
+      gradient.addColorStop(0.3, "#764ba2");
+      gradient.addColorStop(0.7, "#667eea");
+      gradient.addColorStop(1, "#764ba2");
+      scratchCtx.fillStyle = gradient;
+      scratchCtx.fillRect(0, 0, canvasSize, canvasSize);
+      
+      // Try to get the background image from CSS custom property
+      const gamifiedBgUrl = getComputedStyle(document.documentElement).getPropertyValue('--gamified-bg-image');
+      
+      if (gamifiedBgUrl && gamifiedBgUrl.trim() !== '' && gamifiedBgUrl !== 'none') {
+        // Extract URL from CSS url() function
+        const urlMatch = gamifiedBgUrl.match(/url\(['"]?([^'"]+)['"]?\)/);
+        if (urlMatch && urlMatch[1]) {
+          const backgroundImage = new Image();
+          backgroundImage.crossOrigin = "anonymous";
+          
+          backgroundImage.onload = () => {
+            // Draw the background image over the gradient
+            scratchCtx.drawImage(backgroundImage, 0, 0, canvasSize, canvasSize);
+            
+            // Add subtle overlay to make it scratchable while keeping image visible
+            const overlayGradient = scratchCtx.createLinearGradient(0, 0, canvasSize, canvasSize);
+            overlayGradient.addColorStop(0, "rgba(102, 126, 234, 0.6)");
+            overlayGradient.addColorStop(0.5, "rgba(118, 75, 162, 0.7)");
+            overlayGradient.addColorStop(1, "rgba(102, 126, 234, 0.6)");
+            scratchCtx.fillStyle = overlayGradient;
+            scratchCtx.fillRect(0, 0, canvasSize, canvasSize);
+            
+            addScratchEffects();
+          };
+          
+          backgroundImage.onerror = () => {
+            console.log('Background image failed to load, using gradient only');
+            addScratchEffects();
+          };
+          
+          backgroundImage.src = urlMatch[1];
+          return; // Exit early if we're loading an image
         }
       }
+      
+      // If no image or image failed, just add effects to gradient
+      addScratchEffects();
+    };
+
+    const addScratchEffects = () => {
+      // Add metallic texture pattern
+      scratchCtx.fillStyle = "rgba(255, 255, 255, 0.15)";
+      const patternSize = Math.floor(canvasSize / 10);
+      for (let i = 0; i < canvasSize; i += patternSize) {
+        for (let j = 0; j < canvasSize; j += patternSize) {
+          if ((i + j) % (patternSize * 2) === 0) {
+            scratchCtx.fillRect(i, j, patternSize / 3, patternSize / 3);
+          }
+        }
+      }
+
+      // Add shimmer effect
+      const shimmerGradient = scratchCtx.createLinearGradient(0, 0, canvasSize, 0);
+      shimmerGradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+      shimmerGradient.addColorStop(0.3, "rgba(255, 255, 255, 0.2)");
+      shimmerGradient.addColorStop(0.7, "rgba(255, 255, 255, 0.4)");
+      shimmerGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+      scratchCtx.fillStyle = shimmerGradient;
+      scratchCtx.fillRect(0, 0, canvasSize, canvasSize);
+      
+      // Add gamified dot pattern
+      scratchCtx.fillStyle = "rgba(255, 255, 255, 0.2)";
+      for (let i = 0; i < canvasSize; i += 15) {
+        for (let j = 0; j < canvasSize; j += 15) {
+          scratchCtx.beginPath();
+          scratchCtx.arc(i + 7, j + 7, 1, 0, 2 * Math.PI);
+          scratchCtx.fill();
+        }
+      }
+      
+      addScratchText();
+    };
+
+    // Start creating the scratch surface
+    createScratchSurface();
+
+    function addScratchText() {
+      // Add "SCRATCH HERE" text with better styling
+      scratchCtx.fillStyle = "#FFFFFF";
+      scratchCtx.font = `bold ${fontSize} Arial`;
+      scratchCtx.textAlign = "center";
+      scratchCtx.shadowColor = "rgba(0, 0, 0, 0.5)";
+      scratchCtx.shadowBlur = 4;
+      scratchCtx.shadowOffsetX = 2;
+      scratchCtx.shadowOffsetY = 2;
+      
+      scratchCtx.fillText("🎁 SCRATCH", canvasSize / 2, canvasSize / 2 - 10);
+      scratchCtx.fillText("TO WIN! 🎁", canvasSize / 2, canvasSize / 2 + 10);
+
+      // Add scratch icon with glow effect
+      scratchCtx.font = `${iconSize} Arial`;
+      scratchCtx.shadowBlur = 8;
+      scratchCtx.fillText("✨", canvasSize / 2, canvasSize / 2 + 35);
+      
+      // Reset shadow for future drawings
+      scratchCtx.shadowColor = "transparent";
+      scratchCtx.shadowBlur = 0;
+      scratchCtx.shadowOffsetX = 0;
+      scratchCtx.shadowOffsetY = 0;
+
+      // Set up scratch functionality
+      scratchCtx.globalCompositeOperation = "destination-out";
+
+      // Mouse events
+      scratchCanvas.addEventListener("mousedown", startScratching);
+      scratchCanvas.addEventListener("mousemove", scratch);
+      scratchCanvas.addEventListener("mouseup", stopScratching);
+      scratchCanvas.addEventListener("mouseleave", stopScratching);
+
+      // Touch events for mobile
+      scratchCanvas.addEventListener("touchstart", handleTouchStart);
+      scratchCanvas.addEventListener("touchmove", handleTouchMove);
+      scratchCanvas.addEventListener("touchend", stopScratching);
+
+      // Enable form validation
+      setupScratchFormValidation();
     }
-
-    // Add "SCRATCH HERE" text
-    scratchCtx.fillStyle = "#FFFFFF";
-    scratchCtx.font = `bold ${fontSize} Arial`;
-    scratchCtx.textAlign = "center";
-    scratchCtx.fillText("SCRATCH", canvasSize / 2, canvasSize / 2 - 10);
-    scratchCtx.fillText("HERE", canvasSize / 2, canvasSize / 2 + 10);
-
-    // Add small scratch icon
-    scratchCtx.font = `${iconSize} Arial`;
-    scratchCtx.fillText("✋", canvasSize / 2, canvasSize / 2 + 35);
-
-    // Set up scratch functionality
-    scratchCtx.globalCompositeOperation = "destination-out";
-
-    // Mouse events
-    scratchCanvas.addEventListener("mousedown", startScratching);
-    scratchCanvas.addEventListener("mousemove", scratch);
-    scratchCanvas.addEventListener("mouseup", stopScratching);
-    scratchCanvas.addEventListener("mouseleave", stopScratching);
-
-    // Touch events for mobile
-    scratchCanvas.addEventListener("touchstart", handleTouchStart);
-    scratchCanvas.addEventListener("touchmove", handleTouchMove);
-    scratchCanvas.addEventListener("touchend", stopScratching);
-
-    // Enable form validation
-    setupScratchFormValidation();
   }//initializeScratchCanvas ends
 
   function startScratching(e) {
@@ -2071,24 +2389,74 @@
     // Clear the entire canvas to reveal the hidden content
     scratchCtx.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
 
-    // Show hidden content
+    // Show hidden content with animation
     const hiddenContent = document.getElementById("hidden-discount");
     if (hiddenContent) {
       hiddenContent.style.opacity = "1";
+      hiddenContent.style.transform = "scale(1.05)";
+      hiddenContent.style.transition = "all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)";
+      
+      // Reset scale after animation
+      setTimeout(() => {
+        hiddenContent.style.transform = "scale(1)";
+      }, 500);
     }
 
-    // Enable the submit button since scratch is now revealed
+    // Update step progress - Step 2 complete, Step 3 active
+    updateStepProgress(2, 3);
+
+    // Enable the submit button with enhanced styling
     const submitBtn = document.querySelector(".scratch-submit-btn");
     if (submitBtn) {
       submitBtn.disabled = false;
+      submitBtn.style.opacity = "1";
+      submitBtn.style.background = "linear-gradient(135deg, #28a745 0%, #20c997 100%)";
+      submitBtn.style.boxShadow = "0 4px 20px rgba(40, 167, 69, 0.4)";
+      submitBtn.style.transform = "translateY(-2px)";
+      
+      // Add pulsing animation
+      submitBtn.style.animation = "pulse 2s infinite";
+    }
+
+    // Update instruction text
+    const instruction = document.getElementById("scratch-instruction");
+    if (instruction) {
+      instruction.innerHTML = `
+        <span style="color: #28a745; font-weight: 700;">🎉 Congratulations! You won ${selectedDiscount.value}% OFF! 🎉</span>
+        <br>
+        <small style="color: #6c757d; font-size: 14px;">Click the button below to claim your discount</small>
+      `;
     }
 
     // Track scratch reveal event
     trackEvent("scratch_revealed", {
       metadata: {
         popupType: "scratch-card",
+        discount: window.selectedScratchDiscount?.value || '',
       },
     });
+
+    // Show celebration notification
+    showCustomNotification("🎉 Amazing! You've revealed your discount!", "success");
+
+    // Add CSS animation keyframes if not already added
+    if (!document.querySelector("#scratch-animations")) {
+      const style = document.createElement("style");
+      style.id = "scratch-animations";
+      style.textContent = `
+        @keyframes pulse {
+          0% { box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4); }
+          50% { box-shadow: 0 4px 30px rgba(40, 167, 69, 0.8); }
+          100% { box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4); }
+        }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }//revealDiscount ends
 
   function setupScratchFormValidation() {
@@ -2108,18 +2476,18 @@
     termsCheckbox.addEventListener("change", validateForm);
   }//setupScratchFormValidation ends
 
-  // New function to enable scratch card after email entry
+  // Enhanced function to enable scratch card after email entry with gamified progress
   function enableScratchCard(discount) {
     const email = document.getElementById("scratch-email")?.value;
     const termsChecked = document.getElementById("scratch-terms")?.checked;
 
     if (!email || !email.includes("@")) {
-      alert("Please enter a valid email address.");
+      showCustomNotification("Please enter a valid email address.", "error");
       return;
     }
 
     if (!termsChecked) {
-      alert("Please agree to receive promotional emails.");
+      showCustomNotification("Please agree to receive promotional emails.", "error");
       return;
     }
 
@@ -2132,23 +2500,135 @@
       },
     });
 
-    // Enable the scratch canvas
+    // Update step progress - Step 1 complete, Step 2 active
+    updateStepProgress(1, 2);
+
+    // Enable the scratch canvas with enhanced styling
     const canvas = document.getElementById("scratch-canvas");
     const instruction = document.getElementById("scratch-instruction");
     const submitBtn = document.getElementById("enable-scratch-btn");
 
     canvas.style.pointerEvents = "auto";
     canvas.style.opacity = "1";
-    instruction.textContent = "Now scratch to reveal your discount!";
+    canvas.style.cursor = "crosshair";
+    
+    // Add glow effect to canvas
+    canvas.style.boxShadow = "0 0 20px rgba(102, 126, 234, 0.5)";
+    canvas.style.transition = "all 0.3s ease";
+
+    instruction.innerHTML = `
+      <span style="color: #28a745; font-weight: 700;">✨ Now scratch to reveal your discount! ✨</span>
+      <br>
+      <small style="color: #6c757d; font-size: 14px;">Use your mouse or finger to scratch the surface</small>
+    `;
 
     // Change button to claim button (disabled until scratched)
-    submitBtn.textContent = popupConfig.buttonText || "CLAIM DISCOUNT";
+    submitBtn.innerHTML = `
+      <span style="display: flex; align-items: center; justify-content: center;">
+        🏆 ${popupConfig.buttonText || "CLAIM DISCOUNT"}
+      </span>
+    `;
     submitBtn.onclick = () => handleScratchCardSubmit(discount);
     submitBtn.disabled = true; // Will be enabled when scratch is revealed
+    submitBtn.style.opacity = "0.6";
 
     // Store email for later use
     window.scratchCardEmail = email;
+
+    // Show success notification
+    showCustomNotification("Great! Now scratch the card to reveal your prize!", "success");
   }//enableScratchCard ends
+
+  // Helper function to update step progress indicators
+  function updateStepProgress(completedStep, activeStep) {
+    // Update completed step
+    if (completedStep) {
+      const stepEl = document.getElementById(`step-${completedStep}`);
+      const progressLine = document.getElementById(`progress-line-${completedStep}`);
+      
+      if (stepEl) {
+        stepEl.style.color = "#28a745";
+        const stepNumber = stepEl.querySelector('div');
+        if (stepNumber) {
+          stepNumber.style.background = "#28a745";
+          stepNumber.innerHTML = "✓";
+        }
+      }
+      
+      if (progressLine) {
+        progressLine.style.width = "100%";
+      }
+    }
+
+    // Update active step
+    if (activeStep) {
+      const stepEl = document.getElementById(`step-${activeStep}`);
+      
+      if (stepEl) {
+        stepEl.style.color = "#667eea";
+        const stepNumber = stepEl.querySelector('div');
+        if (stepNumber) {
+          stepNumber.style.background = "#667eea";
+          stepNumber.style.color = "white";
+        }
+      }
+    }
+  }
+
+  // Enhanced custom notification system
+  function showCustomNotification(message, type = "info") {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.scratch-notification');
+    existingNotifications.forEach(notification => notification.remove());
+
+    const notification = document.createElement("div");
+    notification.className = "scratch-notification";
+    
+    const colors = {
+      success: { bg: "#28a745", icon: "✅" },
+      error: { bg: "#dc3545", icon: "❌" },
+      info: { bg: "#17a2b8", icon: "ℹ️" },
+      warning: { bg: "#ffc107", icon: "⚠️" }
+    };
+    
+    const config = colors[type] || colors.info;
+    
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${config.bg};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      z-index: 10001;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      max-width: 300px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    `;
+    
+    notification.innerHTML = `
+      <span style="font-size: 16px;">${config.icon}</span>
+      <span>${message}</span>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+      notification.style.animation = "slideOutRight 0.3s ease-out";
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, 4000);
+  }
 
   // Scratch card form submission handler
   async function handleScratchCardSubmit(discount) {

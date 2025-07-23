@@ -313,6 +313,7 @@ export default function PopupConfigurationModal({
         placeholder: initialConfig.placeholder || "Enter your email",
         buttonText: initialConfig.buttonText || "CLAIM DISCOUNT",
         discountCode: initialConfig.discountCode || "SCRATCH10",
+        scratchDiscountPercentage: initialConfig.scratchDiscountPercentage || initialConfig.discountPercentage || 15,
         backgroundColor: initialConfig.backgroundColor || "#ffffff",
         textColor: initialConfig.textColor || "#000000",
         borderRadius: initialConfig.borderRadius || 16,
@@ -329,6 +330,7 @@ export default function PopupConfigurationModal({
       placeholder: "Enter your email",
       buttonText: "CLAIM DISCOUNT",
       discountCode: "SCRATCH10",
+      scratchDiscountPercentage: 15,
       backgroundColor: "#ffffff",
       textColor: "#000000",
       borderRadius: 16,
@@ -1244,6 +1246,22 @@ export default function PopupConfigurationModal({
         placeholder="Discount code to offer (e.g., SCRATCH10)"
       />
       
+      <TextField
+        label="Discount Percentage"
+        type="number"
+        value={scratchCardConfig.scratchDiscountPercentage.toString()}
+        onChange={(value) => {
+          const percentage = parseInt(value) || 15;
+          const clampedPercentage = Math.min(Math.max(percentage, 1), 100);
+          setScratchCardConfig({ ...scratchCardConfig, scratchDiscountPercentage: clampedPercentage });
+        }}
+        min={1}
+        max={100}
+        suffix="%"
+        placeholder="15"
+        helpText="Set the exact discount percentage customers will receive (1-100%)"
+      />
+      
       <InlineStack gap="400">
         <Box minWidth="200px">
           <Text as="p" variant="bodyMd">Background Color</Text>
@@ -1339,7 +1357,7 @@ export default function PopupConfigurationModal({
               • Interactive canvas-based scratch effect
             </Text>
             <Text variant="bodyMd" as="p" tone="subdued">
-              • Random discount percentages (5%, 10%, 15%, 20%, 25%, 30%)
+              • Configurable discount percentage (you control the exact amount)
             </Text>
             <Text variant="bodyMd" as="p" tone="subdued">
               • Touch and mouse support for all devices
@@ -1349,6 +1367,9 @@ export default function PopupConfigurationModal({
             </Text>
             <Text variant="bodyMd" as="p" tone="subdued">
               • Automatic discount code generation
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Dynamic color themes based on discount value
             </Text>
           </BlockStack>
         </BlockStack>
@@ -1638,7 +1659,7 @@ export default function PopupConfigurationModal({
             </Box>
 
             {/* Preview Tips */}
-            <Card sectioned>
+            {/* <Card sectioned>
               <BlockStack gap="200">
                 <Text as="h4" variant="headingSm">Preview Tips</Text>
                 <BlockStack gap="100">
@@ -1656,7 +1677,7 @@ export default function PopupConfigurationModal({
                   </Text>
                 </BlockStack>
               </BlockStack>
-            </Card>
+            </Card> */}
           </BlockStack>
         </Card>
       </div>

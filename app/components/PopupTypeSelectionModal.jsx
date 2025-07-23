@@ -13,6 +13,7 @@ import {
 } from "@shopify/polaris";
 import { EmailIcon, ClockIcon } from "@shopify/polaris-icons";
 import PopupConfigurationModal from "./PopupConfigurationModal";
+import { getPopupTypesWithImages } from "../utils/popupImages";
 
 export default function PopupTypeSelectionModal({ active, onClose, existingConfig }) {
   const [selectedPopupType, setSelectedPopupType] = useState(null);
@@ -20,48 +21,7 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
   const [popupName, setPopupName] = useState("");
   const [showCreationModal, setShowCreationModal] = useState(false);
 
-  const popupTypes = [
-    {
-      type: "email",
-      title: "Email Discount Popup",
-      description: "Capture emails with discount offers to grow your subscriber list",
-      icon: EmailIcon,
-      color: "#007ace",
-      features: ["Email capture", "Discount codes", "Customizable design", "Exit intent"],
-    },
-    {
-      type: "wheel-email",
-      title: "Wheel + Email Combo",
-      description: "Interactive spinning wheel with email capture for higher engagement",
-      icon: "🎡",
-      color: "#1e40af",
-      features: ["Spinning wheel", "Multiple prizes", "Email capture", "Gamification"]
-    },
-    {
-      type: "community",
-      title: "Community Social Popup",
-      description: "Grow your social media following with attractive social icons",
-      icon: "👥",
-      color: "#10b981",
-      features: ["Social media links", "Custom banner", "Multiple platforms", "Ask me later"]
-    },
-    {
-      type: "timer",
-      title: "Timer Countdown Popup",
-      description: "Create urgency with countdown timers for limited-time offers",
-      icon: ClockIcon,
-      color: "#f59e0b",
-      features: ["Countdown timer", "Urgency creation", "Email capture", "Custom expiry"]
-    },
-    {
-      type: "scratch-card",
-      title: "Scratch Card Popup",
-      description: "Interactive scratch-to-win experience with discount reveals",
-      icon: "🎲",
-      color: "#8b5cf6",
-      features: ["Canvas scratch effect", "Random discounts", "Email capture", "Gamification"]
-    }
-  ];
+  const popupTypes = getPopupTypesWithImages();
 
   // const handleSelectPopupType = (type) => {
   //   setSelectedPopupType(type);
@@ -127,109 +87,57 @@ export default function PopupTypeSelectionModal({ active, onClose, existingConfi
       >
         <Modal.Section>
           <BlockStack gap="500">
-            <Text variant="bodyMd" as="p" tone="subdued">
-              Select the type of popup you want to create. Each type is designed for different goals and engagement strategies.
-            </Text>
-            
             <Layout>
               {popupTypes.map((popup) => (
-                <Layout.Section key={popup.type} variant="oneHalf">
+                <Layout.Section key={popup.type} variant="oneThird">
                   <Card>
-                    <BlockStack gap="400">
-                      <InlineStack align="space-between" blockAlign="start">
-                        <InlineStack gap="300" align="center">
-                          {typeof popup.icon === 'string' ? (
-                            <Box
-                              style={{
-          width: "320px",       // ✅ Fixed width for consistency
-          minWidth: "320px",
-          maxWidth: "320px",
-          margin: "0 auto",     // ✅ Centers the card when single
-        }}
-                              
-                            >
-                              <Text as="span" variant="headingLg" alignment="center">
-                                {popup.icon}
-                              </Text>
-                            </Box>
-                          ) : (
-                            <Box
-                              padding="200"
-                              background="bg-surface-secondary"
-                              borderRadius="100"
-                              minWidth="40px"
-                              minHeight="40px"
-                            >
-                              <Icon source={popup.icon} tone="base" />
-                            </Box>
-                          )}
-                          <BlockStack gap="100">
-                            <Text as="h3" variant="headingMd">
-                              {popup.title}
-                            </Text>
-                          </BlockStack>
-                        </InlineStack>
-                      </InlineStack>
+                    <BlockStack gap="400" inlineAlign="center">
+                      {/* Large popup preview image with fixed dimensions */}
+                      <Box
+                        padding="400"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "100%",
+                          height: "280px", // Fixed height for consistency
+                          overflow: "hidden"
+                        }}
+                      >
+                        <img
+                          src={popup.image}
+                          alt={popup.title}
+                          style={{
+                            width: "260px", // Fixed width
+                            height: "200px", // Fixed height
+                            objectFit: "cover", // Cover to fill the exact dimensions
+                            borderRadius: "12px",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)"
+                          }}
+                        />
+                      </Box>
                       
-                      <Text variant="bodyMd" as="p" tone="subdued">
-                        {popup.description}
-                      </Text>
-                      
-                      <BlockStack gap="200">
-                        <Text as="h4" variant="headingSm">
-                          Key Features:
+                      {/* Simple title with fixed height */}
+                      <Box style={{ height: "60px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Text as="h3" variant="headingMd" alignment="center">
+                          {popup.title.replace(" Popup", "")}
                         </Text>
-                        <BlockStack gap="100">
-                          {popup.features.map((feature, index) => (
-                            <InlineStack key={index} gap="200" align="center">
-                              <Box
-                                minWidth="6px"
-                                minHeight="6px"
-                                background="bg-fill-success"
-                                borderRadius="100"
-                              />
-                              <Text variant="bodyMd" as="p">
-                                {feature}
-                              </Text>
-                            </InlineStack>
-                          ))}
-                        </BlockStack>
-                      </BlockStack>
+                      </Box>
                       
+                      {/* Create button */}
                       <Button
                         variant="primary"
                         onClick={() => handleSelectPopupType(popup.type)}
+                        size="large"
                         fullWidth
                       >
-                        Create {popup.title}
+                        Create popup
                       </Button>
                     </BlockStack>
                   </Card>
                 </Layout.Section>
               ))}
             </Layout>
-            
-            <Box padding="400" background="bg-surface-secondary" borderRadius="200">
-              <BlockStack gap="200">
-                <Text as="h4" variant="headingSm">
-                  💡 Pro Tips:
-                </Text>
-                <BlockStack gap="100">
-                  <Text variant="bodyMd" as="p" tone="subdued">
-                    • Email popups are great for first-time visitors and newsletter signups
-                  </Text>
-                  <Text variant="bodyMd" as="p" tone="subdued">
-                    • Wheel popups increase engagement and can boost conversion rates by 30%
-                  </Text>
-                  <Text variant="bodyMd" as="p" tone="subdued">
-                    • Social popups work best for brand awareness and community building
-                  </Text>
-                  <Text variant="bodyMd" as="p" tone="subdued">
-                    • Timer popups create urgency and are perfect for limited-time offers
-                  </Text>
-                </BlockStack>
-              </BlockStack>
-            </Box>
           </BlockStack>
         </Modal.Section>
       </Modal>
