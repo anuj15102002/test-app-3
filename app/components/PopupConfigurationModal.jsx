@@ -76,6 +76,10 @@ export default function PopupConfigurationModal({
   // Popup name for identification in the admin interface
   const [popupName, setPopupName] = useState(initialConfig?.name || initialPopupName || "");
   
+  // State for popup name validation
+  const [popupNameError, setPopupNameError] = useState("");
+  const [existingPopupNames, setExistingPopupNames] = useState([]);
+  
   // ============================================================================
   // TAB MANAGEMENT STATE
   // ============================================================================
@@ -409,12 +413,57 @@ export default function PopupConfigurationModal({
     }
   }, [pagesLoading, storefrontPages.staticPages.length]);
 
-  // Load storefront pages when modal opens
+  // Fetch existing popup names for validation
+  const fetchExistingPopupNames = useCallback(async () => {
+    try {
+      const response = await fetch('/app/popups');
+      if (response.ok) {
+        const html = await response.text();
+        // Extract popup names from the response (this is a simple approach)
+        // In a real implementation, you'd want a dedicated API endpoint
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const popupElements = doc.querySelectorAll('[data-popup-name]');
+        const names = Array.from(popupElements).map(el => el.getAttribute('data-popup-name'));
+        setExistingPopupNames(names);
+      }
+    } catch (error) {
+      console.error('Error fetching existing popup names:', error);
+      // Fallback: try to get names from localStorage or other source
+      setExistingPopupNames([]);
+    }
+  }, []);
+
+  // Validate popup name for duplicates
+  const validatePopupName = useCallback((name) => {
+    if (!name.trim()) {
+      setPopupNameError("Popup name is required");
+      return false;
+    }
+    
+    // Check for duplicates (exclude current popup if editing)
+    const trimmedName = name.trim();
+    const isDuplicate = existingPopupNames.some(existingName =>
+      existingName.toLowerCase() === trimmedName.toLowerCase() &&
+      existingName !== initialConfig?.name
+    );
+    
+    if (isDuplicate) {
+      setPopupNameError("A popup with this name already exists. Please choose a different name.");
+      return false;
+    }
+    
+    setPopupNameError("");
+    return true;
+  }, [existingPopupNames, initialConfig?.name]);
+
+  // Load storefront pages and existing popup names when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchStorefrontPages();
+      fetchExistingPopupNames();
     }
-  }, [isOpen, fetchStorefrontPages]);
+  }, [isOpen, fetchStorefrontPages, fetchExistingPopupNames]);
 
   // ============================================================================
   // SAVE AND FORM SUBMISSION HANDLERS
@@ -430,6 +479,12 @@ export default function PopupConfigurationModal({
     
     // Generate a default name if not provided
     const finalPopupName = popupName || `${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup - ${new Date().toLocaleDateString()}`;
+    
+    // Validate popup name before saving
+    if (!validatePopupName(finalPopupName)) {
+      shopify.toast.show("Please fix the popup name error before saving.", { isError: true });
+      return;
+    }
     
     const formData = {
       popupConfig: JSON.stringify({
@@ -453,7 +508,7 @@ export default function PopupConfigurationModal({
     
     // Close modal after save - this will trigger the parent to close both modals
     onClose();
-  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, scratchCardConfig, popupName, pageTargeting, initialConfig, fetcher, onClose]);
+  }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, scratchCardConfig, popupName, pageTargeting, initialConfig, fetcher, onClose, validatePopupName, shopify]);
 
   // Handle API response after form submission
   useEffect(() => {
@@ -530,16 +585,16 @@ export default function PopupConfigurationModal({
     const config = getCurrentConfig();
     
     return (
-      <BlockStack gap="400">
-        <Text as="h3" variant="headingMd">📋 Rules & Behavior</Text>
+      <BlockStack>
+        {/* <Text as="h3" variant="headingMd">📋 Rules & Behavior</Text>
         <Text as="p" variant="bodyMd" tone="subdued">
           Control when, where, and how often your popup appears to visitors
-        </Text>
+        </Text> */}
         
-        <Divider />
+        {/* <Divider /> */}
         
         {/* Display Timing */}
-        <BlockStack gap="300">
+        <BlockStack gap="200">
           <Text as="h4" variant="headingSm">Display Timing</Text>
           
           <RangeSlider
@@ -695,10 +750,10 @@ export default function PopupConfigurationModal({
   
   const renderEmailContentFields = () => (
     <BlockStack gap="400">
-      <Text as="h3" variant="headingMd">📝 Email Popup Content</Text>
+      {/* <Text as="h3" variant="headingMd">📝 Email Popup Content</Text>
       <Text as="p" variant="bodyMd" tone="subdued">
         Configure all text content and messaging for your email popup
-      </Text>
+      </Text> */}
       
       <Divider />
       
@@ -2896,11 +2951,21 @@ export default function PopupConfigurationModal({
           .popup-config-preview {
             width: 800px !important;
             flex-shrink: 0 !important;
-            overflow: hidden !important;
+            overflow: visible !important;
             position: sticky !important;
             top: 0 !important;
             height: fit-content !important;
-            max-height: 85vh !important;
+            max-height: none !important;
+          }
+          
+          /* Ensure preview content doesn't create its own scroll */
+          .popup-config-preview * {
+            overflow: visible !important;
+          }
+          
+          /* Timer preview container specific styling */
+          .timer-preview-container {
+            overflow: visible !important;
           }
         `}
       </style>
@@ -2944,33 +3009,47 @@ export default function PopupConfigurationModal({
                   
                   <Divider />
                   
-                  {/* Basic Configuration */}
-                  <TextField
-                    label="Popup Name"
-                    value={popupName}
-                    onChange={(value) => setPopupName(value.slice(0, 50))}
-                    placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
-                    maxLength={50}
-                    showCharacterCount
-                    helpText="Give your popup a descriptive name for easy identification (max 50 characters)"
-                  />
-                  
-                  {/* Popup Type Selector */}
-                  <Select
-                    label="Popup Type"
-                    options={popupTypeOptions}
-                    value={popupType}
-                    onChange={setPopupType}
-                  />
-                  
-                  <Divider />
-                  
                   {/* Tabbed Configuration Interface */}
-                  <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab}>
-                    {activeTab === 0 && renderRulesSection()}
-                    {activeTab === 1 && renderContentSection()}
-                    {activeTab === 2 && renderStyleSection()}
-                  </Tabs>
+                  <Box width="100%" textAlign="center">
+                    <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab}>
+                      <Box padding="400">
+                        <BlockStack gap="400">
+                          {/* Basic Configuration */}
+                          <TextField
+                            label="Popup Name"
+                            value={popupName}
+                            onChange={(value) => {
+                              const trimmedValue = value.slice(0, 50);
+                              setPopupName(trimmedValue);
+                              // Validate on change with a small delay to avoid excessive validation
+                              setTimeout(() => validatePopupName(trimmedValue), 300);
+                            }}
+                            onBlur={() => validatePopupName(popupName)}
+                            placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
+                            maxLength={50}
+                            showCharacterCount
+                            helpText="Give your popup a descriptive name for easy identification (max 50 characters)"
+                            error={popupNameError}
+                          />
+                          
+                          {/* Popup Type Selector */}
+                          {/* <Select
+                            label="Popup Type"
+                            options={popupTypeOptions}
+                            value={popupType}
+                            onChange={setPopupType}
+                          /> */}
+                          
+                          <Divider />
+                          
+                          {/* Tab Content */}
+                          {activeTab === 0 && renderRulesSection()}
+                          {activeTab === 1 && renderContentSection()}
+                          {activeTab === 2 && renderStyleSection()}
+                        </BlockStack>
+                      </Box>
+                    </Tabs>
+                  </Box>
                   
                 </BlockStack>
               </Card>
