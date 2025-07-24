@@ -20,6 +20,7 @@ import {
   Combobox,
   Listbox,
   AutoSelection,
+  Tabs,
 } from "@shopify/polaris";
 import { EmailIcon, ClockIcon } from "@shopify/polaris-icons";
 import { useAppBridge } from "@shopify/app-bridge-react";
@@ -74,6 +75,13 @@ export default function PopupConfigurationModal({
   
   // Popup name for identification in the admin interface
   const [popupName, setPopupName] = useState(initialConfig?.name || initialPopupName || "");
+  
+  // ============================================================================
+  // TAB MANAGEMENT STATE
+  // ============================================================================
+  
+  // Active tab state for the three-section interface
+  const [activeTab, setActiveTab] = useState(0);
   
   // ============================================================================
   // PAGE TARGETING SYSTEM STATE
@@ -487,178 +495,1260 @@ export default function PopupConfigurationModal({
   };
 
   // ============================================================================
-  // RENDER FUNCTIONS FOR DIFFERENT POPUP TYPES
+  // TABBED CONFIGURATION RENDER FUNCTIONS
   // ============================================================================
   
-  // Main configuration panel renderer - switches between popup types
-  const renderConfigurationPanel = () => {
+  // Tab definitions for the three-section interface
+  const tabs = [
+    {
+      id: 'rules',
+      content: '📋 Rules',
+      accessibilityLabel: 'Rules configuration',
+      panelID: 'rules-panel',
+    },
+    {
+      id: 'content',
+      content: '📝 Content',
+      accessibilityLabel: 'Content configuration',
+      panelID: 'content-panel',
+    },
+    {
+      id: 'style',
+      content: '🎨 Style',
+      accessibilityLabel: 'Style configuration',
+      panelID: 'style-panel',
+    },
+  ];
+
+
+  // ============================================================================
+  // RULES SECTION RENDERER
+  // ============================================================================
+  
+  // Renders the Rules tab - controls when, where, and how often popup appears
+  const renderRulesSection = () => {
+    const config = getCurrentConfig();
+    
+    return (
+      <BlockStack gap="400">
+        <Text as="h3" variant="headingMd">📋 Rules & Behavior</Text>
+        <Text as="p" variant="bodyMd" tone="subdued">
+          Control when, where, and how often your popup appears to visitors
+        </Text>
+        
+        <Divider />
+        
+        {/* Display Timing */}
+        <BlockStack gap="300">
+          <Text as="h4" variant="headingSm">Display Timing</Text>
+          
+          <RangeSlider
+            label={`Display Delay: ${config.displayDelay / 1000}s`}
+            value={config.displayDelay}
+            onChange={(value) => {
+              const updateConfig = popupType === "email" ? setEmailConfig :
+                                 popupType === "community" ? setCommunityConfig :
+                                 popupType === "timer" ? setTimerConfig :
+                                 popupType === "scratch-card" ? setScratchCardConfig :
+                                 setWheelEmailConfig;
+              updateConfig(prev => ({ ...prev, displayDelay: value }));
+            }}
+            min={0}
+            max={10000}
+            step={500}
+            helpText="How long to wait before showing the popup after page load"
+          />
+          
+          <Checkbox
+            label="Enable exit intent detection"
+            checked={config.exitIntent}
+            onChange={(checked) => {
+              const updateConfig = popupType === "email" ? setEmailConfig :
+                                 popupType === "community" ? setCommunityConfig :
+                                 popupType === "timer" ? setTimerConfig :
+                                 popupType === "scratch-card" ? setScratchCardConfig :
+                                 setWheelEmailConfig;
+              updateConfig(prev => ({ ...prev, exitIntent: checked }));
+            }}
+            helpText="Show popup when user is about to leave the page"
+          />
+          
+          {config.exitIntent && (
+            <RangeSlider
+              label={`Exit intent delay: ${config.exitIntentDelay}ms`}
+              value={config.exitIntentDelay}
+              onChange={(value) => {
+                const updateConfig = popupType === "email" ? setEmailConfig :
+                                   popupType === "community" ? setCommunityConfig :
+                                   popupType === "timer" ? setTimerConfig :
+                                   popupType === "scratch-card" ? setScratchCardConfig :
+                                   setWheelEmailConfig;
+                updateConfig(prev => ({ ...prev, exitIntentDelay: value }));
+              }}
+              min={500}
+              max={3000}
+              step={100}
+              helpText="Delay before exit intent triggers"
+            />
+          )}
+        </BlockStack>
+        
+        <Divider />
+        
+        {/* Display Frequency */}
+        <BlockStack gap="300">
+          <Text as="h4" variant="headingSm">Display Frequency</Text>
+          
+          <Select
+            label="How often to show popup"
+            options={[
+              { label: "Show once per visitor", value: "once" },
+              { label: "Show once per day", value: "daily" },
+              { label: "Show once per week", value: "weekly" },
+              { label: "Show on every visit", value: "always" },
+            ]}
+            value={config.frequency}
+            onChange={(value) => {
+              const updateConfig = popupType === "email" ? setEmailConfig :
+                                 popupType === "community" ? setCommunityConfig :
+                                 popupType === "timer" ? setTimerConfig :
+                                 popupType === "scratch-card" ? setScratchCardConfig :
+                                 setWheelEmailConfig;
+              updateConfig(prev => ({ ...prev, frequency: value }));
+            }}
+            helpText="Control how often the popup appears to the same visitor"
+          />
+        </BlockStack>
+        
+        <Divider />
+        
+        {/* Behavior Settings */}
+        <BlockStack gap="300">
+          <Text as="h4" variant="headingSm">Behavior Settings</Text>
+          
+          <Checkbox
+            label="Show close button"
+            checked={config.showCloseButton !== false}
+            onChange={(checked) => {
+              const updateConfig = popupType === "email" ? setEmailConfig :
+                                 popupType === "community" ? setCommunityConfig :
+                                 popupType === "timer" ? setTimerConfig :
+                                 popupType === "scratch-card" ? setScratchCardConfig :
+                                 setWheelEmailConfig;
+              updateConfig(prev => ({ ...prev, showCloseButton: checked }));
+            }}
+            helpText="Allow users to close the popup manually"
+          />
+        </BlockStack>
+        
+        <Divider />
+        
+        {/* Page Targeting */}
+        {renderPageTargeting()}
+      </BlockStack>
+    );
+  };
+
+  // ============================================================================
+  // CONTENT SECTION RENDERER
+  // ============================================================================
+  
+  // Renders the Content tab - all text, images, and messaging
+  const renderContentSection = () => {
     switch (popupType) {
       case "email":
-        return renderEmailConfig();
+        return renderEmailContentFields();
       case "community":
-        return renderCommunityConfig();
+        return renderCommunityContentFields();
       case "timer":
-        return renderTimerConfig();
+        return renderTimerContentFields();
       case "scratch-card":
-        return renderScratchCardConfig();
+        return renderScratchCardContentFields();
       default:
-        return renderWheelEmailConfig();
+        return renderWheelEmailContentFields();
     }
   };
 
   // ============================================================================
-  // EMAIL POPUP CONFIGURATION RENDERER
+  // STYLE SECTION RENDERER
   // ============================================================================
   
-  // Renders configuration options specific to email capture popups
-  const renderEmailConfig = () => (
+  // Renders the Style tab - colors, layout, and appearance
+  const renderStyleSection = () => {
+    switch (popupType) {
+      case "email":
+        return renderEmailStyleFields();
+      case "community":
+        return renderCommunityStyleFields();
+      case "timer":
+        return renderTimerStyleFields();
+      case "scratch-card":
+        return renderScratchCardStyleFields();
+      default:
+        return renderWheelEmailStyleFields();
+    }
+  };
+
+  // ============================================================================
+  // EMAIL POPUP CONTENT FIELDS
+  // ============================================================================
+  
+  const renderEmailContentFields = () => (
     <BlockStack gap="400">
-      <Text as="h3" variant="headingMd">Email Popup Configuration</Text>
-      
-      <TextField
-        label="Popup Title"
-        value={emailConfig.title}
-        onChange={(value) => setEmailConfig({ ...emailConfig, title: value })}
-        placeholder="Enter popup title"
-      />
-      
-      <TextField
-        label="Description"
-        value={emailConfig.description}
-        onChange={(value) => setEmailConfig({ ...emailConfig, description: value })}
-        multiline={3}
-        placeholder="Enter popup description"
-      />
-      
-      <TextField
-        label="Email Placeholder"
-        value={emailConfig.placeholder}
-        onChange={(value) => setEmailConfig({ ...emailConfig, placeholder: value })}
-        placeholder="Email input placeholder"
-      />
-      
-      <TextField
-        label="Button Text"
-        value={emailConfig.buttonText}
-        onChange={(value) => setEmailConfig({ ...emailConfig, buttonText: value })}
-        placeholder="Button text"
-      />
-      
-      <TextField
-        label="Discount Code"
-        value={emailConfig.discountCode}
-        onChange={(value) => setEmailConfig({ ...emailConfig, discountCode: value })}
-        placeholder="Discount code to offer"
-      />
-      
-      <TextField
-        label="Banner Image URL"
-        value={emailConfig.bannerImage}
-        onChange={(value) => setEmailConfig({ ...emailConfig, bannerImage: value })}
-        placeholder="Enter banner image URL (optional)"
-        helpText="Upload your image to a hosting service and paste the URL here. This image will be displayed on the left side of the popup."
-      />
-      
-      <InlineStack gap="400">
-        <Box minWidth="200px">
-          <Text as="p" variant="bodyMd">Background Color</Text>
-          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
-            <input
-              type="color"
-              value={emailConfig.backgroundColor}
-              onChange={(e) => setEmailConfig({ ...emailConfig, backgroundColor: e.target.value })}
-              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
-            />
-          </Box>
-        </Box>
-        <Box minWidth="200px">
-          <Text as="p" variant="bodyMd">Text Color</Text>
-          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
-            <input
-              type="color"
-              value={emailConfig.textColor}
-              onChange={(e) => setEmailConfig({ ...emailConfig, textColor: e.target.value })}
-              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
-            />
-          </Box>
-        </Box>
-        <Box minWidth="200px">
-          <Text as="p" variant="bodyMd">Button Color</Text>
-          <Box padding="200" background="bg-surface-secondary" borderRadius="200">
-            <input
-              type="color"
-              value={emailConfig.buttonColor}
-              onChange={(e) => setEmailConfig({ ...emailConfig, buttonColor: e.target.value })}
-              style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
-            />
-          </Box>
-        </Box>
-      </InlineStack>
-      
-      <RangeSlider
-        label={`Border Radius: ${emailConfig.borderRadius}px`}
-        value={emailConfig.borderRadius}
-        onChange={(value) => setEmailConfig({ ...emailConfig, borderRadius: value })}
-        min={0}
-        max={20}
-        step={1}
-      />
-      
-      <RangeSlider
-        label={`Display Delay: ${emailConfig.displayDelay / 1000}s`}
-        value={emailConfig.displayDelay}
-        onChange={(value) => setEmailConfig({ ...emailConfig, displayDelay: value })}
-        min={0}
-        max={10000}
-        step={500}
-      />
-      
-      <Checkbox
-        label="Show close button"
-        checked={emailConfig.showCloseButton}
-        onChange={(checked) => setEmailConfig({ ...emailConfig, showCloseButton: checked })}
-      />
+      <Text as="h3" variant="headingMd">📝 Email Popup Content</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Configure all text content and messaging for your email popup
+      </Text>
       
       <Divider />
       
-      <Text as="h4" variant="headingSm">Advanced Settings</Text>
-      
-      <Select
-        label="Display Frequency"
-        options={[
-          { label: "Show once per visitor", value: "once" },
-          { label: "Show once per day", value: "daily" },
-          { label: "Show once per week", value: "weekly" },
-          { label: "Show on every visit", value: "always" },
-        ]}
-        value={emailConfig.frequency}
-        onChange={(value) => setEmailConfig({ ...emailConfig, frequency: value })}
-        helpText="Control how often the popup appears to the same visitor"
-      />
-      
-      <Checkbox
-        label="Enable exit intent detection"
-        checked={emailConfig.exitIntent}
-        onChange={(checked) => setEmailConfig({ ...emailConfig, exitIntent: checked })}
-        helpText="Show popup when user is about to leave the page"
-      />
-      
-      {emailConfig.exitIntent && (
-        <RangeSlider
-          label={`Exit intent delay: ${emailConfig.exitIntentDelay}ms`}
-          value={emailConfig.exitIntentDelay}
-          onChange={(value) => setEmailConfig({ ...emailConfig, exitIntentDelay: value })}
-          min={500}
-          max={3000}
-          step={100}
-          helpText="Delay before exit intent triggers"
+      {/* Main Content */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Main Content</Text>
+        
+        <TextField
+          label="Popup Title"
+          value={emailConfig.title}
+          onChange={(value) => setEmailConfig({ ...emailConfig, title: value })}
+          placeholder="Enter popup title"
+          helpText="Main headline that grabs attention"
         />
+        
+        <TextField
+          label="Description"
+          value={emailConfig.description}
+          onChange={(value) => setEmailConfig({ ...emailConfig, description: value })}
+          multiline={3}
+          placeholder="Enter popup description"
+          helpText="Supporting text that explains the offer"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Form Elements */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Form Elements</Text>
+        
+        <TextField
+          label="Email Placeholder"
+          value={emailConfig.placeholder}
+          onChange={(value) => setEmailConfig({ ...emailConfig, placeholder: value })}
+          placeholder="Email input placeholder"
+          helpText="Placeholder text shown in the email input field"
+        />
+        
+        <TextField
+          label="Button Text"
+          value={emailConfig.buttonText}
+          onChange={(value) => setEmailConfig({ ...emailConfig, buttonText: value })}
+          placeholder="Button text"
+          helpText="Text displayed on the submit button"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Discount & Images */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Discount & Images</Text>
+        
+        <TextField
+          label="Discount Code"
+          value={emailConfig.discountCode}
+          onChange={(value) => setEmailConfig({ ...emailConfig, discountCode: value })}
+          placeholder="Discount code to offer"
+          helpText="The discount code customers will receive"
+        />
+        
+        <TextField
+          label="Banner Image URL"
+          value={emailConfig.bannerImage}
+          onChange={(value) => setEmailConfig({ ...emailConfig, bannerImage: value })}
+          placeholder="Enter banner image URL (optional)"
+          helpText="Upload your image to a hosting service and paste the URL here. This image will be displayed on the left side of the popup."
+        />
+      </BlockStack>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // EMAIL POPUP STYLE FIELDS
+  // ============================================================================
+  
+  const renderEmailStyleFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">🎨 Email Popup Style</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Customize the visual appearance and layout of your email popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Colors */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Colors</Text>
+        
+        <InlineStack gap="400">
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Background Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={emailConfig.backgroundColor}
+                onChange={(e) => setEmailConfig({ ...emailConfig, backgroundColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Text Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={emailConfig.textColor}
+                onChange={(e) => setEmailConfig({ ...emailConfig, textColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Button Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={emailConfig.buttonColor}
+                onChange={(e) => setEmailConfig({ ...emailConfig, buttonColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+        </InlineStack>
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Layout */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Layout</Text>
+        
+        <RangeSlider
+          label={`Border Radius: ${emailConfig.borderRadius}px`}
+          value={emailConfig.borderRadius}
+          onChange={(value) => setEmailConfig({ ...emailConfig, borderRadius: value })}
+          min={0}
+          max={20}
+          step={1}
+          helpText="Roundness of popup corners"
+        />
+      </BlockStack>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // WHEEL-EMAIL COMBO CONTENT FIELDS
+  // ============================================================================
+  
+  const renderWheelEmailContentFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">📝 Wheel + Email Content</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Configure all text content and wheel segments for your spinning wheel popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Main Content */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Main Content</Text>
+        
+        <TextField
+          label="Main Title"
+          value={wheelEmailConfig.title}
+          onChange={(value) => setWheelEmailConfig({ ...wheelEmailConfig, title: value })}
+          placeholder="Main title (e.g., GET YOUR CHANCE TO WIN)"
+          helpText="Primary headline for the popup"
+        />
+        
+        <TextField
+          label="Subtitle"
+          value={wheelEmailConfig.subtitle}
+          onChange={(value) => setWheelEmailConfig({ ...wheelEmailConfig, subtitle: value })}
+          placeholder="Subtitle (e.g., AMAZING DISCOUNTS!)"
+          helpText="Secondary headline below the main title"
+        />
+        
+        <TextField
+          label="Description"
+          value={wheelEmailConfig.description}
+          onChange={(value) => setWheelEmailConfig({ ...wheelEmailConfig, description: value })}
+          multiline={3}
+          placeholder="Description text"
+          helpText="Explanation of how the wheel works"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Form Elements */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Form Elements</Text>
+        
+        <TextField
+          label="Email Placeholder"
+          value={wheelEmailConfig.placeholder}
+          onChange={(value) => setWheelEmailConfig({ ...wheelEmailConfig, placeholder: value })}
+          placeholder="Email input placeholder"
+          helpText="Placeholder text for the email input"
+        />
+        
+        <TextField
+          label="Button Text"
+          value={wheelEmailConfig.buttonText}
+          onChange={(value) => setWheelEmailConfig({ ...wheelEmailConfig, buttonText: value })}
+          placeholder="Button text (e.g., TRY YOUR LUCK)"
+          helpText="Text on the spin button"
+        />
+        
+        <TextField
+          label="Default Discount Code"
+          value={wheelEmailConfig.discountCode}
+          onChange={(value) => setWheelEmailConfig({ ...wheelEmailConfig, discountCode: value })}
+          placeholder="Default discount code for winners"
+          helpText="Fallback discount code"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Wheel Segments */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Wheel Segments</Text>
+        <Text as="p" variant="bodyMd" tone="subdued">
+          Configure the prizes and labels on your spinning wheel
+        </Text>
+        
+        <BlockStack gap="200">
+          {wheelEmailConfig.segments.map((segment, index) => (
+            <InlineStack key={index} gap="200" align="center">
+              <Box minWidth="120px">
+                <TextField
+                  label={`Segment ${index + 1} Label`}
+                  value={segment.label}
+                  onChange={(value) => {
+                    const newSegments = [...wheelEmailConfig.segments];
+                    newSegments[index].label = value;
+                    setWheelEmailConfig({ ...wheelEmailConfig, segments: newSegments });
+                  }}
+                  placeholder="Segment text"
+                />
+              </Box>
+              <Box minWidth="100px">
+                <TextField
+                  label="Discount Code"
+                  value={segment.code || ''}
+                  onChange={(value) => {
+                    const newSegments = [...wheelEmailConfig.segments];
+                    newSegments[index].code = value || null;
+                    setWheelEmailConfig({ ...wheelEmailConfig, segments: newSegments });
+                  }}
+                  placeholder="Discount code"
+                />
+              </Box>
+            </InlineStack>
+          ))}
+        </BlockStack>
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* House Rules */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">House Rules</Text>
+        
+        <Checkbox
+          label="Show house rules section"
+          checked={wheelEmailConfig.showHouseRules}
+          onChange={(checked) => setWheelEmailConfig({ ...wheelEmailConfig, showHouseRules: checked })}
+          helpText="Display rules and terms at the bottom of the popup"
+        />
+        
+        {wheelEmailConfig.showHouseRules && (
+          <BlockStack gap="200">
+            {wheelEmailConfig.houseRules.map((rule, index) => (
+              <InlineStack key={index} gap="200" align="center">
+                <Box minWidth="400px">
+                  <TextField
+                    label={`Rule ${index + 1}`}
+                    value={rule}
+                    onChange={(value) => {
+                      const newRules = [...wheelEmailConfig.houseRules];
+                      newRules[index] = value;
+                      setWheelEmailConfig({ ...wheelEmailConfig, houseRules: newRules });
+                    }}
+                    placeholder={`House rule ${index + 1}`}
+                  />
+                </Box>
+                <Button
+                  onClick={() => {
+                    const newRules = wheelEmailConfig.houseRules.filter((_, i) => i !== index);
+                    setWheelEmailConfig({ ...wheelEmailConfig, houseRules: newRules });
+                  }}
+                  variant="plain"
+                  tone="critical"
+                  disabled={wheelEmailConfig.houseRules.length <= 1}
+                >
+                  Remove
+                </Button>
+              </InlineStack>
+            ))}
+            <Button
+              onClick={() => {
+                const newRules = [...wheelEmailConfig.houseRules, ""];
+                setWheelEmailConfig({ ...wheelEmailConfig, houseRules: newRules });
+              }}
+              variant="plain"
+            >
+              Add Rule
+            </Button>
+          </BlockStack>
+        )}
+      </BlockStack>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // WHEEL-EMAIL COMBO STYLE FIELDS
+  // ============================================================================
+  
+  const renderWheelEmailStyleFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">🎨 Wheel + Email Style</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Customize the visual appearance of your spinning wheel popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Wheel Segment Colors */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Wheel Segment Colors</Text>
+        
+        <BlockStack gap="200">
+          {wheelEmailConfig.segments.map((segment, index) => (
+            <InlineStack key={index} gap="200" align="center">
+              <Box minWidth="120px">
+                <Text variant="bodyMd">{segment.label}</Text>
+              </Box>
+              <Box minWidth="60px">
+                <Text as="p" variant="bodyMd">Color</Text>
+                <input
+                  type="color"
+                  value={segment.color}
+                  onChange={(e) => {
+                    const newSegments = [...wheelEmailConfig.segments];
+                    newSegments[index].color = e.target.value;
+                    setWheelEmailConfig({ ...wheelEmailConfig, segments: newSegments });
+                  }}
+                  style={{ width: "40px", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                />
+              </Box>
+            </InlineStack>
+          ))}
+        </BlockStack>
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Background & Colors */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Background & Colors</Text>
+        
+        <TextField
+          label="Background Gradient/Color"
+          value={wheelEmailConfig.backgroundColor}
+          onChange={(value) => setWheelEmailConfig({ ...wheelEmailConfig, backgroundColor: value })}
+          placeholder="linear-gradient(135deg, #09090aff 0%, #2a5298 100%)"
+          helpText="CSS gradient or solid color for popup background"
+        />
+        
+        <InlineStack gap="400">
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Text Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={wheelEmailConfig.textColor}
+                onChange={(e) => setWheelEmailConfig({ ...wheelEmailConfig, textColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+        </InlineStack>
+      </BlockStack>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // COMMUNITY POPUP CONTENT FIELDS
+  // ============================================================================
+  
+  const renderCommunityContentFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">📝 Community Content</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Configure all text content and social media links for your community popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Main Content */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Main Content</Text>
+        
+        <TextField
+          label="Popup Title"
+          value={communityConfig.title}
+          onChange={(value) => setCommunityConfig({ ...communityConfig, title: value })}
+          placeholder="Enter popup title (e.g., JOIN OUR COMMUNITY)"
+          helpText="Main headline that encourages social engagement"
+        />
+        
+        <TextField
+          label="Description"
+          value={communityConfig.description}
+          onChange={(value) => setCommunityConfig({ ...communityConfig, description: value })}
+          multiline={3}
+          placeholder="Enter popup description"
+          helpText="Supporting text that explains the benefits of following"
+        />
+        
+        <TextField
+          label="Button Text"
+          value={communityConfig.buttonText}
+          onChange={(value) => setCommunityConfig({ ...communityConfig, buttonText: value })}
+          placeholder="Button text (e.g., Follow Us)"
+          helpText="Text displayed on the main action button"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Banner Image */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Banner Image</Text>
+        
+        <TextField
+          label="Banner Image URL"
+          value={communityConfig.bannerImage}
+          onChange={(value) => setCommunityConfig({ ...communityConfig, bannerImage: value })}
+          placeholder="Enter banner image URL (optional)"
+          helpText="Upload your image to a hosting service and paste the URL here. This image will be displayed at the top of the popup."
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Social Media Links */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Social Media Links</Text>
+        <Text as="p" variant="bodyMd" tone="subdued">
+          Configure which social platforms to display and their URLs
+        </Text>
+        
+        <BlockStack gap="200">
+          {communityConfig.socialIcons.map((social, index) => (
+            <InlineStack key={social.platform} gap="200" align="center">
+              <Box minWidth="100px">
+                <Checkbox
+                  label={social.platform.charAt(0).toUpperCase() + social.platform.slice(1)}
+                  checked={social.enabled}
+                  onChange={(checked) => {
+                    const newSocialIcons = [...communityConfig.socialIcons];
+                    newSocialIcons[index].enabled = checked;
+                    setCommunityConfig({ ...communityConfig, socialIcons: newSocialIcons });
+                  }}
+                />
+              </Box>
+              <Box minWidth="300px">
+                <TextField
+                  label={`${social.platform.charAt(0).toUpperCase() + social.platform.slice(1)} URL`}
+                  value={social.url}
+                  onChange={(value) => {
+                    const newSocialIcons = [...communityConfig.socialIcons];
+                    newSocialIcons[index].url = value;
+                    setCommunityConfig({ ...communityConfig, socialIcons: newSocialIcons });
+                  }}
+                  placeholder={`https://${social.platform}.com/yourpage`}
+                  disabled={!social.enabled}
+                  helpText={social.enabled ? `Enter your ${social.platform} page URL` : `Enable ${social.platform} to add URL`}
+                />
+              </Box>
+            </InlineStack>
+          ))}
+        </BlockStack>
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Additional Options */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Additional Options</Text>
+        
+        <Checkbox
+          label="Show Ask Me Later link"
+          checked={communityConfig.showAskMeLater}
+          onChange={(checked) => setCommunityConfig({ ...communityConfig, showAskMeLater: checked })}
+          helpText="Allow users to dismiss the popup temporarily"
+        />
+        
+        {communityConfig.showAskMeLater && (
+          <TextField
+            label="Ask Me Later Text"
+            value={communityConfig.askMeLaterText}
+            onChange={(value) => setCommunityConfig({ ...communityConfig, askMeLaterText: value })}
+            placeholder="Text for the ask me later link"
+            helpText="Text shown for the temporary dismiss option"
+          />
+        )}
+      </BlockStack>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // COMMUNITY POPUP STYLE FIELDS
+  // ============================================================================
+  
+  const renderCommunityStyleFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">🎨 Community Style</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Customize the visual appearance and layout of your community popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Colors */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Colors</Text>
+        
+        <InlineStack gap="400">
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Background Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={communityConfig.backgroundColor}
+                onChange={(e) => setCommunityConfig({ ...communityConfig, backgroundColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Text Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={communityConfig.textColor}
+                onChange={(e) => setCommunityConfig({ ...communityConfig, textColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+        </InlineStack>
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Layout */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Layout</Text>
+        
+        <RangeSlider
+          label={`Border Radius: ${communityConfig.borderRadius}px`}
+          value={communityConfig.borderRadius}
+          onChange={(value) => setCommunityConfig({ ...communityConfig, borderRadius: value })}
+          min={0}
+          max={20}
+          step={1}
+          helpText="Roundness of popup corners"
+        />
+      </BlockStack>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // TIMER POPUP CONTENT FIELDS
+  // ============================================================================
+  
+  const renderTimerContentFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">📝 Timer Content</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Configure all text content and timer settings for your countdown popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Main Content */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Main Content</Text>
+        
+        <TextField
+          label="Popup Title"
+          value={timerConfig.title}
+          onChange={(value) => setTimerConfig({ ...timerConfig, title: value })}
+          placeholder="Enter popup title (e.g., LIMITED TIME OFFER!)"
+          helpText="Main headline that creates urgency"
+        />
+        
+        <TextField
+          label="Description"
+          value={timerConfig.description}
+          onChange={(value) => setTimerConfig({ ...timerConfig, description: value })}
+          multiline={3}
+          placeholder="Enter popup description"
+          helpText="Supporting text that explains the limited-time offer"
+        />
+        
+        <TextField
+          label="Disclaimer Text"
+          value={timerConfig.disclaimer}
+          onChange={(value) => setTimerConfig({ ...timerConfig, disclaimer: value })}
+          placeholder="Limited time offer. Valid while supplies last."
+          helpText="Small print text shown at bottom of popup"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Timer Configuration */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Timer Configuration</Text>
+        
+        <InlineStack gap="400">
+          <Box minWidth="120px">
+            <TextField
+              label="Days"
+              type="number"
+              value={timerConfig.timerDays.toString()}
+              onChange={(value) => setTimerConfig({ ...timerConfig, timerDays: parseInt(value) || 0 })}
+              min={0}
+              max={365}
+              helpText="Number of days"
+            />
+          </Box>
+          <Box minWidth="120px">
+            <TextField
+              label="Hours"
+              type="number"
+              value={timerConfig.timerHours.toString()}
+              onChange={(value) => setTimerConfig({ ...timerConfig, timerHours: parseInt(value) || 0 })}
+              min={0}
+              max={23}
+              helpText="Number of hours"
+            />
+          </Box>
+          <Box minWidth="120px">
+            <TextField
+              label="Minutes"
+              type="number"
+              value={timerConfig.timerMinutes.toString()}
+              onChange={(value) => setTimerConfig({ ...timerConfig, timerMinutes: parseInt(value) || 0 })}
+              min={0}
+              max={59}
+              helpText="Number of minutes"
+            />
+          </Box>
+          <Box minWidth="120px">
+            <TextField
+              label="Seconds"
+              type="number"
+              value={timerConfig.timerSeconds.toString()}
+              onChange={(value) => setTimerConfig({ ...timerConfig, timerSeconds: parseInt(value) || 0 })}
+              min={0}
+              max={59}
+              helpText="Number of seconds"
+            />
+          </Box>
+        </InlineStack>
+        
+        <InlineStack gap="400">
+          <Box minWidth="120px">
+            <TextField
+              label="Timer Icon"
+              value={timerConfig.timerIcon}
+              onChange={(value) => setTimerConfig({ ...timerConfig, timerIcon: value })}
+              placeholder="⏰"
+              helpText="Emoji or icon to display with timer"
+            />
+          </Box>
+          <Box minWidth="200px">
+            <Select
+              label="When Timer Expires"
+              options={[
+                { label: "Show expired message", value: "show_expired" },
+                { label: "Hide popup", value: "hide" },
+              ]}
+              value={timerConfig.onExpiration}
+              onChange={(value) => setTimerConfig({ ...timerConfig, onExpiration: value })}
+              helpText="What happens when timer reaches zero"
+            />
+          </Box>
+        </InlineStack>
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Form Elements */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Form Elements</Text>
+        
+        <TextField
+          label="Email Placeholder"
+          value={timerConfig.placeholder}
+          onChange={(value) => setTimerConfig({ ...timerConfig, placeholder: value })}
+          placeholder="Email input placeholder"
+          helpText="Placeholder text for the email input field"
+        />
+        
+        <TextField
+          label="Button Text"
+          value={timerConfig.buttonText}
+          onChange={(value) => setTimerConfig({ ...timerConfig, buttonText: value })}
+          placeholder="Button text (e.g., CLAIM OFFER NOW)"
+          helpText="Text displayed on the submit button"
+        />
+        
+        <TextField
+          label="Discount Code"
+          value={timerConfig.discountCode}
+          onChange={(value) => setTimerConfig({ ...timerConfig, discountCode: value })}
+          placeholder="Discount code to offer"
+          helpText="The discount code customers will receive"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Success State */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Success State</Text>
+        
+        <TextField
+          label="Success Title"
+          value={timerConfig.successTitle}
+          onChange={(value) => setTimerConfig({ ...timerConfig, successTitle: value })}
+          placeholder="SUCCESS!"
+          helpText="Title shown when user submits email"
+        />
+        
+        <TextField
+          label="Success Message"
+          value={timerConfig.successMessage}
+          onChange={(value) => setTimerConfig({ ...timerConfig, successMessage: value })}
+          multiline={2}
+          placeholder="Message to show when user submits email"
+          helpText="Message displayed after successful email submission"
+        />
+      </BlockStack>
+      
+      {timerConfig.onExpiration === "show_expired" && (
+        <>
+          <Divider />
+          
+          {/* Expired State */}
+          <BlockStack gap="300">
+            <Text as="h4" variant="headingSm">Expired State</Text>
+            
+            <TextField
+              label="Expired Title"
+              value={timerConfig.expiredTitle}
+              onChange={(value) => setTimerConfig({ ...timerConfig, expiredTitle: value })}
+              placeholder="OFFER EXPIRED"
+              helpText="Title shown when timer expires"
+            />
+            
+            <TextField
+              label="Expired Message"
+              value={timerConfig.expiredMessage}
+              onChange={(value) => setTimerConfig({ ...timerConfig, expiredMessage: value })}
+              multiline={3}
+              placeholder="Message to show when timer expires"
+              helpText="Message displayed when the countdown reaches zero"
+            />
+            
+            <InlineStack gap="400">
+              <Box minWidth="120px">
+                <TextField
+                  label="Expired Icon"
+                  value={timerConfig.expiredIcon}
+                  onChange={(value) => setTimerConfig({ ...timerConfig, expiredIcon: value })}
+                  placeholder="⏰"
+                  helpText="Icon for expired state"
+                />
+              </Box>
+              <Box minWidth="200px">
+                <TextField
+                  label="Expired Button Text"
+                  value={timerConfig.expiredButtonText}
+                  onChange={(value) => setTimerConfig({ ...timerConfig, expiredButtonText: value })}
+                  placeholder="CONTINUE SHOPPING"
+                  helpText="Button text in expired state"
+                />
+              </Box>
+            </InlineStack>
+          </BlockStack>
+        </>
       )}
     </BlockStack>
   );
 
   // ============================================================================
-  // WHEEL-EMAIL COMBO CONFIGURATION RENDERER
+  // TIMER POPUP STYLE FIELDS
+  // ============================================================================
+  
+  const renderTimerStyleFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">🎨 Timer Style</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Customize the visual appearance and layout of your timer popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Background & Colors */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Background & Colors</Text>
+        
+        <TextField
+          label="Background Gradient/Color"
+          value={timerConfig.backgroundColor}
+          onChange={(value) => setTimerConfig({ ...timerConfig, backgroundColor: value })}
+          placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+          helpText="CSS gradient or solid color for popup background"
+        />
+        
+        <InlineStack gap="400">
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Text Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={timerConfig.textColor}
+                onChange={(e) => setTimerConfig({ ...timerConfig, textColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+        </InlineStack>
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Layout */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Layout</Text>
+        
+        <RangeSlider
+          label={`Border Radius: ${timerConfig.borderRadius}px`}
+          value={timerConfig.borderRadius}
+          onChange={(value) => setTimerConfig({ ...timerConfig, borderRadius: value })}
+          min={0}
+          max={30}
+          step={1}
+          helpText="Roundness of popup corners"
+        />
+      </BlockStack>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // SCRATCH CARD POPUP CONTENT FIELDS
+  // ============================================================================
+  
+  const renderScratchCardContentFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">📝 Scratch Card Content</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Configure all text content and scratch card settings for your interactive popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Main Content */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Main Content</Text>
+        
+        <TextField
+          label="Popup Title"
+          value={scratchCardConfig.title}
+          onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, title: value })}
+          placeholder="Enter popup title (e.g., Scratch & Win!)"
+          helpText="Main headline that encourages interaction"
+        />
+        
+        <TextField
+          label="Description"
+          value={scratchCardConfig.description}
+          onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, description: value })}
+          multiline={3}
+          placeholder="Enter popup description"
+          helpText="Instructions on how to use the scratch card"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Scratch Card Configuration */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Scratch Card Configuration</Text>
+        
+        <TextField
+          label="Discount Percentage"
+          type="number"
+          value={scratchCardConfig.scratchDiscountPercentage.toString()}
+          onChange={(value) => {
+            const percentage = parseInt(value) || 15;
+            const clampedPercentage = Math.min(Math.max(percentage, 1), 100);
+            setScratchCardConfig({ ...scratchCardConfig, scratchDiscountPercentage: clampedPercentage });
+          }}
+          min={1}
+          max={100}
+          suffix="%"
+          placeholder="15"
+          helpText="Set the exact discount percentage customers will receive (1-100%)"
+        />
+        
+        <TextField
+          label="Discount Code"
+          value={scratchCardConfig.discountCode}
+          onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, discountCode: value })}
+          placeholder="Discount code to offer (e.g., SCRATCH10)"
+          helpText="The discount code customers will receive after scratching"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Form Elements */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Form Elements</Text>
+        
+        <TextField
+          label="Email Placeholder"
+          value={scratchCardConfig.placeholder}
+          onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, placeholder: value })}
+          placeholder="Email input placeholder"
+          helpText="Placeholder text for the email input field"
+        />
+        
+        <TextField
+          label="Button Text"
+          value={scratchCardConfig.buttonText}
+          onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, buttonText: value })}
+          placeholder="Button text (e.g., CLAIM DISCOUNT)"
+          helpText="Text displayed on the submit button"
+        />
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Scratch Card Features Info */}
+      <Box padding="400" background="bg-surface-secondary" borderRadius="200">
+        <BlockStack gap="200">
+          <Text as="h4" variant="headingSm">
+            🎲 Scratch Card Features:
+          </Text>
+          <BlockStack gap="100">
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Interactive canvas-based scratch effect
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Configurable discount percentage (you control the exact amount)
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Touch and mouse support for all devices
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Email validation with terms agreement checkbox
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Automatic discount code generation
+            </Text>
+            <Text variant="bodyMd" as="p" tone="subdued">
+              • Dynamic color themes based on discount value
+            </Text>
+          </BlockStack>
+        </BlockStack>
+      </Box>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // SCRATCH CARD POPUP STYLE FIELDS
+  // ============================================================================
+  
+  const renderScratchCardStyleFields = () => (
+    <BlockStack gap="400">
+      <Text as="h3" variant="headingMd">🎨 Scratch Card Style</Text>
+      <Text as="p" variant="bodyMd" tone="subdued">
+        Customize the visual appearance and layout of your scratch card popup
+      </Text>
+      
+      <Divider />
+      
+      {/* Colors */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Colors</Text>
+        
+        <InlineStack gap="400">
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Background Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={scratchCardConfig.backgroundColor}
+                onChange={(e) => setScratchCardConfig({ ...scratchCardConfig, backgroundColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+          <Box minWidth="200px">
+            <Text as="p" variant="bodyMd">Text Color</Text>
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <input
+                type="color"
+                value={scratchCardConfig.textColor}
+                onChange={(e) => setScratchCardConfig({ ...scratchCardConfig, textColor: e.target.value })}
+                style={{ width: "100%", height: "30px", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              />
+            </Box>
+          </Box>
+        </InlineStack>
+      </BlockStack>
+      
+      <Divider />
+      
+      {/* Layout */}
+      <BlockStack gap="300">
+        <Text as="h4" variant="headingSm">Layout</Text>
+        
+        <RangeSlider
+          label={`Border Radius: ${scratchCardConfig.borderRadius}px`}
+          value={scratchCardConfig.borderRadius}
+          onChange={(value) => setScratchCardConfig({ ...scratchCardConfig, borderRadius: value })}
+          min={0}
+          max={30}
+          step={1}
+          helpText="Roundness of popup corners"
+        />
+      </BlockStack>
+    </BlockStack>
+  );
+
+  // ============================================================================
+  // LEGACY CONFIGURATION RENDERERS (TO BE REMOVED)
   // ============================================================================
   
   // Renders configuration options for the spinning wheel + email capture combo
@@ -1875,13 +2965,12 @@ export default function PopupConfigurationModal({
                   
                   <Divider />
                   
-                  {/* Type-Specific Configuration Panel */}
-                  {renderConfigurationPanel()}
-                  
-                  <Divider />
-                  
-                  {/* Page Targeting Configuration */}
-                  {renderPageTargeting()}
+                  {/* Tabbed Configuration Interface */}
+                  <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab}>
+                    {activeTab === 0 && renderRulesSection()}
+                    {activeTab === 1 && renderContentSection()}
+                    {activeTab === 2 && renderStyleSection()}
+                  </Tabs>
                   
                 </BlockStack>
               </Card>
