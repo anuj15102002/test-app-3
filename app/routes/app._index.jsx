@@ -185,7 +185,7 @@ export default function Dashboard() {
         )}
 
         {/* Feedback Section */}
-        <Layout>
+        {/* <Layout>
           <Layout.Section>
             <Card>
               <InlineStack align="space-between">
@@ -204,7 +204,7 @@ export default function Dashboard() {
               </InlineStack>
             </Card>
           </Layout.Section>
-        </Layout>
+        </Layout> */}
 
         {/* Quick Setup Guide */}
         <Layout>

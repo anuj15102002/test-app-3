@@ -719,7 +719,7 @@
       // scratch popup ends here 
 
       // WHEEL POPUP Starts from here
-    } else {
+    }else {
       // Show wheel-email combo layout
       popup.classList.remove("email-popup");
       popup.style.background =
@@ -774,12 +774,12 @@
       // Use vibrant, eye-catching colors for segments
       const segments = /*config.segments || */[
         { label: "5% OFF", color: "#0a2a43", value: "5" },      // Dark navy
-  { label: "10% OFF", color: "#133b5c", value: "10" },    // Deep steel blue
-  { label: "15% OFF", color: "#0a2a43", value: "15" },
-  { label: "20% OFF", color: "#133b5c", value: "20" },
-  { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping" },
-  { label: "TRY AGAIN", color: "#133b5c", value: null },
-      ];
+        { label: "10% OFF", color: "#133b5c", value: "10" },    // Deep steel blue
+        { label: "15% OFF", color: "#0a2a43", value: "15" },
+        { label: "20% OFF", color: "#133b5c", value: "20" },
+        { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping" },
+        { label: "TRY AGAIN", color: "#133b5c", value: null },
+            ];
 
       const angle = 360 / segments.length;
       // Create premium gradient with subtle transitions
@@ -826,29 +826,31 @@
     `;
   })
   .join("");
-      // Create the wheel with premium styling
+      // Create the wheel with premium styling - pointer moved outside spinning container
       wheelContainer.innerHTML = `
-        <div class="spinning-wheel" id="spinning-wheel" style="
-          background: conic-gradient(${gradient});
-          position: relative;
-          background-size: 100% 100%;
-          background-repeat: no-repeat;
-        ">
-          <div class="wheel-pointer"></div>
-          <div class="wheel-center">
-            <div style="
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              width: 8px;
-              height: 8px;
-              background: #08162aff;
-              border-radius: 50%;
-              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
-            "></div>
+        <div style="position: relative; display: inline-block;">
+          <div class="spinning-wheel" id="spinning-wheel" style="
+            background: conic-gradient(${gradient});
+            position: relative;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+          ">
+            <div class="wheel-center">
+              <div style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 8px;
+                height: 8px;
+                background: #08162aff;
+                border-radius: 50%;
+                box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+              "></div>
+            </div>
+            ${segmentLabels}
           </div>
-          ${segmentLabels}
+          <div class="wheel-pointer">  </div>
         </div>
       `;
 
@@ -1060,11 +1062,19 @@
 
     // Calculate the angle where the wheel should stop to land on the selected prize
     const segmentAngle = 360 / segments.length;
-    const targetAngle = prizeIndex * segmentAngle + segmentAngle / 2;
-
+    
+    // The segments are positioned with their centers at:
+    // segment 0: 30°, segment 1: 90°, segment 2: 150°, etc.
+    // This matches the segmentLabels calculation: (360 / segments.length) * index + 360 / segments.length / 2
+    const segmentCenterAngle = prizeIndex * segmentAngle + segmentAngle / 2;
+    
     // Add multiple full rotations for visual effect (3-5 full spins)
     const fullRotations = 3 + Math.random() * 2; // 3-5 rotations
-    const finalRotation = fullRotations * 360 + (360 - targetAngle); // Subtract because wheel spins clockwise but pointer is on right
+    
+    // The pointer is at 0 degrees (right side). To align the winning segment with the pointer,
+    // we need to rotate the wheel so the segment center aligns with 0 degrees.
+    // Since the wheel rotates clockwise, we subtract the segment center angle from full rotations
+    const finalRotation = fullRotations * 360 - segmentCenterAngle;
 
     // Start spinning the wheel
     const wheel = document.getElementById("spinning-wheel");

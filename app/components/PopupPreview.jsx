@@ -69,16 +69,62 @@ export default function PopupPreview({
   // COMPONENT RENDER
   // ============================================================================
   
+  // Create type-specific container styles
+  const getContainerStyle = () => {
+    const baseStyle = {
+      position: 'relative',
+      width: 'auto',
+      height: 'auto',
+      margin: '0px auto',
+    };
+
+    switch (type) {
+      case 'email':
+        return {
+          ...baseStyle,
+          maxWidth: 575,
+          width:100,
+          borderRadius: '8px',
+          ...style  // Email-specific style spread
+        };
+      case 'wheel-email':
+        return {
+          ...baseStyle,
+          maxWidth: 705,
+          ...style
+        };
+      case 'community':
+        return {
+          ...baseStyle,
+          maxWidth: 400,
+          ...style
+        };
+      case 'timer':
+        return {
+          ...baseStyle,
+          maxWidth: 420,
+          ...style
+        };
+      case 'scratch-card':
+        return {
+          ...baseStyle,
+          maxWidth: 700,
+          ...style
+        };
+      default:
+        return {
+          ...baseStyle,
+          maxWidth: 600,
+          ...style
+        };
+    }
+  };
+
   return (
-    <div 
+    <div
       ref={popupRef}
       className={`popup-preview ${className}`}
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: 'auto',
-        ...style
-      }}
+      style={getContainerStyle()}
     />
   );
 }
@@ -126,6 +172,243 @@ function renderStorefrontPopup(container, { type, config, disableInteractions })
  */
 function createPopupHTML(type, config) {
   const baseHTML = `
+    <style>
+      /* Email Popup Styles - matching popup-styles.css */
+      .custom-popup.email-popup {
+        max-width: 600px !important;
+        display: block !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .custom-popup.email-popup .popup-content {
+        display: flex !important;
+        align-items: stretch !important;
+        padding: 0 !important;
+        min-height: 320px !important;
+      }
+
+      .email-popup-wrapper {
+        display: flex;
+        width: 100%;
+        border-radius: 8px;
+      }
+
+      .email-popup-image {
+        flex: 1;
+        max-width: 50%;
+        overflow: hidden;
+      }
+
+      .email-popup-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .email-popup-content {
+        flex: 1;
+        background: #f9f9f9;
+        padding: 40px 30px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: left;
+      }
+
+      .email-popup-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        color: #000;
+        text-transform: uppercase;
+      }
+
+      .email-popup-subtitle {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0 0 10px 0;
+        color: #555;
+      }
+
+      .email-popup-desc {
+        font-size: 13px;
+        margin-bottom: 18px;
+        color: #777;
+        line-height: 1.4;
+      }
+
+      .email-popup-content input[type="email"] {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        font-size: 14px;
+        outline: none;
+      }
+
+      .email-popup-content input[type="email"]:focus {
+        border-color: #007ace;
+      }
+
+      .email-popup-button {
+        width: 100%;
+        padding: 12px;
+        background: #007ace;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+        transition: background 0.2s ease-in-out;
+      }
+
+      .email-popup-button:hover {
+        background: #005f99;
+      }
+
+      .email-popup-note {
+        font-size: 11px;
+        margin-top: 8px;
+        color: #999;
+        text-align: center;
+      }
+
+      .custom-popup.email-popup .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        z-index: 10;
+      }
+
+      .custom-popup.email-popup .popup-close:hover {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      /* Responsive Media Queries for Popup Preview */
+      @media (max-width: 768px) {
+        .custom-popup.wheel-email-popup {
+          flex-direction: column !important;
+          max-width: 95vw !important;
+          min-height: auto !important;
+        }
+        .custom-popup.wheel-email-popup .wheel-section {
+          width: 100% !important;
+          padding: 15px !important;
+        }
+        .custom-popup.wheel-email-popup .spinning-wheel {
+          width: 220px !important;
+          height: 220px !important;
+        }
+        .custom-popup.wheel-email-popup .form-section {
+          border-radius: 0 0 20px 20px !important;
+          padding: 20px !important;
+        }
+        .custom-popup.timer-popup {
+          max-width: 95vw !important;
+        }
+        .custom-popup.scratch-card-popup {
+          max-width: 95vw !important;
+        }
+        .custom-popup.scratch-card-popup .scratch-card-layout {
+          flex-direction: column !important;
+          gap: 20px !important;
+        }
+        .custom-popup.scratch-card-popup .scratch-card-right {
+          max-width: 100% !important;
+        }
+      }
+
+      /* Email popup responsive */
+      @media (max-width: 480px) {
+        .custom-popup {
+          margin: 10px !important;
+          border-radius: 12px !important;
+        }
+        .custom-popup.email-popup {
+          max-width: 95vw !important;
+        }
+
+        .custom-popup.email-popup .popup-content {
+          flex-direction: column !important;
+        }
+
+        .email-popup-wrapper {
+          flex-direction: column !important;
+        }
+
+        .email-popup-image {
+          max-width: 100% !important;
+          height: 150px !important;
+        }
+
+        .email-popup-content {
+          padding: 25px 20px;
+          text-align: center;
+        }
+
+        .email-popup-title {
+          font-size: 20px;
+        }
+        
+        .custom-popup.wheel-email-popup .spinning-wheel {
+          width: 180px !important;
+          height: 180px !important;
+        }
+        .custom-popup.timer-popup .timer-display {
+          gap: 8px !important;
+        }
+        .custom-popup.timer-popup .timer-unit {
+          min-width: 50px !important;
+          padding: 8px 6px !important;
+        }
+        .custom-popup.timer-popup .timer-number {
+          font-size: 20px !important;
+        }
+        .custom-popup.scratch-card-popup .scratch-card-container {
+          width: 140px !important;
+          height: 140px !important;
+        }
+      }
+      
+      /* Base popup styling */
+      .custom-popup {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        box-sizing: border-box;
+      }
+      
+      .custom-popup * {
+        box-sizing: border-box;
+      }
+      
+      .popup-close {
+        transition: all 0.2s ease;
+      }
+      
+      .popup-close:hover {
+        background: rgba(0, 0, 0, 0.2) !important;
+        transform: scale(1.1);
+      }
+    </style>
     <div class="custom-popup ${type}-popup" style="position: relative; display: block; max-width: none; width: 100%; margin: 0;">
       <div class="popup-content">
         ${getPopupTypeContent(type, config)}
@@ -185,80 +468,34 @@ function getPopupTypeContent(type, config) {
  * @returns {string} Complete HTML for email popup
  */
 function createEmailPopupContent(config) {
+  // Default image fallback to match real popup
+  const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='320' viewBox='0 0 300 320'%3E%3Crect width='300' height='320' fill='%23888'/%3E%3Ctext x='150' y='160' text-anchor='middle' fill='white' font-size='16'%3EBANNER%3C/text%3E%3C/svg%3E";
+  const imageUrl = config.bannerImage || defaultImage;
+
+  // Match the exact structure from popup.js lines 417-441
   return `
-    <div class="email-popup-container" style="
-      background: ${config.backgroundColor || '#ffffff'};
-      color: ${config.textColor || '#000000'};
-      padding: 24px;
-      border-radius: ${config.borderRadius || 8}px;
-      text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      position: relative;
-      max-width: 400px;
-      margin: 0 auto;
-    ">
-      ${config.showCloseButton !== false ? `
-        <button class="popup-close" style="
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          background: rgba(0,0,0,0.1);
-          border: none;
-          border-radius: 50%;
-          width: 24px;
-          height: 24px;
-          cursor: pointer;
-          color: ${config.textColor || '#000000'};
-          font-size: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">&times;</button>
-      ` : ''}
-      
-      <div style="font-size: 24px; margin-bottom: 10px; color: ${config.textColor || '#000000'};">📧</div>
-      <h3 style="
-        font-size: 20px;
-        font-weight: 600;
-        margin: 0 0 15px 0;
-        color: ${config.textColor || '#000000'};
-      ">
-        ${config.title || 'Get 10% Off Your First Order!'}
-      </h3>
-      <p style="
-        margin-bottom: 20px;
-        line-height: 1.5;
-        color: ${config.textColor || '#000000'};
-      ">
-        ${config.description || 'Subscribe to our newsletter and receive exclusive discounts'}
-      </p>
-      <input
-        type="email"
-        placeholder="${config.placeholder || 'Enter your email address'}"
-        style="
-          width: 100%;
-          padding: 12px;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-          margin-bottom: 15px;
-          font-size: 14px;
-          box-sizing: border-box;
-        "
-        readonly
-      />
-      <button style="
-        width: 100%;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 14px;
-        background-color: ${config.buttonColor || '#007ace'};
-        color: white;
-      ">
-        ${config.buttonText || 'Get Discount'}
-      </button>
+    <button class="popup-close" style="
+      position: absolute; top: 10px; right: 10px; z-index: 10;
+      background: rgba(0,0,0,0.1); border: none; border-radius: 50%;
+      width: 28px; height: 28px; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: ${config.textColor || "#000000"};
+    ">&times;</button>
+
+    <div class="email-popup-wrapper">
+      <div class="email-popup-image">
+        <img src="${imageUrl}" alt="Popup" onerror="this.style.display='none'" />
+      </div>
+      <div class="email-popup-content">
+        <h3 class="email-popup-title">${config.title || "GET 15% OFF"}</h3>
+        <p class="email-popup-subtitle">${config.subtitle || "Your first order"}</p>
+        <p class="email-popup-desc">${config.description || "Stay updated with our latest products"}</p>
+        <input type="email" id="popup-email" placeholder="${config.placeholder || "Enter your email"}" />
+        <button onclick="handleEmailSubmit()" class="email-popup-button" style="background-color: ${config.buttonColor || '#1b1e21ff'}; border: none; color: white;">
+          ${config.buttonText || "SUBSCRIBE"}
+        </button>
+        <p class="email-popup-note">No thanks, I'll pay full price</p>
+      </div>
     </div>
   `;
 }
@@ -286,7 +523,8 @@ function createEmailPopupContent(config) {
  * @returns {string} Complete HTML for wheel-email popup
  */
 function createWheelEmailPopupContent(config) {
-  const segments = config.segments || [
+  // Use hardcoded segments to match real popup implementation
+  const segments = [
     { label: "5% OFF", color: "#0a2a43", value: "5" },
     { label: "10% OFF", color: "#133b5c", value: "10" },
     { label: "15% OFF", color: "#0a2a43", value: "15" },
@@ -295,201 +533,245 @@ function createWheelEmailPopupContent(config) {
     { label: "TRY AGAIN", color: "#133b5c", value: null },
   ];
 
-  const gradient = segments.map((s, i) => {
-    const startAngle = i * (360 / segments.length);
-    const endAngle = (i + 1) * (360 / segments.length) + 0.2; // tiny overlap
-    return `${s.color} ${startAngle}deg ${endAngle}deg`;
-  }).join(", ");
+  const angle = 360 / segments.length;
+  // Create premium gradient with subtle transitions to match real popup
+  const gradient = segments
+    .map((s, i) => {
+      const startAngle = i * angle;
+      const endAngle = (i + 1) * angle;
+      const midAngle = startAngle + angle * 0.5;
 
-  const segmentLabels = segments.map((segment, index) => {
-    const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
-    const radius = 95;
-    const x = Math.cos((segmentAngle - 90) * Math.PI / 180) * radius;
-    const y = Math.sin((segmentAngle - 90) * Math.PI / 180) * radius;
+      // Add subtle gradient within each segment for depth
+      return `${s.color} ${startAngle}deg, ${s.color}dd ${midAngle}deg, ${s.color} ${endAngle}deg`;
+    })
+    .join(", ");
 
-    return `
-      <div class="wheel-segment-label" style="
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%) translate(${x}px, ${y}px);
-        font-size: 13px;
-        font-weight: 800;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-        pointer-events: none;
-        text-align: center;
-        line-height: 1.2;
-        max-width: 75px;
-        overflow: hidden;
-      ">
-        ${segment.label}
-      </div>
-    `;
-  }).join("");
+  // Create segment labels with horizontal text positioned within wheel - matching real popup
+  const segmentLabels = segments
+    .map((segment, index) => {
+      const segmentAngle = (360 / segments.length) * index + 360 / segments.length / 2;
+
+      // Responsive radius based on screen size to match real popup
+      let radius = window.innerWidth <= 480 ? 55 : window.innerWidth <= 768 ? 70 : 90;
+      let fontSize = window.innerWidth <= 480 ? "10px" : window.innerWidth <= 768 ? "12px" : "14px";
+
+      const x = Math.cos(((segmentAngle - 90) * Math.PI) / 180) * radius;
+      const y = Math.sin(((segmentAngle - 90) * Math.PI) / 180) * radius;
+
+      return `
+        <div class="wheel-segment-label" style="
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${segmentAngle}deg);
+          font-size: ${fontSize};
+          font-weight: bold;
+          text-transform: uppercase;
+          color: white;
+          letter-spacing: 0.5px;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+          max-width: 60px;
+          text-align: center;
+          pointer-events: none;
+        ">
+          ${segment.label}
+        </div>
+      `;
+    })
+    .join("");
 
   return `
-    <div class="wheel-email-popup-container" style="
-      background: #0b1220;
+    <div class="custom-popup wheel-email-popup" style="
+      background: linear-gradient(135deg, #09090aff 0%, #2a5298 100%);
       border-radius: 20px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      max-width: 705px;
+      width: 100%;
       overflow: hidden;
       position: relative;
-      padding: 25px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
       display: flex;
-      align-items: center;
-      max-width: 650px;
-      margin: 0 auto;
+      align-items: stretch;
+      border: none;
+      min-height: 350px;
+      max-height: 450px;
     ">
-      <!-- Wheel Section -->
-      <div class="wheel-section" style="
-        width: 300px;
+      <div class="popup-content" style="
+        padding: 0;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        padding-right: 0;
+        width: 100%;
+        min-height: 330px;
+        max-height: 430px;
       ">
-        <div class="popup-wheel-container">
-          <div class="spinning-wheel" style="
-            width: 250px;
-            height: 250px;
-            border-radius: 50%;
-            border: 4px solid rgba(10, 20, 40, 0.7);
-            position: relative;
-            background: conic-gradient(${gradient});
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4),
-                        0 4px 15px rgba(0, 0, 0, 0.3),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
-            margin: 0 auto;
-          ">
-            <div class="wheel-pointer" style="
-              position: absolute;
-              top: 50%;
-              right: -20px;
-              transform: translateY(-50%);
-              width: 0;
-              height: 0;
-              border-top: 16px solid transparent;
-              border-bottom: 16px solid transparent;
-              border-left: 28px solid #fbbf24;
-              filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-            "></div>
-            <div class="wheel-center" style="
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-              width: 45px;
-              height: 45px;
+        <!-- Wheel Section -->
+        <div class="wheel-section" style="
+          width: 300px;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          overflow: hidden;
+        ">
+          <div style="position: relative; display: inline-block;">
+            <div class="spinning-wheel" style="
+              width: 280px;
+              height: 280px;
               border-radius: 50%;
-              border: 3px solid rgba(148, 163, 184, 0.3);
-              z-index: 5;
-              box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2),
-                          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+              border: 4px solid rgba(255, 255, 255, 0.15);
+              position: relative;
+              background: conic-gradient(${gradient});
+              box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+              filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+              margin: 0 auto;
             ">
-              <div style="
+              <div class="wheel-center" style="
                 position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 8px;
-                height: 8px;
-                background: #64748b;
+                background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+                width: 40px;
+                height: 40px;
                 border-radius: 50%;
-                box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
-              "></div>
+                border: 3px solid rgba(148, 163, 184, 0.3);
+                z-index: 5;
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+              ">
+                <div style="
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  width: 8px;
+                  height: 8px;
+                  background: #08162aff;
+                  border-radius: 50%;
+                  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+                "></div>
+              </div>
+              ${segmentLabels}
             </div>
-            ${segmentLabels}
+            // <div class="wheel-pointer" style="
+            //   position: absolute;
+            //   top: 50%;
+            //   right: -18px;
+            //   transform: translateY(-50%);
+            //   width: 0;
+            //   height: 0;
+            //   border-top: 16px solid transparent;
+            //   border-bottom: 16px solid transparent;
+            //   border-left: 28px solid #fbbf24;
+            //   z-index: 10;
+            //   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+            // "></div>
           </div>
         </div>
-      </div>
-      
-      <!-- Form Section -->
-      <div class="form-section" style="
-        flex: 1;
-        padding: 0 30px;
-        color: #1f2937;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        background: #ffffff;
-        border-radius: 0 20px 20px 0;
-      ">
-        <div class="form-title" style="
-          font-size: 20px;
-          font-weight: 700;
-          margin-bottom: 6px;
-          color: #0f172a;
-        ">${config.title || 'GET YOUR CHANCE TO WIN'}</div>
         
-        <div class="form-subtitle" style="
-          font-size: 14px;
-          margin-bottom: 12px;
-          color: #475569;
-          font-weight: 500;
-        ">${config.subtitle || 'AMAZING DISCOUNTS!'}</div>
-        
-        <p class="form-description" style="
-          font-size: 12px;
-          margin-bottom: 15px;
-          color: #64748b;
-        ">${config.description || 'Enter your email below and spin the wheel to see if you are our next lucky winner!'}</p>
-        
-        <div class="popup-form">
-          <input type="email" class="email-input" placeholder="${config.placeholder || 'Enter your email'}" style="
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            margin-bottom: 10px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #1e293b;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          " readonly />
-          <button class="spin-button" style="
-            width: 100%;
-            padding: 14px 20px;
-            background: linear-gradient(45deg, #0a2a43, #133b5c);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 15px;
+        <!-- Form Section -->
+        <div class="form-section" style="
+          flex: 1;
+          padding: 25px 30px;
+          color: #1f2937;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+          backdrop-filter: blur(10px);
+          border-radius: 0 20px 20px 0;
+          box-shadow: none;
+        ">
+          <div class="form-title" style="
+            font-size: 20px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-          ">
-            ${config.buttonText || 'TRY YOUR LUCK'}
-          </button>
-        </div>
-        
-        ${config.showHouseRules !== false ? `
-          <div class="house-rules" style="
-            margin-top: 10px;
-            font-size: 10px;
+            margin-bottom: 8px;
+            color: #0f172a;
+            text-shadow: none;
+            letter-spacing: -0.3px;
+          ">${config.title || 'GET YOUR CHANCE TO WIN'}</div>
+          
+          <div class="form-subtitle" style="
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #475569;
+            line-height: 1.3;
+            font-weight: 500;
+          ">${config.subtitle || 'AMAZING DISCOUNTS!'}</div>
+          
+          <p class="form-description" style="
+            font-size: 12px;
+            margin-bottom: 15px;
             color: #64748b;
+            line-height: 1.3;
+            font-weight: 400;
+          ">${config.description || 'Enter your email below and spin the wheel to see if you are our next lucky winner!'}</p>
+          
+          <div class="popup-form" style="
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0;
+            margin: 0;
           ">
-            <h4 style="
-              margin: 0 0 4px 0;
-              font-size: 11px;
-              color: #475569;
-              font-weight: 600;
-            ">The House rules:</h4>
-            <ul style="
-              margin: 0;
-              padding-left: 15px;
-              list-style-type: disc;
+            <input type="email" class="email-input" placeholder="${config.placeholder || 'Enter your email'}" style="
+              width: 100%;
+              padding: 14px 18px;
+              border: 2px solid rgba(148, 163, 184, 0.2);
+              border-radius: 12px;
+              margin-bottom: 15px;
+              font-size: 16px;
+              box-sizing: border-box;
+              background: rgba(255, 255, 255, 0.8);
+              color: #1e293b;
+              transition: all 0.3s ease;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            " readonly />
+            <button class="spin-button" style="
+              width: 100%;
+              padding: 14px 20px;
+              background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+              border: none;
+              border-radius: 12px;
+              color: white;
+              font-size: 15px;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+              text-transform: uppercase;
+              letter-spacing: 0.6px;
+              position: relative;
+              overflow: hidden;
+              box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
             ">
-              ${(config.houseRules || [
-                "Winnings through cheating will not be processed.",
-                "Only one spin allowed"
-              ]).map(rule => `<li style="margin-bottom: 4px;">${rule}</li>`).join('')}
-            </ul>
+              ${config.buttonText || 'TRY YOUR LUCK'}
+            </button>
           </div>
-        ` : ''}
+          
+          ${config.showHouseRules !== false ? `
+            <div class="house-rules" style="
+              margin-top: 12px;
+              font-size: 10px;
+              color: #64748b;
+              text-align: left;
+            ">
+              <h4 style="
+                margin: 0 0 4px 0;
+                font-size: 11px;
+                color: #475569;
+                font-weight: 600;
+              ">The House rules:</h4>
+              <ul style="
+                margin: 0;
+                padding-left: 15px;
+                list-style-type: disc;
+              ">
+                ${(config.houseRules || [
+                  "Winnings through cheating will not be processed.",
+                  "Only one spin allowed"
+                ]).map(rule => `<li style="margin-bottom: 4px; line-height: 1.3;">${rule}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        </div>
       </div>
     </div>
   `;
@@ -581,7 +863,7 @@ function createCommunityPopupContent(config) {
       background-color: ${config.backgroundColor || '#ffffff'};
       border-radius: ${config.borderRadius || 12}px;
       overflow: hidden;
-      max-width: 350px;
+      max-width: 400px;
       margin: 0 auto;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       position: relative;
@@ -681,220 +963,282 @@ function createCommunityPopupContent(config) {
  * Creates urgency-driven popups with countdown timers to encourage immediate action.
  * This popup type is highly effective for limited-time offers and flash sales.
  *
- * Features Generated:
- * - Customizable countdown timer with days, hours, minutes, seconds
- * - Dynamic timer display that adapts based on duration
- * - Gradient backgrounds for visual appeal
- * - Email capture form integrated with timer
- * - Configurable expiration behavior
- * - Success and expired state messaging
- * - Disclaimer text for legal compliance
- *
- * Timer Features:
- * - Responsive timer units that hide when zero
- * - Professional styling with glassmorphism effects
- * - Customizable icons and colors
- * - Multiple expiration handling options
- *
  * @param {object} config - Timer popup configuration
  * @returns {string} Complete HTML for timer popup
  */
 function createTimerPopupContent(config) {
   return `
-    <div class="timer-content" style="
+    <div class="custom-popup timer-popup" style="
+      max-width: 420px;
+      width: 100%;
+      display: block;
       background: ${config.backgroundColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
-      border-radius: ${config.borderRadius || 16}px;
-      padding: 20px;
-      color: ${config.textColor || '#ffffff'};
-      text-align: center;
-      max-width: 350px;
-      margin: 0 auto;
+      border-radius: 20px;
+      box-shadow: 0 25px 70px rgba(102, 126, 234, 0.5), 0 10px 30px rgba(118, 75, 162, 0.3);
+      overflow: hidden;
       position: relative;
+      border: none;
     ">
-      ${config.showCloseButton !== false ? `
-        <button class="popup-close" style="
-          position: absolute;
-          top: 15px;
-          right: 15px;
-          background: rgba(255, 255, 255, 0.2);
-          border: none;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          cursor: pointer;
-          color: white;
-          font-size: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">&times;</button>
-      ` : ''}
-      
-      <div class="timer-popup-inner">
-        <div class="timer-popup-header" style="margin-bottom: 25px;">
-          <div class="timer-popup-icon" style="
-            font-size: 40px;
-            margin-bottom: 12px;
-            display: block;
-          ">${config.timerIcon || '⏰'}</div>
-          <h2 class="timer-popup-title" style="
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            color: #ffffff;
-          ">${config.title || 'LIMITED TIME OFFER!'}</h2>
-          <p class="timer-popup-subtitle" style="
-            font-size: 14px;
-            margin: 0 0 25px 0;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.4;
-          ">${config.description || 'Don\'t miss out on this exclusive deal. Time is running out!'}</p>
-        </div>
-        
-        <div class="timer-display" style="
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 12px;
-          margin: 25px 0;
-          flex-wrap: wrap;
+      <div class="popup-content" style="
+        display: block;
+        min-height: auto;
+        position: relative;
+      ">
+        <div class="timer-content" style="
+          display: block;
+          width: 100%;
+          padding: 0;
+          position: relative;
         ">
-          ${config.timerDays > 0 ? `
-            <div class="timer-unit" style="
-              background: rgba(255, 255, 255, 0.18);
-              border: 1px solid rgba(255, 255, 255, 0.25);
-              border-radius: 16px;
-              padding: 12px 10px;
-              min-width: 60px;
-            ">
-              <div class="timer-number" style="
-                font-size: 28px;
+          <div class="timer-popup-inner" style="
+            padding: 30px 25px 25px;
+            text-align: center;
+            position: relative;
+          ">
+            ${config.showCloseButton !== false ? `
+              <button class="popup-close" style="
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                border-radius: 50%;
+                width: 35px;
+                height: 35px;
+                cursor: pointer;
+                color: white;
+                font-size: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                z-index: 10;
+              ">&times;</button>
+            ` : ''}
+            
+            <div class="timer-popup-header" style="margin-bottom: 25px;">
+              <div class="timer-popup-icon" style="
+                font-size: 40px;
+                margin-bottom: 12px;
+                display: block;
+                filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+              ">${config.timerIcon || '⏰'}</div>
+              <h2 class="timer-popup-title" style="
+                font-size: 24px;
                 font-weight: 700;
+                margin: 0 0 8px 0;
                 color: #ffffff;
-                margin: 0;
-                line-height: 1;
-              ">${config.timerDays.toString().padStart(2, '0')}</div>
-              <div class="timer-label" style="
-                font-size: 10px;
-                color: rgba(255, 255, 255, 0.75);
-                margin: 4px 0 0 0;
+                text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+                letter-spacing: -0.3px;
+                background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+              ">${config.title || 'LIMITED TIME OFFER!'}</h2>
+              <p class="timer-popup-subtitle" style="
+                font-size: 14px;
+                margin: 0 0 25px 0;
+                color: rgba(255, 255, 255, 0.85);
+                line-height: 1.4;
+                font-weight: 400;
+              ">${config.description || 'Don\'t miss out on this exclusive deal. Time is running out!'}</p>
+            </div>
+            
+            <div class="timer-display" style="
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 12px;
+              margin: 25px 0;
+              flex-wrap: wrap;
+            ">
+              ${config.timerDays > 0 ? `
+                <div class="timer-unit" style="
+                  background: rgba(255, 255, 255, 0.18);
+                  backdrop-filter: blur(15px);
+                  border: 1px solid rgba(255, 255, 255, 0.25);
+                  border-radius: 16px;
+                  padding: 12px 10px;
+                  min-width: 60px;
+                  position: relative;
+                  overflow: hidden;
+                  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+                ">
+                  <div class="timer-number" style="
+                    font-size: 28px;
+                    font-weight: 700;
+                    color: #ffffff;
+                    margin: 0;
+                    line-height: 1;
+                    font-family: 'Courier New', monospace;
+                    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+                    background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                  ">${config.timerDays.toString().padStart(2, '0')}</div>
+                  <div class="timer-label" style="
+                    font-size: 10px;
+                    color: rgba(255, 255, 255, 0.75);
+                    margin: 4px 0 0 0;
+                    text-transform: uppercase;
+                    letter-spacing: 0.8px;
+                    font-weight: 600;
+                  ">Days</div>
+                </div>
+              ` : ''}
+              <div class="timer-unit" style="
+                background: rgba(255, 255, 255, 0.18);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 16px;
+                padding: 12px 10px;
+                min-width: 60px;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+              ">
+                <div class="timer-number" style="
+                  font-size: 28px;
+                  font-weight: 700;
+                  color: #ffffff;
+                  margin: 0;
+                  line-height: 1;
+                  font-family: 'Courier New', monospace;
+                  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+                  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  background-clip: text;
+                ">${(config.timerHours || 0).toString().padStart(2, '0')}</div>
+                <div class="timer-label" style="
+                  font-size: 10px;
+                  color: rgba(255, 255, 255, 0.75);
+                  margin: 4px 0 0 0;
+                  text-transform: uppercase;
+                  letter-spacing: 0.8px;
+                  font-weight: 600;
+                ">Hours</div>
+              </div>
+              <div class="timer-unit" style="
+                background: rgba(255, 255, 255, 0.18);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 16px;
+                padding: 12px 10px;
+                min-width: 60px;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+              ">
+                <div class="timer-number" style="
+                  font-size: 28px;
+                  font-weight: 700;
+                  color: #ffffff;
+                  margin: 0;
+                  line-height: 1;
+                  font-family: 'Courier New', monospace;
+                  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+                  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  background-clip: text;
+                ">${(config.timerMinutes || 0).toString().padStart(2, '0')}</div>
+                <div class="timer-label" style="
+                  font-size: 10px;
+                  color: rgba(255, 255, 255, 0.75);
+                  margin: 4px 0 0 0;
+                  text-transform: uppercase;
+                  letter-spacing: 0.8px;
+                  font-weight: 600;
+                ">Minutes</div>
+              </div>
+              <div class="timer-unit" style="
+                background: rgba(255, 255, 255, 0.18);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 16px;
+                padding: 12px 10px;
+                min-width: 60px;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+              ">
+                <div class="timer-number" style="
+                  font-size: 28px;
+                  font-weight: 700;
+                  color: #ffffff;
+                  margin: 0;
+                  line-height: 1;
+                  font-family: 'Courier New', monospace;
+                  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+                  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  background-clip: text;
+                ">${(config.timerSeconds || 0).toString().padStart(2, '0')}</div>
+                <div class="timer-label" style="
+                  font-size: 10px;
+                  color: rgba(255, 255, 255, 0.75);
+                  margin: 4px 0 0 0;
+                  text-transform: uppercase;
+                  letter-spacing: 0.8px;
+                  font-weight: 600;
+                ">Seconds</div>
+              </div>
+            </div>
+            
+            <div class="timer-form" style="margin: 25px 0 18px 0;">
+              <input class="timer-email-input" type="email" placeholder="${config.placeholder || 'Enter your email to claim this offer'}" style="
+                width: 100%;
+                padding: 14px 18px;
+                border: none;
+                border-radius: 25px;
+                font-size: 15px;
+                box-sizing: border-box;
+                background: rgba(255, 255, 255, 0.95);
+                color: #333;
+                margin-bottom: 18px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+              " readonly />
+              <button class="timer-cta-button" style="
+                width: 100%;
+                padding: 16px 28px;
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+                border: none;
+                border-radius: 25px;
+                color: white;
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 text-transform: uppercase;
                 letter-spacing: 0.8px;
-                font-weight: 600;
-              ">Days</div>
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4), 0 4px 12px rgba(238, 90, 82, 0.3);
+              ">
+                ${config.buttonText || 'CLAIM OFFER NOW'}
+              </button>
             </div>
-          ` : ''}
-          <div class="timer-unit" style="
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 16px;
-            padding: 12px 10px;
-            min-width: 60px;
-          ">
-            <div class="timer-number" style="
-              font-size: 28px;
-              font-weight: 700;
-              color: #ffffff;
-              margin: 0;
-              line-height: 1;
-            ">${(config.timerHours || 0).toString().padStart(2, '0')}</div>
-            <div class="timer-label" style="
-              font-size: 10px;
-              color: rgba(255, 255, 255, 0.75);
-              margin: 4px 0 0 0;
-              text-transform: uppercase;
-              letter-spacing: 0.8px;
-              font-weight: 600;
-            ">Hours</div>
-          </div>
-          <div class="timer-unit" style="
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 16px;
-            padding: 12px 10px;
-            min-width: 60px;
-          ">
-            <div class="timer-number" style="
-              font-size: 28px;
-              font-weight: 700;
-              color: #ffffff;
-              margin: 0;
-              line-height: 1;
-            ">${(config.timerMinutes || 0).toString().padStart(2, '0')}</div>
-            <div class="timer-label" style="
-              font-size: 10px;
-              color: rgba(255, 255, 255, 0.75);
-              margin: 4px 0 0 0;
-              text-transform: uppercase;
-              letter-spacing: 0.8px;
-              font-weight: 600;
-            ">Minutes</div>
-          </div>
-          <div class="timer-unit" style="
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 16px;
-            padding: 12px 10px;
-            min-width: 60px;
-          ">
-            <div class="timer-number" style="
-              font-size: 28px;
-              font-weight: 700;
-              color: #ffffff;
-              margin: 0;
-              line-height: 1;
-            ">${(config.timerSeconds || 0).toString().padStart(2, '0')}</div>
-            <div class="timer-label" style="
-              font-size: 10px;
-              color: rgba(255, 255, 255, 0.75);
-              margin: 4px 0 0 0;
-              text-transform: uppercase;
-              letter-spacing: 0.8px;
-              font-weight: 600;
-            ">Seconds</div>
+            
+            ${config.disclaimer ? `
+              <div style="
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.6);
+                margin-top: 15px;
+              ">
+                ${config.disclaimer}
+              </div>
+            ` : ''}
           </div>
         </div>
-        
-        <div class="timer-form" style="margin-bottom: 15px;">
-          <input
-            type="email"
-            placeholder="${config.placeholder || 'Enter your email to claim this offer'}"
-            style="
-              width: 100%;
-              padding: 12px;
-              border: none;
-              border-radius: 6px;
-              font-size: 14px;
-              box-sizing: border-box;
-              margin-bottom: 12px;
-            "
-            readonly
-          />
-          <button style="
-            width: 100%;
-            padding: 12px 20px;
-            background: #ff6b6b;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-transform: uppercase;
-          ">
-            ${config.buttonText || 'CLAIM OFFER NOW'}
-          </button>
-        </div>
-        
-        ${config.disclaimer ? `
-          <div class="timer-disclaimer" style="
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.6);
-            font-style: italic;
-          ">
-            ${config.disclaimer}
-          </div>
-        ` : ''}
       </div>
     </div>
   `;
@@ -906,20 +1250,6 @@ function createTimerPopupContent(config) {
  * Creates interactive scratch-to-reveal discount popups that gamify the discount
  * discovery process. This popup type provides high engagement through interactivity.
  *
- * Features Generated:
- * - Canvas-based scratch card with realistic scratch effects
- * - Responsive sizing based on screen dimensions
- * - Hidden discount reveal with dynamic percentages
- * - Two-panel layout (scratch card + form)
- * - Email capture with terms agreement checkbox
- * - Progressive disclosure of discount information
- *
- * Technical Implementation:
- * - Responsive canvas sizing for different devices
- * - Layered design with scratch overlay and hidden content
- * - Dynamic discount percentage generation
- * - Touch and mouse interaction support
- *
  * @param {object} config - Scratch card popup configuration
  * @returns {string} Complete HTML for scratch card popup
  */
@@ -929,183 +1259,283 @@ function createScratchCardPopupContent(config) {
   const randomDiscount = discountOptions[Math.floor(Math.random() * discountOptions.length)];
   
   // Responsive canvas size based on screen size - matching storefront implementation
-  let canvasSize, discountFontSize, discountTextSize, containerWidth;
-  if (window.innerWidth <= 480) {
-    canvasSize = 160;
-    discountFontSize = '36px';
-    discountTextSize = '18px';
-    containerWidth = '98vw';
-  } else if (window.innerWidth <= 768) {
-    canvasSize = 160;
-    discountFontSize = '40px';
-    discountTextSize = '20px';
-    containerWidth = '95vw';
+  let canvasSize, discountFontSize, discountTextSize, containerWidth, containerHeight;
+  if (typeof window !== 'undefined') {
+    if (window.innerWidth <= 480) {
+      canvasSize = 140;
+      discountFontSize = '24px';
+      discountTextSize = '12px';
+      containerWidth = '98vw';
+      containerHeight = 140;
+    } else if (window.innerWidth <= 768) {
+      canvasSize = 160;
+      discountFontSize = '28px';
+      discountTextSize = '14px';
+      containerWidth = '95vw';
+      containerHeight = 160;
+    } else {
+      canvasSize = 200;
+      discountFontSize = '32px';
+      discountTextSize = '16px';
+      containerWidth = '700px';
+      containerHeight = 200;
+    }
   } else {
+    // Default values for server-side rendering - increased for desktop
     canvasSize = 200;
-    discountFontSize = '48px';
-    discountTextSize = '18px';
-    containerWidth = '600px';
+    discountFontSize = '32px';
+    discountTextSize = '16px';
+    containerWidth = '700px';
+    containerHeight = 200;
   }
 
   return `
-    <div class="scratch-card-popup-inner" style="
-      padding: 20px;
-      background: ${config.backgroundColor || '#ffffff'};
-      color: ${config.textColor || '#000000'};
-      border-radius: ${config.borderRadius || 16}px;
-      position: relative;
+    <div class="custom-popup scratch-card-popup" style="
       max-width: ${containerWidth};
-      width: 100%;
-      margin: 0 auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      width: 90%;
+      display: block;
+      background: ${config.backgroundColor || '#ffffff'};
+      border-radius: 20px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      position: relative;
+      border: none;
       min-height: auto;
     ">
-      ${config.showCloseButton !== false ? `
-        <button class="popup-close" style="
-          position: absolute;
-          top: 15px;
-          right: 15px;
-          background: rgba(0, 0, 0, 0.1);
-          border: none;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          cursor: pointer;
-          color: ${config.textColor || '#000000'};
-          font-size: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10;
-        ">&times;</button>
-      ` : ''}
-      
-      <div class="scratch-card-layout" style="
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 30px;
-        padding: 0;
-        width: 90%;
+      <div class="popup-content" style="
+        display: block;
+        min-height: auto;
+        position: relative;
       ">
-        <div class="scratch-card-left" style="
-          flex: 0 0 auto;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 15px;
+        <div class="scratch-card-content" style="
+          display: block;
+          width: 100%;
+          padding: 0;
+          position: relative;
         ">
-          <div class="scratch-card-container" style="
+          <div class="scratch-card-popup-inner" style="
+            padding: 30px 25px 25px;
             position: relative;
-            width: ${canvasSize}px;
-            height: ${canvasSize}px;
           ">
-            <div style="
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(135deg, #4A90E2 0%, #5BA0F2 100%);
-              border-radius: 8px;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              font-weight: bold;
-              position: relative;
-              cursor: pointer;
-              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            ">
-              <div style="font-size: 16px; margin-bottom: 5px;">SCRATCH</div>
-              <div style="font-size: 16px; margin-bottom: 10px;">HERE</div>
-              <div style="font-size: 20px;">✋</div>
-              
-              <!-- Hidden discount content (partially visible in preview) -->
-              <div style="
+            ${config.showCloseButton !== false ? `
+              <button class="popup-close" style="
                 position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.1);
+                border: none;
+                border-radius: 50%;
+                width: 35px;
+                height: 35px;
+                cursor: pointer;
+                color: ${config.textColor || '#000000'};
+                font-size: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10;
+                transition: all 0.3s ease;
+              ">&times;</button>
+            ` : ''}
+            
+            <div class="scratch-card-layout" style="
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              gap: 30px;
+              padding: 0;
+              width: 100%;
+              justify-content: space-between;
+            ">
+              <div class="scratch-card-left" style="
+                flex: 0 0 auto;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: center;
-                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-                color: white;
-                opacity: 0.3;
-                border-radius: 8px;
+                gap: 10px;
               ">
-                <div style="font-size: ${discountFontSize}; font-weight: bold; margin-bottom: 5px;">${randomDiscount}%</div>
-                <div style="font-size: ${discountTextSize}; font-weight: 600;">OFF</div>
+                <div class="scratch-card-container" style="
+                  position: relative;
+                  width: ${canvasSize}px;
+                  height: ${containerHeight}px;
+                  border-radius: 16px;
+                  overflow: hidden;
+                  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+                  margin-bottom: 15px;
+                  background: rgba(255, 255, 255, 0.9);
+                  backdrop-filter: blur(10px);
+                  border: 2px solid rgba(255, 255, 255, 0.8);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                ">
+                  <div class="scratch-card-overlay" style="
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg, #4A90E2 0%, #5BA0F2 100%);
+                    border-radius: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    position: relative;
+                    cursor: pointer;
+                    box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3), 0 4px 12px rgba(91, 160, 242, 0.2);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border: 2px solid rgba(255, 255, 255, 0.2);
+                  ">
+                    <div style="
+                      font-size: 14px;
+                      margin-bottom: 3px;
+                      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                      letter-spacing: 1px;
+                      font-weight: 700;
+                    ">SCRATCH</div>
+                    <div style="
+                      font-size: 14px;
+                      margin-bottom: 8px;
+                      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                      letter-spacing: 1px;
+                      font-weight: 700;
+                    ">HERE</div>
+                    <div style="
+                      font-size: 20px;
+                      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+                    ">✋</div>
+                    
+                    <!-- Hidden discount content (partially visible in preview) -->
+                    <div class="scratch-card-hidden" style="
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                      color: white;
+                      opacity: 0.3;
+                      border-radius: 12px;
+                      border: 2px solid rgba(255, 255, 255, 0.2);
+                      transition: all 0.3s ease;
+                    ">
+                      <div style="
+                        font-size: ${discountFontSize};
+                        font-weight: 800;
+                        margin-bottom: 5px;
+                        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+                        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                      ">${randomDiscount}%</div>
+                      <div style="
+                        font-size: ${discountTextSize};
+                        font-weight: 700;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+                        letter-spacing: 2px;
+                      ">OFF</div>
+                    </div>
+                  </div>
+                </div>
+                <p style="
+                  font-size: 14px;
+                  color: ${config.textColor || '#000000'};
+                  text-align: center;
+                  margin: 0;
+                  max-width: ${canvasSize}px;
+                  line-height: 1.4;
+                  font-weight: 500;
+                ">Enter your email to start scratching!</p>
+              </div>
+              
+              <div class="scratch-card-right" style="
+                flex: 1;
+                min-width: 0;
+                max-width: none;
+                padding-left: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+              ">
+                <h2 class="scratch-card-title" style="
+                  font-size: 32px;
+                  font-weight: 700;
+                  margin: 0 0 15px 0;
+                  color: ${config.textColor || '#000000'};
+                  line-height: 1.2;
+                  letter-spacing: -0.5px;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  background-clip: text;
+                ">${config.title || 'Scratch & Win!'}</h2>
+                
+                <p class="scratch-card-description" style="
+                  font-size: 18px;
+                  color: ${config.textColor || '#6c757d'};
+                  margin: 0 0 25px 0;
+                  line-height: 1.6;
+                  font-weight: 400;
+                ">${config.description || 'Scratch the card to reveal your exclusive discount and enter your email to claim it!'}</p>
+                
+                <div class="scratch-card-form">
+                  <input class="scratch-card-email-input" type="email" placeholder="${config.placeholder || 'Enter your email'}" style="
+                    width: 100%;
+                    padding: 14px 18px;
+                    border: 2px solid rgba(0, 0, 0, 0.1);
+                    border-radius: 12px;
+                    margin-bottom: 15px;
+                    font-size: 15px;
+                    box-sizing: border-box;
+                    background: rgba(255, 255, 255, 0.8);
+                    color: #333;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+                  " readonly />
+                  
+                  <label class="scratch-card-checkbox-label" style="
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 20px;
+                    font-size: 13px;
+                    color: ${config.textColor || '#666666'};
+                    cursor: pointer;
+                    line-height: 1.4;
+                  ">
+                    <input type="checkbox" style="
+                      margin-right: 10px;
+                      transform: scale(1.1);
+                    " />
+                    <span>I agree to receive promotional emails and special offers</span>
+                  </label>
+                  
+                  <button class="scratch-card-cta-button" style="
+                    width: 100%;
+                    background: linear-gradient(135deg, ${config.buttonColor || '#007ace'} 0%, ${config.buttonColor ? config.buttonColor + 'dd' : '#0056a3'} 100%);
+                    border: none;
+                    color: white;
+                    padding: 16px 28px;
+                    border-radius: 12px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    font-size: 15px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.8px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 6px 20px rgba(0, 122, 206, 0.3), 0 2px 8px rgba(0, 86, 163, 0.2);
+                    position: relative;
+                    overflow: hidden;
+                  ">
+                    ${config.buttonText || 'Enable Scratching'}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          <p style="
-            font-size: 14px;
-            color: ${config.textColor || '#000000'};
-            text-align: center;
-            margin: 0;
-            max-width: ${canvasSize}px;
-            line-height: 1.3;
-          ">Enter your email to start scratching!</p>
-        </div>
-        
-        <div class="scratch-card-right" style="
-          flex: 1;
-          min-width: 0;
-          max-width: 350px;
-        ">
-          <h2 style="
-            font-size: 24px;
-            font-weight: 600;
-            margin: 0 0 15px 0;
-            color: ${config.textColor || '#000000'};
-            line-height: 1.2;
-          ">${config.title || 'Scratch & Win!'}</h2>
-          
-          <p style="
-            font-size: 14px;
-            color: ${config.textColor || '#000000'};
-            margin: 0 0 20px 0;
-            line-height: 1.5;
-          ">${config.description || 'Scratch the card to reveal your exclusive discount and enter your email to claim it!'}</p>
-          
-          <div class="scratch-card-form">
-            <input type="email" placeholder="${config.placeholder || 'Enter your email'}" style="
-              width: 100%;
-              padding: 12px;
-              border: 1px solid #ccc;
-              border-radius: 6px;
-              margin-bottom: 10px;
-              font-size: 14px;
-              box-sizing: border-box;
-            " readonly />
-            
-            <label style="
-              display: flex;
-              align-items: center;
-              margin-bottom: 15px;
-              font-size: 12px;
-              color: ${config.textColor || '#000000'};
-              cursor: pointer;
-            ">
-              <input type="checkbox" style="margin-right: 8px;" />
-              <span>I agree to receive promotional emails</span>
-            </label>
-            
-            <button style="
-              width: 100%;
-              background-color: ${config.buttonColor || '#007ace'};
-              border: none;
-              color: white;
-              padding: 12px 24px;
-              border-radius: 6px;
-              font-weight: 600;
-              cursor: pointer;
-              font-size: 14px;
-            ">
-              ${config.buttonText || 'Enable Scratching'}
-            </button>
           </div>
         </div>
       </div>
@@ -1140,6 +1570,98 @@ function applyPopupStyling(container, type, config) {
     popup.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
     popup.style.fontSize = '14px';
     popup.style.lineHeight = '1.5';
+    popup.style.boxSizing = 'border-box';
+    
+    // Ensure all child elements inherit box-sizing
+    const allElements = popup.querySelectorAll('*');
+    allElements.forEach(el => {
+      el.style.boxSizing = 'border-box';
+    });
+    
+    // Apply hover effects to close buttons
+    const closeButtons = popup.querySelectorAll('.popup-close');
+    closeButtons.forEach(button => {
+      button.addEventListener('mouseenter', () => {
+        button.style.transform = 'scale(1.1)';
+        button.style.opacity = '0.8';
+      });
+      button.addEventListener('mouseleave', () => {
+        button.style.transform = 'scale(1)';
+        button.style.opacity = '1';
+      });
+    });
+    
+    // Apply type-specific enhancements
+    if (type === 'wheel-email') {
+      // Ensure wheel segments are properly positioned
+      const wheelLabels = popup.querySelectorAll('.wheel-segment-label');
+      wheelLabels.forEach(label => {
+        label.style.pointerEvents = 'none';
+        label.style.userSelect = 'none';
+      });
+      
+      // Add wheel center pin styling
+      const wheelCenter = popup.querySelector('.wheel-center');
+      if (wheelCenter) {
+        wheelCenter.style.cursor = 'pointer';
+      }
+    }
+    
+    if (type === 'timer') {
+      // Enhance timer number styling
+      const timerNumbers = popup.querySelectorAll('.timer-number');
+      timerNumbers.forEach(number => {
+        number.style.fontVariantNumeric = 'tabular-nums';
+        number.style.fontFeatureSettings = '"tnum"';
+      });
+      
+      // Add subtle animation to timer units
+      const timerUnits = popup.querySelectorAll('.timer-unit');
+      timerUnits.forEach((unit, index) => {
+        unit.style.animationDelay = `${index * 0.1}s`;
+      });
+    }
+    
+    if (type === 'scratch-card') {
+      // Enhance scratch card interactivity styling
+      const scratchOverlay = popup.querySelector('.scratch-card-overlay');
+      if (scratchOverlay) {
+        scratchOverlay.style.userSelect = 'none';
+        scratchOverlay.style.webkitUserSelect = 'none';
+        scratchOverlay.style.mozUserSelect = 'none';
+        scratchOverlay.style.msUserSelect = 'none';
+      }
+    }
+    
+    if (type === 'email') {
+      // Enhance email popup button hover effects
+      const emailButton = popup.querySelector('.email-popup-button');
+      if (emailButton) {
+        emailButton.addEventListener('mouseenter', () => {
+          emailButton.style.transform = 'translateY(-2px)';
+          emailButton.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+        });
+        emailButton.addEventListener('mouseleave', () => {
+          emailButton.style.transform = 'translateY(0)';
+          emailButton.style.boxShadow = 'none';
+        });
+      }
+    }
+    
+    if (type === 'community') {
+      // Enhance social icon hover effects
+      const socialIcons = popup.querySelectorAll('.social-icon');
+      socialIcons.forEach(icon => {
+        icon.addEventListener('mouseenter', () => {
+          icon.style.transform = 'scale(1.1) translateY(-2px)';
+          icon.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
+        });
+        icon.addEventListener('mouseleave', () => {
+          icon.style.transform = 'scale(1) translateY(0)';
+          icon.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        });
+      });
+    }
   }
 }
 
