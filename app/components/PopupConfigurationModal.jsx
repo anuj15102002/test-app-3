@@ -2914,13 +2914,13 @@ export default function PopupConfigurationModal({
         'email': '600px', // From popup.js email popup maxWidth
         'wheel-email': '700px', // From popup.js wheel popup maxWidth (lines 737-738)
         'community': '400px', // From popup.js community popup maxWidth (line 449)
-        'timer': '500px', // From popup.js timer popup maxWidth (line 653)
+        'timer': '420px', // From popup.js timer popup maxWidth (line 653)
         'scratch-card': '800px' // From popup.js scratch card responsive maxWidth (line 694)
       };
 
       const desktopWidths = {
         'email': '100%',
-        'wheel-email': '90%', // Wheel popup needs some margin
+        'wheel-email': '100%', // Wheel popup needs some margin
         'community': '100%',
         'timer': '100%', // Timer popup responsive width
         'scratch-card': '100%'
@@ -2965,6 +2965,7 @@ export default function PopupConfigurationModal({
         }
       };
 
+      console.log("PopupType for ---------------- _------------ " + popupType)
       const config = mobilePreviewConfig[popupType] || mobilePreviewConfig['email'];
 
       return {
@@ -3003,41 +3004,42 @@ export default function PopupConfigurationModal({
           case 'email':
             return {
               ...baseStyles,
-              maxWidth: '95vw', // From popup-styles.css @media (max-width: 480px)
-              transform: 'scale(0.85)',
+              maxWidth: '280px', // Fixed mobile frame width
+              transform: 'scale(0.9)', // Slightly larger for better visibility
             };
           
           case 'wheel-email':
             return {
               ...baseStyles,
-              maxWidth: '98vw', // From popup-styles.css wheel responsive
-              transform: 'scale(0.7)', // Wheel needs more compression for mobile frame
+              maxWidth: '280px', // Fixed mobile frame width
+              transform: 'scale(0.65)', // Wheel needs significant compression due to two-panel layout
             };
           
           case 'community':
             return {
               ...baseStyles,
-              maxWidth: '95vw',
-              transform: 'scale(0.85)',
+              maxWidth: '280px', // Fixed mobile frame width
+              transform: 'scale(0.85)', // Community popup is compact
             };
           
           case 'timer':
             return {
               ...baseStyles,
-              maxWidth: '95vw', // From popup-styles.css timer mobile (line 1024: max-width: 95vw)
-              transform: 'scale(1.0)', // Timer popup is already compact, no additional scaling needed
+              maxWidth: '280px', // Fixed mobile frame width
+              transform: 'scale(0.8)', // Timer needs some compression for mobile frame
             };
           
           case 'scratch-card':
             return {
               ...baseStyles,
-              maxWidth: '98vw', // From popup-styles.css scratch card mobile
-              transform: 'scale(0.75)', // Scratch card has complex layout, needs more compression
+              maxWidth: '280px', // Fixed mobile frame width
+              transform: 'scale(0.7)', // Scratch card has step indicators and two-panel layout
             };
           
           default:
             return {
               ...baseStyles,
+              maxWidth: '280px',
               transform: 'scale(0.8)',
             };
         }

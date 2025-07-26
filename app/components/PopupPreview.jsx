@@ -28,12 +28,13 @@ import { useEffect, useRef, useState } from "react";
  * @param {object} style - Inline styles for the preview container
  * @param {boolean} disableInteractions - Whether to disable interactive elements (default: true)
  */
-export default function PopupPreview({ 
-  config, 
-  type = "wheel-email", 
+export default function PopupPreview({
+  config,
+  type = "wheel-email",
   className = "",
   style = {},
-  disableInteractions = true 
+  disableInteractions = true,
+  deviceView = "desktop"
 }) {
   // ============================================================================
   // COMPONENT STATE AND REFS
@@ -54,7 +55,7 @@ export default function PopupPreview({
     popupRef.current.innerHTML = '';
     
     // Render the popup using the actual storefront logic
-    renderStorefrontPopup(popupRef.current, { type, config, disableInteractions });
+    renderStorefrontPopup(popupRef.current, { type, config, disableInteractions, deviceView });
     setIsRendered(true);
 
     // Cleanup function
@@ -63,7 +64,7 @@ export default function PopupPreview({
         popupRef.current.innerHTML = '';
       }
     };
-  }, [config, type, disableInteractions]);
+  }, [config, type, disableInteractions, deviceView]);
 
   // ============================================================================
   // COMPONENT RENDER
@@ -78,8 +79,55 @@ export default function PopupPreview({
       margin: '0px auto',
     };
 
-    console.log('---------------------------getContainerStyle---------------' + type)
+    // Mobile-specific adjustments based on actual storefront responsive behavior
+    if (deviceView === 'mobile') {
+      const mobileStyles = {
+        ...baseStyle,
+        width: '100%',
+        margin: '0 auto',
+      };
 
+      switch (type) {
+        case 'email':
+          return {
+            ...mobileStyles,
+            maxWidth: '98vw', // From popup-styles.css mobile responsive
+            ...style
+          };
+        case 'wheel-email':
+          return {
+            ...mobileStyles,
+            maxWidth: '98vw', // From popup-styles.css wheel mobile
+            ...style
+          };
+        case 'community':
+          return {
+            ...mobileStyles,
+            maxWidth: '95vw', // Community popup mobile
+            ...style
+          };
+        case 'timer':
+          return {
+            ...mobileStyles,
+            maxWidth: '98vw', // Timer mobile responsive
+            ...style
+          };
+        case 'scratch-card':
+          return {
+            ...mobileStyles,
+            maxWidth: '98vw', // Scratch card mobile responsive
+            ...style
+          };
+        default:
+          return {
+            ...mobileStyles,
+            maxWidth: '95vw',
+            ...style
+          };
+      }
+    }
+
+    // Desktop styles (original behavior)
     switch (type) {
       case 'email':
         return {
@@ -149,9 +197,9 @@ export default function PopupPreview({
  * @param {HTMLElement} container - DOM element to render popup into
  * @param {object} options - Rendering options (type, config, disableInteractions)
  */
-function renderStorefrontPopup(container, { type, config, disableInteractions }) {
+function renderStorefrontPopup(container, { type, config, disableInteractions, deviceView }) {
   // Create the popup structure using the same HTML as the storefront
-  const popupHTML = createPopupHTML(type, config);
+  const popupHTML = createPopupHTML(type, config, deviceView);
   container.innerHTML = popupHTML;
 
   // Apply the same styling logic as the storefront
@@ -174,7 +222,7 @@ function renderStorefrontPopup(container, { type, config, disableInteractions })
  * @param {object} config - Popup configuration object
  * @returns {string} Complete HTML string for the popup
  */
-function createPopupHTML(type, config) {
+function createPopupHTML(type, config, deviceView = 'desktop') {
   const baseHTML = `
     <style>
       /* Email Popup Styles - matching popup-styles.css */
@@ -366,6 +414,41 @@ function createPopupHTML(type, config) {
           font-size: 13px;
           margin-bottom: 15px;
         }
+
+        /* Scratch card responsive styles - matching real popup */
+        .custom-popup.scratch-card-popup {
+          max-width: 95vw !important;
+          margin: 15px !important;
+        }
+        
+        .custom-popup.scratch-card-popup .scratch-card-layout {
+          flex-direction: column !important;
+          gap: 25px !important;
+          text-align: center !important;
+        }
+        
+        .custom-popup.scratch-card-popup .scratch-card-left {
+          order: 1 !important;
+        }
+        
+        .custom-popup.scratch-card-popup .scratch-card-right {
+          order: 2 !important;
+          padding-left: 0 !important;
+        }
+        
+        .custom-popup.scratch-card-popup .scratch-card-title {
+          font-size: 28px !important;
+          text-align: center !important;
+          margin-bottom: 18px !important;
+          line-height: 1.3 !important;
+        }
+        
+        .custom-popup.scratch-card-popup .scratch-card-description {
+          font-size: 17px !important;
+          text-align: center !important;
+          margin-bottom: 25px !important;
+          line-height: 1.5 !important;
+        }
       }
 
       @media (max-width: 480px) {
@@ -405,9 +488,94 @@ function createPopupHTML(type, config) {
         .custom-popup.timer-popup .timer-number {
           font-size: 20px !important;
         }
+        
+        /* Scratch card mobile styles - matching real popup */
+        .custom-popup.scratch-card-popup {
+          max-width: 98vw !important;
+          margin: 10px !important;
+        }
+        
+        .custom-popup.scratch-card-popup .scratch-card-popup-inner {
+          padding: 25px 20px !important;
+        }
+
+        .custom-popup.scratch-card-popup .scratch-progress-steps {
+          flex-direction: column !important;
+          gap: 15px !important;
+          margin-bottom: 25px !important;
+          padding: 0 10px !important;
+        }
+
+        .custom-popup.scratch-card-popup .scratch-progress-steps > div:nth-child(2),
+        .custom-popup.scratch-card-popup .scratch-progress-steps > div:nth-child(4) {
+          display: none !important;
+        }
+
+        .custom-popup.scratch-card-popup .step-indicator {
+          font-size: 12px !important;
+          justify-content: center !important;
+        }
+
+        .custom-popup.scratch-card-popup .step-indicator div:first-child {
+          width: 24px !important;
+          height: 24px !important;
+          margin-right: 8px !important;
+          font-size: 11px !important;
+        }
+        
+        .custom-popup.scratch-card-popup .scratch-card-layout {
+          flex-direction: column !important;
+          gap: 20px !important;
+          text-align: center !important;
+        }
+        
         .custom-popup.scratch-card-popup .scratch-card-container {
-          width: 140px !important;
-          height: 140px !important;
+          width: 180px !important;
+          height: 180px !important;
+          margin: 0 auto 15px auto !important;
+        }
+        
+        .custom-popup.scratch-card-popup .discount-percentage {
+          font-size: 40px !important;
+        }
+        
+        .custom-popup.scratch-card-popup .discount-text {
+          font-size: 20px !important;
+        }
+
+        .custom-popup.scratch-card-popup .winner-emoji {
+          font-size: 28px !important;
+        }
+        
+        .custom-popup.scratch-card-popup .scratch-card-title {
+          font-size: 24px !important;
+          margin-bottom: 15px !important;
+          line-height: 1.2 !important;
+        }
+
+        .custom-popup.scratch-card-popup .scratch-card-description {
+          font-size: 15px !important;
+          margin-bottom: 20px !important;
+          line-height: 1.4 !important;
+          padding: 0 5px !important;
+        }
+
+        .custom-popup.scratch-card-popup .scratch-email-input {
+          padding: 14px 16px !important;
+          font-size: 16px !important;
+          border-radius: 10px !important;
+        }
+
+        .custom-popup.scratch-card-popup .scratch-submit-btn {
+          padding: 15px 22px !important;
+          font-size: 14px !important;
+          border-radius: 10px !important;
+        }
+
+        .custom-popup.scratch-card-popup .scratch-instruction {
+          font-size: 14px !important;
+          line-height: 1.3 !important;
+          padding: 0 5px !important;
         }
       }
       
@@ -432,7 +600,7 @@ function createPopupHTML(type, config) {
     </style>
     <div class="custom-popup ${type}-popup" style="position: relative; display: block; max-width: none; width: 100%; margin: 0; box-sizing: border-box;">
       <div class="popup-content">
-        ${getPopupTypeContent(type, config)}
+        ${getPopupTypeContent(type, config, deviceView)}
       </div>
     </div>
   `;
@@ -451,20 +619,20 @@ function createPopupHTML(type, config) {
  * @param {object} config - Popup configuration object
  * @returns {string} Type-specific HTML content
  */
-function getPopupTypeContent(type, config) {
+function getPopupTypeContent(type, config, deviceView = 'desktop') {
   switch (type) {
     case 'email':
-      return createEmailPopupContent(config);
+      return createEmailPopupContent(config, deviceView);
     case 'wheel-email':
-      return createWheelEmailPopupContent(config);
+      return createWheelEmailPopupContent(config, deviceView);
     case 'community':
-      return createCommunityPopupContent(config);
+      return createCommunityPopupContent(config, deviceView);
     case 'timer':
-      return createTimerPopupContent(config);
+      return createTimerPopupContent(config, deviceView);
     case 'scratch-card':
-      return createScratchCardPopupContent(config);
+      return createScratchCardPopupContent(config, deviceView);
     default:
-      return createWheelEmailPopupContent(config);
+      return createWheelEmailPopupContent(config, deviceView);
   }
 }
 
@@ -488,7 +656,7 @@ function getPopupTypeContent(type, config) {
  * @param {object} config - Email popup configuration
  * @returns {string} Complete HTML for email popup
  */
-function createEmailPopupContent(config) {
+function createEmailPopupContent(config, deviceView = 'desktop') {
   // Default image fallback to match real popup
   const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='320' viewBox='0 0 300 320'%3E%3Crect width='300' height='320' fill='%23888'/%3E%3Ctext x='150' y='160' text-anchor='middle' fill='white' font-size='16'%3EBANNER%3C/text%3E%3C/svg%3E";
   const imageUrl = config.bannerImage || defaultImage;
@@ -543,7 +711,7 @@ function createEmailPopupContent(config) {
  * @param {object} config - Wheel-email popup configuration
  * @returns {string} Complete HTML for wheel-email popup
  */
-function createWheelEmailPopupContent(config) {
+function createWheelEmailPopupContent(config, deviceView = 'desktop') {
   // Use hardcoded segments to match real popup implementation
   const segments = [
     { label: "5% OFF", color: "#0a2a43", value: "5" },
@@ -572,9 +740,15 @@ function createWheelEmailPopupContent(config) {
     .map((segment, index) => {
       const segmentAngle = (360 / segments.length) * index + 360 / segments.length / 2;
 
-      // Responsive radius based on screen size to match real popup
-      let radius = window.innerWidth <= 480 ? 55 : window.innerWidth <= 768 ? 70 : 90;
-      let fontSize = window.innerWidth <= 480 ? "10px" : window.innerWidth <= 768 ? "12px" : "14px";
+      // Responsive radius based on device view and screen size to match real popup
+      let radius, fontSize;
+      if (deviceView === 'mobile') {
+        radius = 55;
+        fontSize = "10px";
+      } else {
+        radius = window.innerWidth <= 480 ? 55 : window.innerWidth <= 768 ? 70 : 90;
+        fontSize = window.innerWidth <= 480 ? "10px" : window.innerWidth <= 768 ? "12px" : "14px";
+      }
 
       const x = Math.cos(((segmentAngle - 90) * Math.PI) / 180) * radius;
       const y = Math.sin(((segmentAngle - 90) * Math.PI) / 180) * radius;
@@ -606,37 +780,40 @@ function createWheelEmailPopupContent(config) {
       background: linear-gradient(135deg, #09090aff 0%, #2a5298 100%);
       border-radius: 20px;
       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
-      max-width: 705px;
+      max-width: ${deviceView === 'mobile' ? '98vw' : '705px'};
       width: 100%;
       overflow: hidden;
       position: relative;
-      display: flex;
+      display: ${deviceView === 'mobile' ? 'block' : 'flex'};
       align-items: stretch;
       border: none;
-      min-height: 350px;
-      max-height: 450px;
+      min-height: ${deviceView === 'mobile' ? 'auto' : '350px'};
+      max-height: ${deviceView === 'mobile' ? 'none' : '450px'};
+      ${deviceView === 'mobile' ? 'margin: 8px;' : ''}
     ">
       <div class="popup-content" style="
         padding: 0;
-        display: flex;
+        display: ${deviceView === 'mobile' ? 'block' : 'flex'};
         width: 100%;
-        min-height: 330px;
-        max-height: 430px;
+        min-height: ${deviceView === 'mobile' ? 'auto' : '330px'};
+        max-height: ${deviceView === 'mobile' ? 'none' : '430px'};
+        ${deviceView === 'mobile' ? 'flex-direction: column;' : ''}
       ">
         <!-- Wheel Section -->
         <div class="wheel-section" style="
-          width: 300px;
+          width: ${deviceView === 'mobile' ? '100%' : '300px'};
           position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 20px;
+          padding: ${deviceView === 'mobile' ? '15px 0' : '20px'};
           overflow: hidden;
+          ${deviceView === 'mobile' ? 'order: 2;' : ''}
         ">
           <div style="position: relative; display: inline-block;">
             <div class="spinning-wheel" style="
-              width: 280px;
-              height: 280px;
+              width: ${deviceView === 'mobile' ? '180px' : '280px'};
+              height: ${deviceView === 'mobile' ? '180px' : '280px'};
               border-radius: 50%;
               border: 4px solid rgba(255, 255, 255, 0.15);
               position: relative;
@@ -691,15 +868,16 @@ function createWheelEmailPopupContent(config) {
         <!-- Form Section -->
         <div class="form-section" style="
           flex: 1;
-          padding: 25px 30px;
+          padding: ${deviceView === 'mobile' ? '25px 20px 15px' : '25px 30px'};
           color: #1f2937;
           display: flex;
           flex-direction: column;
           justify-content: center;
           background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
           backdrop-filter: blur(10px);
-          border-radius: 0 20px 20px 0;
+          border-radius: ${deviceView === 'mobile' ? '20px 20px 0 0' : '0 20px 20px 0'};
           box-shadow: none;
+          ${deviceView === 'mobile' ? 'order: 1;' : ''}
         ">
           <div class="form-title" style="
             font-size: 20px;
@@ -820,7 +998,7 @@ function createWheelEmailPopupContent(config) {
  * @param {object} config - Community popup configuration
  * @returns {string} Complete HTML for community popup
  */
-function createCommunityPopupContent(config) {
+function createCommunityPopupContent(config, deviceView = 'desktop') {
   const socialIcons = config.socialIcons || [
     { platform: 'facebook', url: '', enabled: true },
     { platform: 'instagram', url: '', enabled: true },
@@ -987,10 +1165,10 @@ function createCommunityPopupContent(config) {
  * @param {object} config - Timer popup configuration
  * @returns {string} Complete HTML for timer popup
  */
-function createTimerPopupContent(config) {
+function createTimerPopupContent(config, deviceView = 'desktop') {
   return `
     <div class="custom-popup timer-popup" style="
-      max-width: 420px;
+      max-width: ${deviceView === 'mobile' ? '98vw' : '420px'};
       width: 100%;
       display: block;
       background: ${config.backgroundColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
@@ -999,6 +1177,7 @@ function createTimerPopupContent(config) {
       overflow: hidden;
       position: relative;
       border: none;
+      ${deviceView === 'mobile' ? 'margin: 8px;' : ''}
     ">
       <div class="popup-content" style="
         display: block;
@@ -1012,7 +1191,7 @@ function createTimerPopupContent(config) {
           position: relative;
         ">
           <div class="timer-popup-inner" style="
-            padding: 30px 25px 25px;
+            padding: ${deviceView === 'mobile' ? '25px 20px 20px' : '30px 25px 25px'};
             text-align: center;
             position: relative;
           ">
@@ -1069,8 +1248,8 @@ function createTimerPopupContent(config) {
               display: flex;
               justify-content: center;
               align-items: center;
-              gap: 12px;
-              margin: 25px 0;
+              gap: ${deviceView === 'mobile' ? '8px' : '12px'};
+              margin: ${deviceView === 'mobile' ? '20px 0' : '25px 0'};
               flex-wrap: wrap;
             ">
               ${config.timerDays > 0 ? `
@@ -1079,15 +1258,15 @@ function createTimerPopupContent(config) {
                   backdrop-filter: blur(15px);
                   border: 1px solid rgba(255, 255, 255, 0.25);
                   border-radius: 16px;
-                  padding: 12px 10px;
-                  min-width: 60px;
+                  padding: ${deviceView === 'mobile' ? '8px 6px' : '12px 10px'};
+                  min-width: ${deviceView === 'mobile' ? '50px' : '60px'};
                   position: relative;
                   overflow: hidden;
                   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
                 ">
                   <div class="timer-number" style="
-                    font-size: 28px;
+                    font-size: ${deviceView === 'mobile' ? '20px' : '28px'};
                     font-weight: 700;
                     color: #ffffff;
                     margin: 0;
@@ -1114,15 +1293,15 @@ function createTimerPopupContent(config) {
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.25);
                 border-radius: 16px;
-                padding: 12px 10px;
-                min-width: 60px;
+                padding: ${deviceView === 'mobile' ? '8px 6px' : '12px 10px'};
+                min-width: ${deviceView === 'mobile' ? '50px' : '60px'};
                 position: relative;
                 overflow: hidden;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
               ">
                 <div class="timer-number" style="
-                  font-size: 28px;
+                  font-size: ${deviceView === 'mobile' ? '20px' : '28px'};
                   font-weight: 700;
                   color: #ffffff;
                   margin: 0;
@@ -1148,15 +1327,15 @@ function createTimerPopupContent(config) {
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.25);
                 border-radius: 16px;
-                padding: 12px 10px;
-                min-width: 60px;
+                padding: ${deviceView === 'mobile' ? '8px 6px' : '12px 10px'};
+                min-width: ${deviceView === 'mobile' ? '50px' : '60px'};
                 position: relative;
                 overflow: hidden;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
               ">
                 <div class="timer-number" style="
-                  font-size: 28px;
+                  font-size: ${deviceView === 'mobile' ? '20px' : '28px'};
                   font-weight: 700;
                   color: #ffffff;
                   margin: 0;
@@ -1182,15 +1361,15 @@ function createTimerPopupContent(config) {
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.25);
                 border-radius: 16px;
-                padding: 12px 10px;
-                min-width: 60px;
+                padding: ${deviceView === 'mobile' ? '8px 6px' : '12px 10px'};
+                min-width: ${deviceView === 'mobile' ? '50px' : '60px'};
                 position: relative;
                 overflow: hidden;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
               ">
                 <div class="timer-number" style="
-                  font-size: 28px;
+                  font-size: ${deviceView === 'mobile' ? '20px' : '28px'};
                   font-weight: 700;
                   color: #ffffff;
                   margin: 0;
@@ -1274,59 +1453,83 @@ function createTimerPopupContent(config) {
  * @param {object} config - Scratch card popup configuration
  * @returns {string} Complete HTML for scratch card popup
  */
-function createScratchCardPopupContent(config) {
-  // Generate random discount percentage (5%, 10%, 15%, 20%, 25%, 30%)
-  const discountOptions = [5, 10, 15, 20, 25, 30];
-  const randomDiscount = discountOptions[Math.floor(Math.random() * discountOptions.length)];
+function createScratchCardPopupContent(config, deviceView = 'desktop') {
+  // Use merchant-configurable discount percentage to match real popup
+  const discountValue = parseInt(config.scratchDiscountPercentage) || parseInt(config.discountPercentage) || 15;
+  
+  // Color and emoji mapping based on discount value for better UX - matching real popup
+  const getDiscountTheme = (value) => {
+    if (value >= 30) return { color: "#54a0ff", emoji: "🏆" }; // Premium - Blue
+    if (value >= 25) return { color: "#ff9ff3", emoji: "💎" }; // High - Pink
+    if (value >= 20) return { color: "#feca57", emoji: "⭐" }; // Good - Yellow
+    if (value >= 15) return { color: "#45b7d1", emoji: "🎉" }; // Standard - Light Blue
+    if (value >= 10) return { color: "#4ecdc4", emoji: "🎊" }; // Basic - Teal
+    return { color: "#ff6b6b", emoji: "🎯" }; // Entry - Red
+  };
+
+  const selectedDiscount = {
+    value: discountValue,
+    ...getDiscountTheme(discountValue)
+  };
   
   // Responsive canvas size based on screen size - matching storefront implementation
-  let canvasSize, discountFontSize, discountTextSize, containerWidth, containerHeight;
+  let canvasSize, discountFontSize, discountTextSize;
   if (typeof window !== 'undefined') {
     if (window.innerWidth <= 480) {
-      canvasSize = 140;
-      discountFontSize = '24px';
-      discountTextSize = '12px';
-      containerWidth = '98vw';
-      containerHeight = 140;
+      canvasSize = 160;
+      discountFontSize = "36px";
+      discountTextSize = "18px";
     } else if (window.innerWidth <= 768) {
       canvasSize = 160;
-      discountFontSize = '28px';
-      discountTextSize = '14px';
-      containerWidth = '95vw';
-      containerHeight = 160;
+      discountFontSize = "40px";
+      discountTextSize = "20px";
     } else {
       canvasSize = 200;
-      discountFontSize = '32px';
-      discountTextSize = '16px';
-      containerWidth = '700px';
-      containerHeight = 200;
+      discountFontSize = "48px";
+      discountTextSize = "18px";
     }
   } else {
-    // Default values for server-side rendering - increased for desktop
+    // Default values for server-side rendering
     canvasSize = 200;
-    discountFontSize = '32px';
-    discountTextSize = '16px';
-    containerWidth = '700px';
-    containerHeight = 200;
+    discountFontSize = "48px";
+    discountTextSize = "18px";
   }
 
   return `
     <div class="custom-popup scratch-card-popup" style="
-      max-width: ${containerWidth};
+      max-width: 700px;
       width: 100%;
       display: block;
-      background: ${config.backgroundColor || '#ffffff'};
+      background-image: var(--custom-bg-image), var(--default-pattern-bg), linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      background-size: var(--custom-bg-size, cover), cover, cover;
+      background-position: var(--custom-bg-position, center), center, center;
+      background-repeat: no-repeat, no-repeat, no-repeat;
       border-radius: 20px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
       overflow: hidden;
       position: relative;
       border: none;
-      min-height: auto;
     ">
+      <!-- Soft overlay for content legibility on busy backgrounds -->
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(3px) saturate(1.2);
+        -webkit-backdrop-filter: blur(3px) saturate(1.2);
+        z-index: 0;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+      "></div>
+
       <div class="popup-content" style="
         display: block;
         min-height: auto;
         position: relative;
+        z-index: 1;
       ">
         <div class="scratch-card-content" style="
           display: block;
@@ -1335,224 +1538,291 @@ function createScratchCardPopupContent(config) {
           position: relative;
         ">
           <div class="scratch-card-popup-inner" style="
-            padding: 30px 25px 25px;
+            padding: 30px;
             position: relative;
           ">
             ${config.showCloseButton !== false ? `
               <button class="popup-close" style="
                 position: absolute;
-                top: 20px;
-                right: 20px;
-                background: rgba(0, 0, 0, 0.1);
+                top: 15px;
+                right: 15px;
+                background: rgba(0, 0, 0, 0.2);
                 border: none;
                 border-radius: 50%;
-                width: 35px;
-                height: 35px;
+                width: 32px;
+                height: 32px;
                 cursor: pointer;
-                color: ${config.textColor || '#000000'};
-                font-size: 20px;
+                color: white;
+                font-size: 18px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 z-index: 10;
+                backdrop-filter: blur(4px);
                 transition: all 0.3s ease;
               ">&times;</button>
             ` : ''}
             
+            <!-- Step Progress Indicator - matching real popup -->
+            <div class="scratch-progress-steps" style="
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin-bottom: 20px;
+              padding: 0 20px;
+            ">
+              <div class="step-indicator active" style="
+                display: flex;
+                align-items: center;
+                color: #28a745;
+                font-weight: 600;
+                font-size: 14px;
+              ">
+                <div style="
+                  width: 24px;
+                  height: 24px;
+                  border-radius: 50%;
+                  background: #28a745;
+                  color: white;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-right: 8px;
+                  font-size: 12px;
+                ">1</div>
+                Enter Email
+              </div>
+              <div style="
+                width: 40px;
+                height: 2px;
+                background: #e9ecef;
+                margin: 0 15px;
+                position: relative;
+              ">
+                <div style="
+                  width: 0%;
+                  height: 100%;
+                  background: #28a745;
+                  transition: width 0.5s ease;
+                "></div>
+              </div>
+              <div class="step-indicator" style="
+                display: flex;
+                align-items: center;
+                color: #6c757d;
+                font-weight: 600;
+                font-size: 14px;
+              ">
+                <div style="
+                  width: 24px;
+                  height: 24px;
+                  border-radius: 50%;
+                  background: #e9ecef;
+                  color: #6c757d;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-right: 8px;
+                  font-size: 12px;
+                ">2</div>
+                Scratch Card
+              </div>
+              <div style="
+                width: 40px;
+                height: 2px;
+                background: #e9ecef;
+                margin: 0 15px;
+              ">
+                <div style="
+                  width: 0%;
+                  height: 100%;
+                  background: #28a745;
+                  transition: width 0.5s ease;
+                "></div>
+              </div>
+              <div class="step-indicator" style="
+                display: flex;
+                align-items: center;
+                color: #6c757d;
+                font-weight: 600;
+                font-size: 14px;
+              ">
+                <div style="
+                  width: 24px;
+                  height: 24px;
+                  border-radius: 50%;
+                  background: #e9ecef;
+                  color: #6c757d;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-right: 8px;
+                  font-size: 12px;
+                ">3</div>
+                Claim Prize
+              </div>
+            </div>
+            
             <div class="scratch-card-layout" style="
               display: flex;
-              flex-direction: row;
+              gap: ${deviceView === 'mobile' ? '20px' : '30px'};
               align-items: center;
-              gap: 30px;
-              padding: 0;
-              width: 100%;
               justify-content: space-between;
+              ${deviceView === 'mobile' ? 'flex-direction: column; text-align: center;' : ''}
             ">
               <div class="scratch-card-left" style="
                 flex: 0 0 auto;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 10px;
+                ${deviceView === 'mobile' ? 'order: 1;' : ''}
               ">
                 <div class="scratch-card-container" style="
                   position: relative;
-                  width: ${canvasSize}px;
-                  height: ${containerHeight}px;
                   border-radius: 16px;
+                  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
                   overflow: hidden;
-                  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-                  margin-bottom: 15px;
                   background: rgba(255, 255, 255, 0.9);
                   backdrop-filter: blur(10px);
-                  border: 2px solid rgba(255, 255, 255, 0.8);
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
                 ">
-                  <div class="scratch-card-overlay" style="
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(135deg, #4A90E2 0%, #5BA0F2 100%);
-                    border-radius: 12px;
+                  <!-- Canvas placeholder with scratch surface styling -->
+                  <div style="
+                    width: ${canvasSize}px;
+                    height: ${canvasSize}px;
+                    position: relative;
+                    z-index: 2;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 16px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
                     color: white;
                     font-weight: bold;
-                    position: relative;
-                    cursor: pointer;
-                    box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3), 0 4px 12px rgba(91, 160, 242, 0.2);
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 2px solid rgba(255, 255, 255, 0.2);
+                    cursor: crosshair;
+                    background-image:
+                      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                      linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
                   ">
                     <div style="
-                      font-size: 14px;
-                      margin-bottom: 3px;
-                      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                      font-size: 16px;
+                      margin-bottom: 5px;
+                      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
                       letter-spacing: 1px;
-                      font-weight: 700;
-                    ">SCRATCH</div>
+                    ">🎁 SCRATCH</div>
                     <div style="
-                      font-size: 14px;
-                      margin-bottom: 8px;
-                      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                      font-size: 16px;
+                      margin-bottom: 10px;
+                      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
                       letter-spacing: 1px;
-                      font-weight: 700;
-                    ">HERE</div>
+                    ">TO WIN! 🎁</div>
                     <div style="
                       font-size: 20px;
                       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-                    ">✋</div>
-                    
-                    <!-- Hidden discount content (partially visible in preview) -->
-                    <div class="scratch-card-hidden" style="
-                      position: absolute;
-                      top: 0;
-                      left: 0;
-                      width: 100%;
-                      height: 100%;
-                      display: flex;
-                      flex-direction: column;
-                      align-items: center;
-                      justify-content: center;
-                      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-                      color: white;
-                      opacity: 0.3;
-                      border-radius: 12px;
-                      border: 2px solid rgba(255, 255, 255, 0.2);
-                      transition: all 0.3s ease;
-                    ">
-                      <div style="
-                        font-size: ${discountFontSize};
-                        font-weight: 800;
-                        margin-bottom: 5px;
-                        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-                        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        background-clip: text;
-                      ">${randomDiscount}%</div>
-                      <div style="
-                        font-size: ${discountTextSize};
-                        font-weight: 700;
-                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-                        letter-spacing: 2px;
-                      ">OFF</div>
-                    </div>
+                    ">✨</div>
+                  </div>
+                  
+                  <!-- Hidden discount content -->
+                  <div class="scratch-card-hidden-content" style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: ${canvasSize}px;
+                    height: ${canvasSize}px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    background: linear-gradient(135deg, ${selectedDiscount.color} 0%, ${selectedDiscount.color}dd 100%);
+                    color: white;
+                    opacity: 0.3;
+                    border-radius: 16px;
+                    box-shadow: inset 0 0 30px rgba(255,255,255,0.3);
+                    z-index: 1;
+                    transition: opacity 0.3s ease;
+                  ">
+                    <div class="winner-emoji" style="font-size: 32px; margin-bottom: 8px;">${selectedDiscount.emoji}</div>
+                    <div class="discount-percentage" style="font-size: ${discountFontSize}; font-weight: 900; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${selectedDiscount.value}%</div>
+                    <div class="discount-text" style="font-size: ${discountTextSize}; font-weight: 700; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">OFF</div>
+                    <div class="winner-text" style="font-size: 14px; margin-top: 8px; opacity: 0.9;">WINNER!</div>
                   </div>
                 </div>
-                <p style="
-                  font-size: 14px;
-                  color: ${config.textColor || '#000000'};
+                <p class="scratch-instruction" style="
                   text-align: center;
-                  margin: 0;
-                  max-width: ${canvasSize}px;
-                  line-height: 1.4;
-                  font-weight: 500;
+                  margin-top: 15px;
+                  font-weight: 600;
+                  color: #495057;
+                  font-size: 16px;
                 ">Enter your email to start scratching!</p>
               </div>
               
               <div class="scratch-card-right" style="
                 flex: 1;
-                min-width: 0;
-                max-width: none;
-                padding-left: 20px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
+                padding-left: ${deviceView === 'mobile' ? '0' : '10px'};
+                ${deviceView === 'mobile' ? 'order: 2;' : ''}
               ">
                 <h2 class="scratch-card-title" style="
-                  font-size: 32px;
+                  font-size: 28px;
                   font-weight: 700;
-                  margin: 0 0 15px 0;
-                  color: ${config.textColor || '#000000'};
-                  line-height: 1.2;
-                  letter-spacing: -0.5px;
+                  margin-bottom: 15px;
                   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                   -webkit-background-clip: text;
                   -webkit-text-fill-color: transparent;
                   background-clip: text;
-                ">${config.title || 'Scratch & Win!'}</h2>
-                
+                ">${config.title || "🎮 Scratch & Win!"}</h2>
                 <p class="scratch-card-description" style="
-                  font-size: 18px;
-                  color: ${config.textColor || '#6c757d'};
-                  margin: 0 0 25px 0;
+                  font-size: 16px;
                   line-height: 1.6;
-                  font-weight: 400;
-                ">${config.description || 'Scratch the card to reveal your exclusive discount and enter your email to claim it!'}</p>
+                  color: #6c757d;
+                  margin-bottom: 25px;
+                ">${config.description || `Enter your email first, then scratch the card to reveal your ${selectedDiscount.value}% discount!`}</p>
                 
                 <div class="scratch-card-form">
-                  <input class="scratch-card-email-input" type="email" placeholder="${config.placeholder || 'Enter your email'}" style="
+                  <input type="email" placeholder="${config.placeholder || "Enter your email"}" class="scratch-email-input" style="
                     width: 100%;
-                    padding: 14px 18px;
-                    border: 2px solid rgba(0, 0, 0, 0.1);
+                    padding: 14px 16px;
+                    border: 2px solid #e9ecef;
                     border-radius: 12px;
+                    font-size: 16px;
                     margin-bottom: 15px;
-                    font-size: 15px;
-                    box-sizing: border-box;
-                    background: rgba(255, 255, 255, 0.8);
-                    color: #333;
                     transition: all 0.3s ease;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+                    background: #f8f9fa;
                   " readonly />
-                  
-                  <label class="scratch-card-checkbox-label" style="
+                  <label class="scratch-checkbox-container" style="
                     display: flex;
                     align-items: center;
                     margin-bottom: 20px;
-                    font-size: 13px;
-                    color: ${config.textColor || '#666666'};
                     cursor: pointer;
-                    line-height: 1.4;
+                    font-size: 14px;
+                    color: #6c757d;
                   ">
-                    <input type="checkbox" style="
-                      margin-right: 10px;
-                      transform: scale(1.1);
+                    <input type="checkbox" class="scratch-checkbox" style="
+                      margin-right: 12px;
+                      transform: scale(1.2);
                     " />
-                    <span>I agree to receive promotional emails and special offers</span>
+                    <span class="scratch-checkbox-text">I agree to receive promotional emails</span>
                   </label>
-                  
-                  <button class="scratch-card-cta-button" style="
+                  <button class="scratch-submit-btn" style="
                     width: 100%;
-                    background: linear-gradient(135deg, ${config.buttonColor || '#007ace'} 0%, ${config.buttonColor ? config.buttonColor + 'dd' : '#0056a3'} 100%);
+                    padding: 16px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     border: none;
-                    color: white;
-                    padding: 16px 28px;
                     border-radius: 12px;
+                    color: white;
+                    font-size: 16px;
                     font-weight: 700;
                     cursor: pointer;
-                    font-size: 15px;
+                    transition: all 0.3s ease;
                     text-transform: uppercase;
-                    letter-spacing: 0.8px;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 6px 20px rgba(0, 122, 206, 0.3), 0 2px 8px rgba(0, 86, 163, 0.2);
-                    position: relative;
-                    overflow: hidden;
+                    letter-spacing: 1px;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                    opacity: 0.6;
                   ">
-                    ${config.buttonText || 'Enable Scratching'}
+                    🎯 ${config.buttonText || "CLAIM DISCOUNT"}
                   </button>
                 </div>
               </div>
