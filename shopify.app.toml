@@ -3,7 +3,7 @@
 client_id = "0249c9ec8c24958292aa21be203e2b38"
 name = "testAPp"
 handle = "testapp-4139"
-application_url = "https://strengthening-economic-township-going.trycloudflare.com"
+application_url = "https://occupational-sunglasses-dennis-broad.trycloudflare.com"
 embedded = true
 
 [build]
@@ -23,10 +23,10 @@ api_version = "2025-07"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,write_customers,write_discounts,write_price_rules,read_themes,write_themes,write_app_proxy"
+scopes = "write_products,read_products,write_customers,write_discounts,write_price_rules,read_themes,write_themes,write_app_proxy,read_content"
 
 [auth]
-redirect_urls = ["https://strengthening-economic-township-going.trycloudflare.com/auth/callback", "https://strengthening-economic-township-going.trycloudflare.com/auth/shopify/callback", "https://strengthening-economic-township-going.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://occupational-sunglasses-dennis-broad.trycloudflare.com/auth/callback", "https://occupational-sunglasses-dennis-broad.trycloudflare.com/auth/shopify/callback", "https://occupational-sunglasses-dennis-broad.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

@@ -38,7 +38,7 @@ I've successfully implemented a timer-based popup for your Shopify app that inte
 - `prisma/migrations/20250718075507_add_timer_popup_fields/migration.sql` - Migration
 
 ### Frontend (Storefront)
-- `extensions/pop-up/blocks/popup-display.liquid` - Added timer content container
+- `extensions/pop-up/blocks/.liquid` - Added timer content container
 - `extensions/pop-up/assets/popup-styles.css` - Added comprehensive timer styles
 - `extensions/pop-up/assets/popup.js` - Added timer functionality and logic
 

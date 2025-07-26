@@ -88,6 +88,13 @@ export default function PopupConfigurationModal({
   const [activeTab, setActiveTab] = useState(0);
   
   // ============================================================================
+  // DEVICE PREVIEW STATE
+  // ============================================================================
+  
+  // Device preview state - controls desktop vs mobile preview
+  const [previewDevice, setPreviewDevice] = useState('desktop');
+  
+  // ============================================================================
   // PAGE TARGETING SYSTEM STATE
   // ============================================================================
   
@@ -585,16 +592,9 @@ export default function PopupConfigurationModal({
     const config = getCurrentConfig();
     
     return (
-      <BlockStack>
-        {/* <Text as="h3" variant="headingMd">📋 Rules & Behavior</Text>
-        <Text as="p" variant="bodyMd" tone="subdued">
-          Control when, where, and how often your popup appears to visitors
-        </Text> */}
-        
-        {/* <Divider /> */}
-        
+      <BlockStack gap="500">
         {/* Display Timing */}
-        <BlockStack gap="200">
+        <BlockStack gap="300">
           <Text as="h4" variant="headingSm">Display Timing</Text>
           
           <RangeSlider
@@ -2610,7 +2610,7 @@ export default function PopupConfigurationModal({
 
     return (
       <BlockStack gap="400">
-        <Text as="h3" variant="headingMd">Page Targeting</Text>
+        <Text as="h4" variant="headingSm">Page Targeting</Text>
         <Text as="p" variant="bodyMd" tone="subdued">
           Choose where this popup should appear on your storefront
         </Text>
@@ -2856,6 +2856,313 @@ export default function PopupConfigurationModal({
                       popupType === "scratch-card" ? "Scratch Card Popup" :
                       "Wheel + Email Combo";
     
+    // Device preview tabs
+    const deviceTabs = [
+      {
+        id: 'desktop',
+        content: '🖥️ Desktop',
+        accessibilityLabel: 'Desktop preview',
+        panelID: 'desktop-preview',
+      },
+      {
+        id: 'mobile',
+        content: '📱 Mobile',
+        accessibilityLabel: 'Mobile preview',
+        panelID: 'mobile-preview',
+      },
+    ];
+
+    // Get active device tab index
+    const activeDeviceTab = previewDevice === 'desktop' ? 0 : 1;
+
+    // Get device-specific styles
+    const getDeviceStyles = () => {
+      const baseStyles = {
+        margin: '0 auto',
+        transition: 'all 0.3s ease',
+      };
+
+      if (previewDevice === 'mobile') {
+        // Mobile-specific dimensions matching actual storefront responsive behavior
+        const mobileMaxWidths = {
+          'email': '95vw', // From popup-styles.css @media (max-width: 480px)
+          'wheel-email': '98vw', // From popup-styles.css wheel mobile responsive
+          'community': '95vw', // Community popup mobile
+          'timer': '98vw', // From popup-styles.css timer mobile
+          'scratch-card': '98vw' // From popup-styles.css scratch card mobile
+        };
+
+        const mobileTransforms = {
+          'email': 'scale(0.85)', // Email popup mobile scaling
+          'wheel-email': 'scale(0.7)', // Wheel needs more compression due to complex layout
+          'community': 'scale(0.85)', // Community popup mobile scaling
+          'timer': 'scale(1.0)', // Timer is already compact, no additional scaling needed
+          'scratch-card': 'scale(0.75)' // Scratch card has step indicators, needs more compression
+        };
+
+        return {
+          ...baseStyles,
+          maxWidth: mobileMaxWidths[popupType] || '95vw',
+          width: '100%',
+          transform: mobileTransforms[popupType] || 'scale(0.85)',
+          transformOrigin: 'center',
+        };
+      }
+
+      // Desktop styles - type-specific dimensions matching actual storefront popup.js and PopupPreview.jsx
+      const desktopMaxWidths = {
+        'email': '600px', // From popup.js email popup maxWidth
+        'wheel-email': '700px', // From popup.js wheel popup maxWidth (lines 737-738)
+        'community': '400px', // From popup.js community popup maxWidth (line 449)
+        'timer': '500px', // From popup.js timer popup maxWidth (line 653)
+        'scratch-card': '800px' // From popup.js scratch card responsive maxWidth (line 694)
+      };
+
+      const desktopWidths = {
+        'email': '100%',
+        'wheel-email': '90%', // Wheel popup needs some margin
+        'community': '100%',
+        'timer': '100%', // Timer popup responsive width
+        'scratch-card': '100%'
+      };
+
+      return {
+        ...baseStyles,
+        maxWidth: desktopMaxWidths[popupType] || '600px',
+        width: desktopWidths[popupType] || '100%',
+      };
+    };
+
+    // Get mobile preview-specific styles for each popup type
+    const getMobilePreviewStyles = () => {
+      const baseStyles = {
+        width: '100%',
+        margin: '0 auto',
+        transformOrigin: 'center',
+      };
+
+      // Mobile preview styles based on reference screenshots
+      const mobilePreviewConfig = {
+        'email': {
+          maxWidth: '280px',
+          transform: 'scale(0.85)',
+        },
+        'wheel-email': {
+          maxWidth: '290px',
+          transform: 'scale(0.75)', // Wheel needs more space, smaller scale
+        },
+        'community': {
+          maxWidth: '275px',
+          transform: 'scale(0.85)',
+        },
+        'timer': {
+          maxWidth: '95vw', // From popup-styles.css timer mobile responsive
+          transform: 'scale(1.0)', // Timer is already compact, no additional scaling needed
+        },
+        'scratch-card': {
+          maxWidth: '285px',
+          transform: 'scale(0.8)', // Scratch card needs space for steps
+        }
+      };
+
+      const config = mobilePreviewConfig[popupType] || mobilePreviewConfig['email'];
+
+      return {
+        ...baseStyles,
+        ...config,
+      };
+    };
+
+    // Get container styles based on device
+    const getContainerStyles = () => {
+      if (previewDevice === 'mobile') {
+        return {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '600px',
+          padding: '20px',
+        };
+      }
+      
+      return {};
+    };
+
+    // Mobile phone frame component - matches actual storefront mobile behavior
+    const renderMobileFrame = (children) => {
+      // Get mobile-specific styling based on popup type from actual storefront CSS
+      const getMobileFrameStyles = () => {
+        const baseStyles = {
+          width: '100%',
+          maxWidth: '280px',
+          transformOrigin: 'center',
+        };
+
+        // Mobile frame scaling based on actual popup-styles.css responsive breakpoints
+        switch (popupType) {
+          case 'email':
+            return {
+              ...baseStyles,
+              maxWidth: '95vw', // From popup-styles.css @media (max-width: 480px)
+              transform: 'scale(0.85)',
+            };
+          
+          case 'wheel-email':
+            return {
+              ...baseStyles,
+              maxWidth: '98vw', // From popup-styles.css wheel responsive
+              transform: 'scale(0.7)', // Wheel needs more compression for mobile frame
+            };
+          
+          case 'community':
+            return {
+              ...baseStyles,
+              maxWidth: '95vw',
+              transform: 'scale(0.85)',
+            };
+          
+          case 'timer':
+            return {
+              ...baseStyles,
+              maxWidth: '95vw', // From popup-styles.css timer mobile (line 1024: max-width: 95vw)
+              transform: 'scale(1.0)', // Timer popup is already compact, no additional scaling needed
+            };
+          
+          case 'scratch-card':
+            return {
+              ...baseStyles,
+              maxWidth: '98vw', // From popup-styles.css scratch card mobile
+              transform: 'scale(0.75)', // Scratch card has complex layout, needs more compression
+            };
+          
+          default:
+            return {
+              ...baseStyles,
+              transform: 'scale(0.8)',
+            };
+        }
+      };
+
+      return (
+        <div style={{
+          width: '320px',
+          height: '568px',
+          background: '#1a1a1a',
+          borderRadius: '36px',
+          padding: '20px 8px',
+          position: 'relative',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 2px rgba(255, 255, 255, 0.1)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          margin: '0 auto',
+        }}>
+          {/* Phone screen */}
+          <div style={{
+            width: '100%',
+            height: '100%',
+            background: '#f5f5f5',
+            borderRadius: '28px',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            {/* Status bar */}
+            <div style={{
+              position: 'absolute',
+              top: '8px',
+              left: '16px',
+              right: '16px',
+              height: '20px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: '12px',
+              fontWeight: '600',
+              color: '#000',
+              zIndex: 20,
+            }}>
+              <span>4:49</span>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <span style={{ fontSize: '10px' }}>📶 📶 ▲ 📶 🔋 46%</span>
+              </div>
+            </div>
+            
+            {/* Browser bar */}
+            <div style={{
+              position: 'absolute',
+              top: '35px',
+              left: '8px',
+              right: '8px',
+              height: '40px',
+              background: '#2d2d2d',
+              borderRadius: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 12px',
+              zIndex: 20,
+            }}>
+              <div style={{
+                background: '#4a4a4a',
+                borderRadius: '12px',
+                padding: '6px 12px',
+                fontSize: '11px',
+                color: '#ccc',
+                flex: 1,
+                textAlign: 'center',
+              }}>
+                🔒 opmentst.myshopify.com
+              </div>
+            </div>
+            
+            {/* Home indicator */}
+            <div style={{
+              position: 'absolute',
+              bottom: '8px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '134px',
+              height: '5px',
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '3px',
+              zIndex: 20,
+            }}></div>
+            
+            {/* Website background */}
+            <div style={{
+              position: 'absolute',
+              top: '85px',
+              left: '0',
+              right: '0',
+              bottom: '20px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              opacity: 0.3,
+            }}></div>
+            
+            {/* Popup overlay area */}
+            <div style={{
+              position: 'absolute',
+              top: '85px',
+              left: '0',
+              right: '0',
+              bottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px 12px',
+              zIndex: 10,
+            }}>
+              {/* Popup container with mobile-specific styling matching storefront behavior */}
+              <div style={getMobileFrameStyles()}>
+                {children}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+    
     return (
       <div className="timer-preview-container">
         <Card>
@@ -2865,45 +3172,59 @@ export default function PopupConfigurationModal({
               <Badge tone="info">{badgeText}</Badge>
             </InlineStack>
             
+            {/* Device Preview Toggle */}
+            <Box textAlign="center">
+              <Tabs
+                tabs={deviceTabs}
+                selected={activeDeviceTab}
+                onSelect={(selectedTabIndex) => {
+                  setPreviewDevice(selectedTabIndex === 0 ? 'desktop' : 'mobile');
+                }}
+              >
+                <Box padding="0">
+                  {/* Tab content is handled below in the preview box */}
+                </Box>
+              </Tabs>
+            </Box>
+            
             <Box
               padding="400"
-              background="bg-surface-secondary"
+              background={previewDevice === 'mobile' ? 'bg-surface' : 'bg-surface-secondary'}
               borderRadius="200"
               borderWidth="025"
               borderColor="border"
+              style={getContainerStyles()}
             >
-              <PopupPreview
-                config={config}
-                type={popupType}
-                disableInteractions={true}
-                style={{
-                  maxWidth: popupType === 'wheel-email' ? '600px' : '400px',
-                  width: popupType === 'wheel-email' ? '90%' : 'auto',
-                  margin: '0 auto'
-                }}
-              />
+              {previewDevice === 'mobile' ? (
+                renderMobileFrame(
+                  <PopupPreview
+                    config={config}
+                    type={popupType}
+                    disableInteractions={true}
+                    style={getMobilePreviewStyles()}
+                    deviceView={previewDevice}
+                  />
+                )
+              ) : (
+                <PopupPreview
+                  config={config}
+                  type={popupType}
+                  disableInteractions={true}
+                  style={getDeviceStyles()}
+                  deviceView={previewDevice}
+                />
+              )}
             </Box>
 
-            {/* Preview Tips */}
-            {/* <Card sectioned>
-              <BlockStack gap="200">
-                <Text as="h4" variant="headingSm">Preview Tips</Text>
-                <BlockStack gap="100">
-                  <Text as="p" variant="bodyMd" tone="subdued">
-                    • Changes update instantly in preview
-                  </Text>
-                  <Text as="p" variant="bodyMd" tone="subdued">
-                    • Test different configurations for optimal results
-                  </Text>
-                  <Text as="p" variant="bodyMd" tone="subdued">
-                    • Mobile responsive design included
-                  </Text>
-                  <Text as="p" variant="bodyMd" tone="subdued">
-                    • Save to apply changes to your storefront
-                  </Text>
-                </BlockStack>
-              </BlockStack>
-            </Card> */}
+            {/* Device Info */}
+            <Box padding="200" background="bg-surface-secondary" borderRadius="200">
+              <Text as="p" variant="bodySm" tone="subdued" alignment="center">
+                {previewDevice === 'desktop'
+                  ? '🖥️ Desktop view - Full-size popup display'
+                  : '📱 Mobile view - Responsive mobile layout'
+                }
+              </Text>
+            </Box>
           </BlockStack>
         </Card>
       </div>
@@ -2921,12 +3242,13 @@ export default function PopupConfigurationModal({
         {`
           /* Full-screen modal styling for optimal space usage */
           .Polaris-Modal-Dialog--sizeFullScreen {
-            max-width: 95vw !important;
-            width: 95vw !important;
+            max-width: 115vw !important;
+            max-height: 55vw !important;
+            width: 98vw !important;
             margin: 2.5vw auto !important;
           }
           .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
-            max-height: 90vh !important;
+            max-height: 85vh !important;
             overflow: hidden !important;
             display: flex !important;
             flex-direction: column !important;
@@ -2935,7 +3257,7 @@ export default function PopupConfigurationModal({
           /* Two-panel layout: Configuration (left) + Preview (right) */
           .popup-config-layout {
             display: flex !important;
-            height: 85vh !important;
+            height: 100vh !important;
             overflow: hidden !important;
           }
           
@@ -2944,12 +3266,12 @@ export default function PopupConfigurationModal({
             flex: 1 !important;
             overflow-y: auto !important;
             padding-right: 16px !important;
-            max-height: 85vh !important;
+            max-height: 150vh !important;
           }
           
           /* Right panel: Fixed-width preview panel */
           .popup-config-preview {
-            width: 800px !important;
+            width: 1200px !important;
             flex-shrink: 0 !important;
             overflow: visible !important;
             position: sticky !important;
@@ -2966,6 +3288,177 @@ export default function PopupConfigurationModal({
           /* Timer preview container specific styling */
           .timer-preview-container {
             overflow: visible !important;
+          }
+          
+          /* ============================================================================ */
+          /* RESPONSIVE DESIGN - COMPREHENSIVE BREAKPOINTS */
+          /* ============================================================================ */
+          
+          /* Large Desktop (1400px+) - Maximum space utilization */
+          @media (min-width: 1400px) {
+            .popup-config-preview {
+              width: 800px !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen {
+              max-width: 95vw !important;
+              max-height: 90vh !important;
+              width: 95vw !important;
+              margin: 2.5vh auto !important;
+            }
+          }
+          
+          /* Desktop (1200px-1399px) - Standard desktop layout */
+          @media (min-width: 1200px) and (max-width: 1399px) {
+            .popup-config-preview {
+              width: 700px !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen {
+              max-width: 92vw !important;
+              max-height: 88vh !important;
+              width: 92vw !important;
+            }
+          }
+          
+          /* Medium Desktop (1024px-1199px) - Compact desktop */
+          @media (min-width: 1024px) and (max-width: 1199px) {
+            .popup-config-preview {
+              width: 600px !important;
+            }
+            .popup-config-settings {
+              padding-right: 12px !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen {
+              max-width: 90vw !important;
+              max-height: 85vh !important;
+              width: 90vw !important;
+            }
+          }
+          
+          /* Tablet Landscape (768px-1023px) - Column layout transition */
+          @media (min-width: 768px) and (max-width: 1023px) {
+            .popup-config-layout {
+              flex-direction: column !important;
+              height: auto !important;
+            }
+            .popup-config-settings {
+              flex: none !important;
+              max-height: 50vh !important;
+              padding-right: 0 !important;
+              margin-bottom: 16px !important;
+            }
+            .popup-config-preview {
+              width: 100% !important;
+              flex: none !important;
+              position: static !important;
+              max-height: 45vh !important;
+              overflow-y: auto !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen {
+              max-width: 95vw !important;
+              max-height: 95vh !important;
+              width: 95vw !important;
+              margin: 2.5vh auto !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
+              max-height: 90vh !important;
+            }
+          }
+          
+          /* Mobile Portrait (320px-767px) - Full mobile optimization */
+          @media (max-width: 767px) {
+            .popup-config-layout {
+              flex-direction: column !important;
+              height: auto !important;
+              gap: 12px !important;
+            }
+            .popup-config-settings {
+              flex: none !important;
+              max-height: 60vh !important;
+              padding-right: 0 !important;
+              overflow-y: auto !important;
+            }
+            .popup-config-preview {
+              width: 100% !important;
+              flex: none !important;
+              position: static !important;
+              max-height: 35vh !important;
+              overflow-y: auto !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen {
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+              width: 100vw !important;
+              margin: 0 !important;
+              border-radius: 0 !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
+              max-height: 95vh !important;
+              padding: 8px !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Header {
+              padding: 12px 16px !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Footer {
+              padding: 12px 16px !important;
+            }
+            /* Mobile-specific tab styling */
+            .Polaris-Tabs__TabContainer {
+              overflow-x: auto !important;
+            }
+            .Polaris-Tabs__Tab {
+              min-width: 80px !important;
+              font-size: 12px !important;
+            }
+          }
+          
+          /* Extra Small Mobile (≤320px) - Ultra-compact layout */
+          @media (max-width: 320px) {
+            .popup-config-settings {
+              max-height: 65vh !important;
+            }
+            .popup-config-preview {
+              max-height: 30vh !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
+              padding: 4px !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Header {
+              padding: 8px 12px !important;
+            }
+            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Footer {
+              padding: 8px 12px !important;
+            }
+            /* Ultra-compact tab styling */
+            .Polaris-Tabs__Tab {
+              min-width: 60px !important;
+              font-size: 11px !important;
+              padding: 8px 4px !important;
+            }
+          }
+          
+          /* High DPI / Retina Display Optimizations */
+          @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .popup-config-preview {
+              transform: translateZ(0) !important;
+            }
+            .timer-preview-container {
+              transform: translateZ(0) !important;
+            }
+          }
+          
+          /* Landscape Mobile Orientation */
+          @media (max-width: 767px) and (orientation: landscape) {
+            .popup-config-layout {
+              flex-direction: row !important;
+            }
+            .popup-config-settings {
+              max-height: 80vh !important;
+              width: 60% !important;
+            }
+            .popup-config-preview {
+              width: 40% !important;
+              max-height: 80vh !important;
+            }
           }
         `}
       </style>

@@ -17,76 +17,144 @@ export const loader = async ({ request }) => {
       ]
     };
 
-    // Fetch Collections
+    // Fetch Collections using GraphQL
     try {
-      const collectionsResponse = await admin.rest.resources.Collection.all({
-        session,
-        limit: 50, // Adjust as needed
-        fields: 'id,title,handle'
-      });
+      const collectionsQuery = `
+        query getCollections($first: Int!) {
+          collections(first: $first) {
+            edges {
+              node {
+                id
+                title
+                handle
+              }
+            }
+          }
+        }
+      `;
       
-      storefrontPages.collections = collectionsResponse.data.map(collection => ({
-        type: 'collection',
-        label: collection.title,
-        value: `/collections/${collection.handle}`,
-        id: collection.id
-      }));
-      
-      // Add "All Collections" option
-      storefrontPages.collections.unshift({
-        type: 'collections',
-        label: 'All Collections',
-        value: '/collections/*'
+      const collectionsResponse = await admin.graphql(collectionsQuery, {
+        variables: { first: 50 }
       });
+      const collectionsData = await collectionsResponse.json();
+      
+      // Check for GraphQL errors
+      if (collectionsData.errors) {
+        console.error('GraphQL errors in collections query:', collectionsData.errors);
+      }
+      
+      if (collectionsData.data?.collections?.edges) {
+        storefrontPages.collections = collectionsData.data.collections.edges.map(edge => ({
+          type: 'collection',
+          label: edge.node.title,
+          value: `/collections/${edge.node.handle}`,
+          id: edge.node.id
+        }));
+        
+        // Add "All Collections" option
+        storefrontPages.collections.unshift({
+          type: 'collections',
+          label: 'All Collections',
+          value: '/collections/*'
+        });
+      }
       
     } catch (error) {
       console.error('Error fetching collections:', error);
+      if (error.graphQLErrors) {
+        console.error('GraphQL errors:', error.graphQLErrors);
+      }
     }
 
-    // Fetch Products (limit to recent/popular ones to avoid too many options)
+    // Fetch Products using GraphQL
     try {
-      const productsResponse = await admin.rest.resources.Product.all({
-        session,
-        limit: 20, // Limit to avoid overwhelming UI
-        fields: 'id,title,handle',
-        status: 'active'
-      });
+      const productsQuery = `
+        query getProducts($first: Int!) {
+          products(first: $first, query: "status:active") {
+            edges {
+              node {
+                id
+                title
+                handle
+              }
+            }
+          }
+        }
+      `;
       
-      storefrontPages.products = productsResponse.data.map(product => ({
-        type: 'product',
-        label: product.title,
-        value: `/products/${product.handle}`,
-        id: product.id
-      }));
-      
-      // Add "All Products" option
-      storefrontPages.products.unshift({
-        type: 'products',
-        label: 'All Products',
-        value: '/products/*'
+      const productsResponse = await admin.graphql(productsQuery, {
+        variables: { first: 20 }
       });
+      const productsData = await productsResponse.json();
+      
+      // Check for GraphQL errors
+      if (productsData.errors) {
+        console.error('GraphQL errors in products query:', productsData.errors);
+      }
+      
+      if (productsData.data?.products?.edges) {
+        storefrontPages.products = productsData.data.products.edges.map(edge => ({
+          type: 'product',
+          label: edge.node.title,
+          value: `/products/${edge.node.handle}`,
+          id: edge.node.id
+        }));
+        
+        // Add "All Products" option
+        storefrontPages.products.unshift({
+          type: 'products',
+          label: 'All Products',
+          value: '/products/*'
+        });
+      }
       
     } catch (error) {
       console.error('Error fetching products:', error);
+      if (error.graphQLErrors) {
+        console.error('GraphQL errors:', error.graphQLErrors);
+      }
     }
 
-    // Fetch Custom Pages
+    // Fetch Custom Pages using GraphQL
     try {
-      const pagesResponse = await admin.rest.resources.Page.all({
-        session,
-        limit: 50,
-        fields: 'id,title,handle'
-      });
+      const pagesQuery = `
+        query getPages($first: Int!) {
+          pages(first: $first) {
+            edges {
+              node {
+                id
+                title
+                handle
+              }
+            }
+          }
+        }
+      `;
       
-      storefrontPages.pages = pagesResponse.data.map(page => ({
-        type: 'page',
-        label: page.title,
-        value: `/pages/${page.handle}`,
-        id: page.id
-      }));
+      const pagesResponse = await admin.graphql(pagesQuery, {
+        variables: { first: 50 }
+      });
+      const pagesData = await pagesResponse.json();
+      
+      // Check for GraphQL errors
+      if (pagesData.errors) {
+        console.error('GraphQL errors in pages query:', pagesData.errors);
+      }
+      
+      if (pagesData.data?.pages?.edges) {
+        storefrontPages.pages = pagesData.data.pages.edges.map(edge => ({
+          type: 'page',
+          label: edge.node.title,
+          value: `/pages/${edge.node.handle}`,
+          id: edge.node.id
+        }));
+      }
       
     } catch (error) {
       console.error('Error fetching pages:', error);
+      if (error.graphQLErrors) {
+        console.error('GraphQL errors:', error.graphQLErrors);
+      }
     }
 
     return json({

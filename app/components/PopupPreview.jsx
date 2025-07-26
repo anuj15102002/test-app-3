@@ -78,14 +78,18 @@ export default function PopupPreview({
       margin: '0px auto',
     };
 
+    console.log('---------------------------getContainerStyle---------------' + type)
+
     switch (type) {
       case 'email':
         return {
           ...baseStyle,
-          maxWidth: 575,
-          width:100,
+          maxWidth: '600px',
+          width: '100%',
           borderRadius: '8px',
-          ...style  // Email-specific style spread
+          height: 'auto',
+          minHeight: 'auto',
+          // ...style  // Email-specific style spread
         };
       case 'wheel-email':
         return {
@@ -96,7 +100,7 @@ export default function PopupPreview({
       case 'community':
         return {
           ...baseStyle,
-          maxWidth: 400,
+          maxWidth: 600,
           ...style
         };
       case 'timer':
@@ -108,8 +112,8 @@ export default function PopupPreview({
       case 'scratch-card':
         return {
           ...baseStyle,
-          maxWidth: 700,
-          ...style
+          maxWidth: 650,
+          // ...style
         };
       default:
         return {
@@ -175,20 +179,22 @@ function createPopupHTML(type, config) {
     <style>
       /* Email Popup Styles - matching popup-styles.css */
       .custom-popup.email-popup {
-        max-width: 600px !important;
+        max-width: none !important;
+        width: 100% !important;
         display: block !important;
         padding: 0 !important;
         background: #ffffff !important;
         border-radius: 8px !important;
         overflow: hidden !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        min-height: auto !important;
       }
 
       .custom-popup.email-popup .popup-content {
         display: flex !important;
         align-items: stretch !important;
         padding: 0 !important;
-        min-height: 320px !important;
+        min-height: 200px !important;
       }
 
       .email-popup-wrapper {
@@ -201,6 +207,7 @@ function createPopupHTML(type, config) {
         flex: 1;
         max-width: 50%;
         overflow: hidden;
+        min-height: 200px;
       }
 
       .email-popup-image img {
@@ -212,13 +219,13 @@ function createPopupHTML(type, config) {
 
       .email-popup-content {
         flex: 1;
-        background: #f9f9f9;
-        padding: 40px 30px;
+        background: #ffffff;
+        padding: 30px 25px;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        text-align: left;
+        text-align: center;
       }
 
       .email-popup-title {
@@ -338,36 +345,50 @@ function createPopupHTML(type, config) {
         }
       }
 
-      /* Email popup responsive */
+      /* Email popup responsive - maintain side-by-side layout */
+      @media (max-width: 768px) {
+        .custom-popup.email-popup {
+          max-width: 95vw !important;
+          margin: 15px !important;
+        }
+
+        .email-popup-title {
+          font-size: 20px;
+          margin-bottom: 10px;
+        }
+
+        .email-popup-subtitle {
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .email-popup-desc {
+          font-size: 13px;
+          margin-bottom: 15px;
+        }
+      }
+
       @media (max-width: 480px) {
         .custom-popup {
           margin: 10px !important;
           border-radius: 12px !important;
         }
         .custom-popup.email-popup {
-          max-width: 95vw !important;
-        }
-
-        .custom-popup.email-popup .popup-content {
-          flex-direction: column !important;
-        }
-
-        .email-popup-wrapper {
-          flex-direction: column !important;
-        }
-
-        .email-popup-image {
-          max-width: 100% !important;
-          height: 150px !important;
+          max-width: 98vw !important;
+          margin: 8px !important;
         }
 
         .email-popup-content {
-          padding: 25px 20px;
-          text-align: center;
+          padding: 20px 15px;
         }
 
         .email-popup-title {
-          font-size: 20px;
+          font-size: 18px;
+          margin-bottom: 8px;
+        }
+
+        .email-popup-subtitle {
+          font-size: 13px;
         }
         
         .custom-popup.wheel-email-popup .spinning-wheel {
@@ -409,7 +430,7 @@ function createPopupHTML(type, config) {
         transform: scale(1.1);
       }
     </style>
-    <div class="custom-popup ${type}-popup" style="position: relative; display: block; max-width: none; width: 100%; margin: 0;">
+    <div class="custom-popup ${type}-popup" style="position: relative; display: block; max-width: none; width: 100%; margin: 0; box-sizing: border-box;">
       <div class="popup-content">
         ${getPopupTypeContent(type, config)}
       </div>
@@ -472,7 +493,7 @@ function createEmailPopupContent(config) {
   const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='320' viewBox='0 0 300 320'%3E%3Crect width='300' height='320' fill='%23888'/%3E%3Ctext x='150' y='160' text-anchor='middle' fill='white' font-size='16'%3EBANNER%3C/text%3E%3C/svg%3E";
   const imageUrl = config.bannerImage || defaultImage;
 
-  // Match the exact structure from popup.js lines 417-441
+  // Match the exact structure from the real mobile popup
   return `
     <button class="popup-close" style="
       position: absolute; top: 10px; right: 10px; z-index: 10;
@@ -484,15 +505,15 @@ function createEmailPopupContent(config) {
 
     <div class="email-popup-wrapper">
       <div class="email-popup-image">
-        <img src="${imageUrl}" alt="Popup" onerror="this.style.display='none'" />
+        <img src="${imageUrl}" alt="Popup Banner" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
       </div>
       <div class="email-popup-content">
-        <h3 class="email-popup-title">${config.title || "GET 15% OFF"}</h3>
+        <h3 class="email-popup-title">${config.title || "GET 10% OFF YOUR FIRST ORDER!"}</h3>
         <p class="email-popup-subtitle">${config.subtitle || "Your first order"}</p>
-        <p class="email-popup-desc">${config.description || "Stay updated with our latest products"}</p>
-        <input type="email" id="popup-email" placeholder="${config.placeholder || "Enter your email"}" />
-        <button onclick="handleEmailSubmit()" class="email-popup-button" style="background-color: ${config.buttonColor || '#1b1e21ff'}; border: none; color: white;">
-          ${config.buttonText || "SUBSCRIBE"}
+        <p class="email-popup-desc">${config.description || "Subscribe to our newsletter and receive exclusive discounts"}</p>
+        <input type="email" id="popup-email" placeholder="${config.placeholder || "Enter your email address"}" readonly />
+        <button class="email-popup-button" style="background-color: ${config.buttonColor || '#007ace'}; border: none; color: white;">
+          ${config.buttonText || "GET DISCOUNT"}
         </button>
         <p class="email-popup-note">No thanks, I'll pay full price</p>
       </div>
@@ -1292,7 +1313,7 @@ function createScratchCardPopupContent(config) {
   return `
     <div class="custom-popup scratch-card-popup" style="
       max-width: ${containerWidth};
-      width: 90%;
+      width: 100%;
       display: block;
       background: ${config.backgroundColor || '#ffffff'};
       border-radius: 20px;

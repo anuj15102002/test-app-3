@@ -1,7 +1,7 @@
-name = "Popup Customizer"
+name = "QuickPop"
 type = "theme_app_extension"
 
 [[extensions]]
 type = "theme"
-name = "Popup Display"
-handle = "popup-display"
+name = "QuickPop"
+handle = "QuickPop"
