@@ -771,15 +771,15 @@
         </div>
       `;
 
-      // Use vibrant, eye-catching colors for segments
-      const segments = /*config.segments || */[
-        { label: "5% OFF", color: "#0a2a43", value: "5" },      // Dark navy
-        { label: "10% OFF", color: "#133b5c", value: "10" },    // Deep steel blue
-        { label: "15% OFF", color: "#0a2a43", value: "15" },
-        { label: "20% OFF", color: "#133b5c", value: "20" },
-        { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping" },
-        { label: "TRY AGAIN", color: "#133b5c", value: null },
-            ];
+      // Use unified segments array for both visual and prize logic
+      const segments = popupConfig.segments || [
+        { label: "5% OFF", color: "#0a2a43", value: "5", code: "SAVE5" },
+        { label: "10% OFF", color: "#133b5c", value: "10", code: "SAVE10" },
+        { label: "15% OFF", color: "#0a2a43", value: "15", code: "SAVE15" },
+        { label: "20% OFF", color: "#133b5c", value: "20", code: "SAVE20" },
+        { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping", code: "FREESHIP" },
+        { label: "TRY AGAIN", color: "#133b5c", value: null, code: null },
+      ];
 
       const angle = 360 / segments.length;
       // Create premium gradient with subtle transitions
@@ -797,11 +797,13 @@
       // Create segment labels with horizontal text positioned within wheel
       const segmentLabels = segments
   .map((segment, index) => {
-    const segmentAngle = (360 / segments.length) * index + 360 / segments.length / 2;
+    // Calculate the center angle of each segment
+    const segmentAngle = (360 / segments.length) * index + (360 / segments.length) / 2;
 
     let radius = window.innerWidth <= 480 ? 55 : window.innerWidth <= 768 ? 70 : 90;
     let fontSize = window.innerWidth <= 480 ? "10px" : window.innerWidth <= 768 ? "12px" : "14px";
 
+    // Position labels at the center of each segment, starting from top (0 degrees)
     const x = Math.cos(((segmentAngle - 90) * Math.PI) / 180) * radius;
     const y = Math.sin(((segmentAngle - 90) * Math.PI) / 180) * radius;
 
@@ -810,7 +812,7 @@
         position: absolute;
         left: 50%;
         top: 50%;
-        transform: translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${segmentAngle}deg);
+        transform: translate(-50%, -50%) translate(${x}px, ${y}px);
         font-size: ${fontSize};
         font-weight: bold;
         text-transform: uppercase;
@@ -1039,14 +1041,14 @@
     // Track email entered
     trackEvent("email_entered", { email: email });
 
-    // Get segments
+    // Use the same unified segments array as the visual wheel
     const segments = popupConfig.segments || [
-      { label: "5% OFF", color: "#ff6b6b", code: "SAVE5" },
-      { label: "10% OFF", color: "#4ecdc4", code: "SAVE10" },
-      { label: "15% OFF", color: "#45b7d1", code: "SAVE15" },
-      { label: "20% OFF", color: "#feca57", code: "SAVE20" },
-      { label: "FREE SHIPPING", color: "#ff9ff3", code: "FREESHIP" },
-      { label: "TRY AGAIN", color: "#54a0ff", code: null },
+      { label: "5% OFF", color: "#0a2a43", value: "5", code: "SAVE5" },
+      { label: "10% OFF", color: "#133b5c", value: "10", code: "SAVE10" },
+      { label: "15% OFF", color: "#0a2a43", value: "15", code: "SAVE15" },
+      { label: "20% OFF", color: "#133b5c", value: "20", code: "SAVE20" },
+      { label: "FREE SHIPPING", color: "#0a2a43", value: "shipping", code: "FREESHIP" },
+      { label: "TRY AGAIN", color: "#133b5c", value: null, code: null },
     ];
 
     // Randomly select a prize FIRST
@@ -1063,17 +1065,16 @@
     // Calculate the angle where the wheel should stop to land on the selected prize
     const segmentAngle = 360 / segments.length;
     
-    // The segments are positioned with their centers at:
-    // segment 0: 30°, segment 1: 90°, segment 2: 150°, etc.
-    // This matches the segmentLabels calculation: (360 / segments.length) * index + 360 / segments.length / 2
+    // Calculate the center angle of the selected segment
+    // Segments start from the top (0°) and go clockwise
     const segmentCenterAngle = prizeIndex * segmentAngle + segmentAngle / 2;
     
     // Add multiple full rotations for visual effect (3-5 full spins)
     const fullRotations = 3 + Math.random() * 2; // 3-5 rotations
     
-    // The pointer is at 0 degrees (right side). To align the winning segment with the pointer,
-    // we need to rotate the wheel so the segment center aligns with 0 degrees.
-    // Since the wheel rotates clockwise, we subtract the segment center angle from full rotations
+    // The pointer is at the top (0 degrees). To align the winning segment with the pointer,
+    // we need to rotate the wheel so the segment center aligns with 0 degrees (top position).
+    // Since we want the segment center to end up at the top, we calculate:
     const finalRotation = fullRotations * 360 - segmentCenterAngle;
 
     // Start spinning the wheel

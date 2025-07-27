@@ -3175,7 +3175,7 @@ export default function PopupConfigurationModal({
             </InlineStack>
             
             {/* Device Preview Toggle */}
-            <Box textAlign="center">
+            <Box>
               <Tabs
                 tabs={deviceTabs}
                 selected={activeDeviceTab}
@@ -3505,7 +3505,7 @@ export default function PopupConfigurationModal({
                   <Divider />
                   
                   {/* Tabbed Configuration Interface */}
-                  <Box width="100%" textAlign="center">
+                  <Box width="100%">
                     <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab}>
                       <Box padding="400">
                         <BlockStack gap="400">

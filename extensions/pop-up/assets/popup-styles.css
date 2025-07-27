@@ -285,14 +285,14 @@
 
 .wheel-pointer {
   position: absolute;
-  top: 50%;
-  right: -18px;
-  transform: translateY(-50%);
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-top: 16px solid transparent;
-  border-bottom: 16px solid transparent;
-  border-left: 28px solid #fbbf24;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 28px solid #fbbf24;
   z-index: 10;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
 }
@@ -300,13 +300,13 @@
 .wheel-pointer::after {
   content: '';
   position: absolute;
-  top: -14px;
-  left: -24px;
+  top: -22px;
+  left: -14px;
   width: 0;
   height: 0;
-  border-top: 14px solid transparent;
-  border-bottom: 14px solid transparent;
-  border-left: 22px solid #f1f5f9;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 22px solid #f1f5f9;
 }
 
 .wheel-segment-label {
@@ -384,10 +384,10 @@
 
 @keyframes pointerPulse {
   0%, 100% {
-    transform: translateY(-50%) scale(1);
+    transform: translateX(-50%) scale(1);
   }
   50% {
-    transform: translateY(-50%) scale(1.05);
+    transform: translateX(-50%) scale(1.05);
   }
 }
 
@@ -493,10 +493,10 @@
   }
   
   .wheel-pointer {
-    border-top: 12px solid transparent !important;
-    border-bottom: 12px solid transparent !important;
-    border-left: 20px solid #fbbf24 !important;
-    right: -14px !important;
+    border-left: 12px solid transparent !important;
+    border-right: 12px solid transparent !important;
+    border-bottom: 20px solid #fbbf24 !important;
+    top: -14px !important;
   }
   
   .form-title {
