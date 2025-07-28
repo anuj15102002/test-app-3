@@ -3238,326 +3238,184 @@ export default function PopupConfigurationModal({
   // ============================================================================
   
   return (
-    <>
-      {/* Custom CSS for full-screen modal layout optimization */}
-      <style>
-        {`
-          /* Full-screen modal styling for optimal space usage */
-          .Polaris-Modal-Dialog--sizeFullScreen {
-            max-width: 115vw !important;
-            max-height: 55vw !important;
-            width: 98vw !important;
-            margin: 2.5vw auto !important;
-          }
-          .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
-            max-height: 85vh !important;
-            overflow: hidden !important;
-            display: flex !important;
-            flex-direction: column !important;
-          }
-          
-          /* Two-panel layout: Configuration (left) + Preview (right) */
-          .popup-config-layout {
-            display: flex !important;
-            height: 100vh !important;
-            overflow: hidden !important;
-          }
-          
-          /* Left panel: Configuration settings with scrolling */
-          .popup-config-settings {
-            flex: 1 !important;
-            overflow-y: auto !important;
-            padding-right: 16px !important;
-            max-height: 150vh !important;
-          }
-          
-          /* Right panel: Fixed-width preview panel */
-          .popup-config-preview {
-            width: 1200px !important;
-            flex-shrink: 0 !important;
-            overflow: visible !important;
-            position: sticky !important;
-            top: 0 !important;
-            height: fit-content !important;
-            max-height: none !important;
-          }
-          
-          /* Ensure preview content doesn't create its own scroll */
-          .popup-config-preview * {
-            overflow: visible !important;
-          }
-          
-          /* Timer preview container specific styling */
-          .timer-preview-container {
-            overflow: visible !important;
-          }
-          
-          /* ============================================================================ */
-          /* RESPONSIVE DESIGN - COMPREHENSIVE BREAKPOINTS */
-          /* ============================================================================ */
-          
-          /* Large Desktop (1400px+) - Maximum space utilization */
-          @media (min-width: 1400px) {
-            .popup-config-preview {
-              width: 800px !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen {
-              max-width: 95vw !important;
-              max-height: 90vh !important;
-              width: 95vw !important;
-              margin: 2.5vh auto !important;
-            }
-          }
-          
-          /* Desktop (1200px-1399px) - Standard desktop layout */
-          @media (min-width: 1200px) and (max-width: 1399px) {
-            .popup-config-preview {
-              width: 700px !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen {
-              max-width: 92vw !important;
-              max-height: 88vh !important;
-              width: 92vw !important;
-            }
-          }
-          
-          /* Medium Desktop (1024px-1199px) - Compact desktop */
-          @media (min-width: 1024px) and (max-width: 1199px) {
-            .popup-config-preview {
-              width: 600px !important;
-            }
-            .popup-config-settings {
-              padding-right: 12px !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen {
-              max-width: 90vw !important;
-              max-height: 85vh !important;
-              width: 90vw !important;
-            }
-          }
-          
-          /* Tablet Landscape (768px-1023px) - Column layout transition */
-          @media (min-width: 768px) and (max-width: 1023px) {
-            .popup-config-layout {
-              flex-direction: column !important;
-              height: auto !important;
-            }
-            .popup-config-settings {
-              flex: none !important;
-              max-height: 50vh !important;
-              padding-right: 0 !important;
-              margin-bottom: 16px !important;
-            }
-            .popup-config-preview {
-              width: 100% !important;
-              flex: none !important;
-              position: static !important;
-              max-height: 45vh !important;
-              overflow-y: auto !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen {
-              max-width: 95vw !important;
-              max-height: 95vh !important;
-              width: 95vw !important;
-              margin: 2.5vh auto !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
-              max-height: 90vh !important;
-            }
-          }
-          
-          /* Mobile Portrait (320px-767px) - Full mobile optimization */
-          @media (max-width: 767px) {
-            .popup-config-layout {
-              flex-direction: column !important;
-              height: auto !important;
-              gap: 12px !important;
-            }
-            .popup-config-settings {
-              flex: none !important;
-              max-height: 60vh !important;
-              padding-right: 0 !important;
-              overflow-y: auto !important;
-            }
-            .popup-config-preview {
-              width: 100% !important;
-              flex: none !important;
-              position: static !important;
-              max-height: 35vh !important;
-              overflow-y: auto !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen {
-              max-width: 100vw !important;
-              max-height: 100vh !important;
-              width: 100vw !important;
-              margin: 0 !important;
-              border-radius: 0 !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
-              max-height: 95vh !important;
-              padding: 8px !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Header {
-              padding: 12px 16px !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Footer {
-              padding: 12px 16px !important;
-            }
-            /* Mobile-specific tab styling */
-            .Polaris-Tabs__TabContainer {
-              overflow-x: auto !important;
-            }
-            .Polaris-Tabs__Tab {
-              min-width: 80px !important;
-              font-size: 12px !important;
-            }
-          }
-          
-          /* Extra Small Mobile (≤320px) - Ultra-compact layout */
-          @media (max-width: 320px) {
-            .popup-config-settings {
-              max-height: 65vh !important;
-            }
-            .popup-config-preview {
-              max-height: 30vh !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Body {
-              padding: 4px !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Header {
-              padding: 8px 12px !important;
-            }
-            .Polaris-Modal-Dialog--sizeFullScreen .Polaris-Modal-Footer {
-              padding: 8px 12px !important;
-            }
-            /* Ultra-compact tab styling */
-            .Polaris-Tabs__Tab {
-              min-width: 60px !important;
-              font-size: 11px !important;
-              padding: 8px 4px !important;
-            }
-          }
-          
-          /* High DPI / Retina Display Optimizations */
-          @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .popup-config-preview {
-              transform: translateZ(0) !important;
-            }
-            .timer-preview-container {
-              transform: translateZ(0) !important;
-            }
-          }
-          
-          /* Landscape Mobile Orientation */
-          @media (max-width: 767px) and (orientation: landscape) {
-            .popup-config-layout {
-              flex-direction: row !important;
-            }
-            .popup-config-settings {
-              max-height: 80vh !important;
-              width: 60% !important;
-            }
-            .popup-config-preview {
-              width: 40% !important;
-              max-height: 80vh !important;
-            }
-          }
-        `}
-      </style>
-      
-      {/* Main Modal Component */}
-      <Modal
-        open={isOpen}
-        onClose={onClose}
-        title="Popup Configuration"
-        size="fullScreen"
-        primaryAction={{
-          content: "Save Configuration",
-          onAction: handleSaveConfig,
-          loading: fetcher.state === "submitting",
-        }}
-        secondaryActions={[
-          {
-            content: "Cancel",
-            onAction: onClose,
-          },
-        ]}
-      >
-        <Modal.Section>
-          {/* Two-Panel Layout Container */}
-          <div className="popup-config-layout">
-            
-            {/* LEFT PANEL: Configuration Settings */}
-            <div className="popup-config-settings">
-              <Card>
-                <BlockStack gap="500">
-                  
-                  {/* Header Section */}
-                  <BlockStack gap="200">
-                    <Text as="h2" variant="headingMd">
-                      Popup Configuration
-                    </Text>
-                    <Text variant="bodyMd" as="p">
-                      Customize your popup to engage visitors and boost conversions. Choose between different popup types and configure all settings.
-                    </Text>
-                  </BlockStack>
-                  
-                  <Divider />
-                  
-                  {/* Tabbed Configuration Interface */}
-                  <Box width="100%">
-                    <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab}>
-                      <Box padding="400">
-                        <BlockStack gap="400">
-                          {/* Basic Configuration */}
-                          <TextField
-                            label="Popup Name"
-                            value={popupName}
-                            onChange={(value) => {
-                              const trimmedValue = value.slice(0, 50);
-                              setPopupName(trimmedValue);
-                              // Validate on change with a small delay to avoid excessive validation
-                              setTimeout(() => validatePopupName(trimmedValue), 300);
-                            }}
-                            onBlur={() => validatePopupName(popupName)}
-                            placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
-                            maxLength={50}
-                            showCharacterCount
-                            helpText="Give your popup a descriptive name for easy identification (max 50 characters)"
-                            error={popupNameError}
-                          />
-                          
-                          {/* Popup Type Selector */}
-                          {/* <Select
-                            label="Popup Type"
-                            options={popupTypeOptions}
-                            value={popupType}
-                            onChange={setPopupType}
-                          /> */}
-                          
-                          <Divider />
-                          
-                          {/* Tab Content */}
-                          {activeTab === 0 && renderRulesSection()}
-                          {activeTab === 1 && renderContentSection()}
-                          {activeTab === 2 && renderStyleSection()}
-                        </BlockStack>
-                      </Box>
-                    </Tabs>
-                  </Box>
-                  
+    isOpen && 
+  <>
+    <style>
+      {`
+        .custom-overlay-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+
+        .custom-modal-content {
+          background: white;
+          width: 96vw;
+          height: 95vh;
+          display: flex;
+          flex-direction: column;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+
+        .custom-modal-header,
+        .custom-modal-footer {
+          padding: 16px;
+          background-color: #f9fafb;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid #ddd;
+        }
+
+        .custom-modal-footer {
+          border-top: 1px solid #ddd;
+          border-bottom: none;
+        }
+
+        .custom-modal-body {
+          flex: 1;
+          display: flex;
+          overflow: hidden;
+        }
+
+        .left-panel {
+          flex: 1;
+          padding: 24px;
+          overflow-y: auto;
+          background-color: #ffffff;
+        }
+
+        .right-panel {
+          width: 50%;
+          min-width: 500px;
+          max-width: 1100px;
+          background-color: #f3f4f6;
+          padding: 24px;
+          overflow-y: auto;
+          border-left: 1px solid #ddd;
+        }
+
+        .modal-close-btn {
+          background: transparent;
+          border: none;
+          font-size: 20px;
+          cursor: pointer;
+        }
+
+        .action-btn {
+          padding: 10px 20px;
+          font-weight: bold;
+          border-radius: 4px;
+          border: none;
+          cursor: pointer;
+        }
+
+        .save-btn {
+          background-color: #008060;
+          color: white;
+        }
+
+        .cancel-btn {
+          background-color: #e0e0e0;
+          margin-right: 12px;
+        }
+      `}
+    </style>
+
+    <div className="custom-overlay-modal">
+      <div className="custom-modal-content">
+
+        {/* Header */}
+        <div className="custom-modal-header">
+          <h2>Popup Configuration</h2>
+          <button className="modal-close-btn" onClick={onClose}>×</button>
+        </div>
+
+        {/* Body */}
+        <div className="custom-modal-body">
+          {/* Left Panel: Configuration */}
+          <div className="left-panel">
+            <Card>
+              <BlockStack gap="500">
+                <BlockStack gap="200">
+                  <Text as="h2" variant="headingMd">
+                    Popup Configuration
+                  </Text>
+                  <Text variant="bodyMd" as="p">
+                    Customize your popup to engage visitors and boost conversions.
+                  </Text>
                 </BlockStack>
-              </Card>
-            </div>
-            
-            {/* RIGHT PANEL: Live Preview */}
-            <div className="popup-config-preview">
-              {renderPreviewPanel()}
-            </div>
-            
+
+                <Divider />
+
+                {/* Tabs */}
+                <Box width="100%">
+                  <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab}>
+                    <Box padding="400">
+                      <BlockStack gap="400">
+                        <TextField
+                          label="Popup Name"
+                          value={popupName}
+                          onChange={(value) => {
+                            const trimmedValue = value.slice(0, 50);
+                            setPopupName(trimmedValue);
+                            setTimeout(() => validatePopupName(trimmedValue), 300);
+                          }}
+                          onBlur={() => validatePopupName(popupName)}
+                          placeholder={`${popupType.charAt(0).toUpperCase() + popupType.slice(1)} Popup`}
+                          maxLength={50}
+                          showCharacterCount
+                          helpText="Give your popup a descriptive name"
+                          error={popupNameError}
+                        />
+                        <Divider />
+
+                        {/* Tab Content */}
+                        {activeTab === 0 && renderRulesSection()}
+                        {activeTab === 1 && renderContentSection()}
+                        {activeTab === 2 && renderStyleSection()}
+                      </BlockStack>
+                    </Box>
+                  </Tabs>
+                </Box>
+              </BlockStack>
+            </Card>
           </div>
-        </Modal.Section>
-      </Modal>
-    </>
+
+          {/* Right Panel: Preview */}
+          <div className="right-panel">
+            {renderPreviewPanel()}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="custom-modal-footer">
+          <div>
+            <Button variant="primary" className="action-btn cancel-btn" onClick={onClose}>Cancel</Button>
+          </div>
+          <div>
+            <Button
+              variant="primary"
+              className="action-btn save-btn"
+              onClick={handleSaveConfig}
+              disabled={fetcher.state === "submitting"}
+            >
+              {fetcher.state === "submitting" ? "Saving..." : "Save Configuration"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </>
+
+
   );
 }

@@ -154,12 +154,12 @@ export default function AppEmbedManager({ onEmbedStatusChange }) {
               ✅ Your popup app is enabled on your storefront! You can now save and manage your popup configurations.
             </Text>
 
-            <Button
+            {/* <Button
             variant="primary"
             onClick={handleEnableAppEmbed}
             loading={fetcher.state === "submitting"}
             icon={ExternalIcon}
-          >Manage app</Button>
+          >Manage app</Button> */}
 
             <Text variant="bodySm" tone="subdued">
               The popup will appear on your storefront according to your configuration settings.

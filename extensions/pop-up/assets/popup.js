@@ -852,7 +852,7 @@
             </div>
             ${segmentLabels}
           </div>
-          <div class="wheel-pointer">  </div>
+          <div class="wheel-pointer"></div>
         </div>
       `;
 

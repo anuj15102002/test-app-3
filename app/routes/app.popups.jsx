@@ -26,7 +26,7 @@ import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import PopupTypeSelectionModal from "../components/PopupTypeSelectionModal";
 import PopupConfigurationModal from "../components/PopupConfigurationModal";
-import { getPopupImagePath } from "../utils/popupImages";
+import { getPopupThumbnailPath } from "../utils/popupImages";
 
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -198,7 +198,7 @@ export default function PopupsPage() {
   };
 
   const getPopupThumbnail = (popup) => {
-    return getPopupImagePath(popup.type);
+    return getPopupThumbnailPath(popup.type);
   };
 
   return (

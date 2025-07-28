@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { getSocialIconFromCloudinary } from "../utils/cloudinary.js";
+import { getSocialIconUrl } from "../utils/socialIcons.js";
 
 /**
  * PopupPreview - A reusable React component that renders pixel-perfect previews of storefront popups
@@ -84,44 +86,45 @@ export default function PopupPreview({
       const mobileStyles = {
         ...baseStyle,
         width: '100%',
-        margin: '0 auto',
+        margin: '8px auto',
+        maxWidth: '320px', // Constrain to mobile frame width
       };
 
       switch (type) {
         case 'email':
           return {
             ...mobileStyles,
-            maxWidth: '98vw', // From popup-styles.css mobile responsive
+            maxWidth: '300px', // Smaller for mobile frame
             ...style
           };
         case 'wheel-email':
           return {
             ...mobileStyles,
-            maxWidth: '98vw', // From popup-styles.css wheel mobile
+            maxWidth: '300px', // Smaller for mobile frame
             ...style
           };
         case 'community':
           return {
             ...mobileStyles,
-            maxWidth: '95vw', // Community popup mobile
+            maxWidth: '300px', // Smaller for mobile frame
             ...style
           };
         case 'timer':
           return {
             ...mobileStyles,
-            maxWidth: '98vw', // Timer mobile responsive
+            maxWidth: '300px', // Smaller for mobile frame
             ...style
           };
         case 'scratch-card':
           return {
             ...mobileStyles,
-            maxWidth: '98vw', // Scratch card mobile responsive
+            maxWidth: '300px', // Smaller for mobile frame
             ...style
           };
         default:
           return {
             ...mobileStyles,
-            maxWidth: '95vw',
+            maxWidth: '300px',
             ...style
           };
       }
@@ -358,6 +361,12 @@ function createPopupHTML(type, config, deviceView = 'desktop') {
       .custom-popup.email-popup .popup-close:hover {
         background: rgba(0, 0, 0, 0.2);
       }
+
+
+
+
+
+      
 
       /* Responsive Media Queries for Popup Preview */
       @media (max-width: 768px) {
@@ -661,29 +670,40 @@ function createEmailPopupContent(config, deviceView = 'desktop') {
   const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='320' viewBox='0 0 300 320'%3E%3Crect width='300' height='320' fill='%23888'/%3E%3Ctext x='150' y='160' text-anchor='middle' fill='white' font-size='16'%3EBANNER%3C/text%3E%3C/svg%3E";
   const imageUrl = config.bannerImage || defaultImage;
 
-  // Match the exact structure from the real mobile popup
+  // Mobile-specific styling to match the real popup behavior
+  const isMobile = deviceView === 'mobile';
+  const wrapperStyle = isMobile ? 'flex-direction: column !important;' : '';
+  const imageStyle = isMobile ? 'max-width: 100% !important; height: 100px;' : '';
+  const contentStyle = isMobile ? 'padding: 20px 15px; text-align: center;' : '';
+  // const wrapperClass = isMobile ? 'email-popup-wrapper mobile' : 'email-popup-wrapper';
+  const wrapperAttributes = isMobile
+  ? `style="${wrapperStyle}"`
+  : `class="email-popup-wrapper"`;
+
   return `
     <button class="popup-close" style="
-      position: absolute; top: 10px; right: 10px; z-index: 10;
+      position: absolute; top: 8px; right: 8px; z-index: 10;
       background: rgba(0,0,0,0.1); border: none; border-radius: 50%;
-      width: 28px; height: 28px; font-size: 16px; cursor: pointer;
+      width: ${isMobile ? '24px' : '28px'}; height: ${isMobile ? '24px' : '28px'};
+      font-size: ${isMobile ? '14px' : '16px'}; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       color: ${config.textColor || "#000000"};
     ">&times;</button>
 
-    <div class="email-popup-wrapper">
-      <div class="email-popup-image">
+    <div ${wrapperAttributes}>
+      <div class="email-popup-image" style="${imageStyle}">
         <img src="${imageUrl}" alt="Popup Banner" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
       </div>
-      <div class="email-popup-content">
-        <h3 class="email-popup-title">${config.title || "GET 10% OFF YOUR FIRST ORDER!"}</h3>
-        <p class="email-popup-subtitle">${config.subtitle || "Your first order"}</p>
-        <p class="email-popup-desc">${config.description || "Subscribe to our newsletter and receive exclusive discounts"}</p>
-        <input type="email" id="popup-email" placeholder="${config.placeholder || "Enter your email address"}" readonly />
-        <button class="email-popup-button" style="background-color: ${config.buttonColor || '#007ace'}; border: none; color: white;">
+      <div class="email-popup-content" style="${contentStyle}">
+        <h3 class="email-popup-title" style="${isMobile ? 'font-size: 18px; margin-bottom: 6px;' : ''}">${config.title || "GET 10% OFF YOUR FIRST ORDER!"}</h3>
+        <p class="email-popup-subtitle" style="${isMobile ? 'font-size: 12px; margin-bottom: 8px;' : ''}">${config.subtitle || "Your first order"}</p>
+        <p class="email-popup-desc" style="${isMobile ? 'font-size: 11px; margin-bottom: 12px; line-height: 1.3;' : ''}">${config.description || "Subscribe to our newsletter and receive exclusive discounts"}</p>
+        <input type="email" id="popup-email" placeholder="${config.placeholder || "Enter your email address"}"
+               style="${isMobile ? 'padding: 10px 12px; font-size: 14px; margin-bottom: 10px;' : ''}" readonly />
+        <button class="email-popup-button" style="background-color: ${config.buttonColor || '#007ace'}; border: none; color: white; ${isMobile ? 'padding: 10px 12px; font-size: 13px;' : ''}">
           ${config.buttonText || "GET DISCOUNT"}
         </button>
-        <p class="email-popup-note">No thanks, I'll pay full price</p>
+        <p class="email-popup-note" style="${isMobile ? 'font-size: 10px; margin-top: 6px;' : ''}">No thanks, I'll pay full price</p>
       </div>
     </div>
   `;
@@ -1008,47 +1028,50 @@ function createCommunityPopupContent(config, deviceView = 'desktop') {
 
   const enabledSocialIcons = socialIcons.filter(icon => icon.enabled);
   const socialIconsHTML = enabledSocialIcons.map(social => {
-    const getIconStyle = (platform) => {
-      switch(platform) {
-        case 'facebook':
-          return { backgroundColor: '#1877f2', color: 'white' };
-        case 'instagram':
-          return {
-            background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
-            color: 'white'
-          };
-        case 'linkedin':
-          return { backgroundColor: '#0077b5', color: 'white' };
-        case 'x':
-          return { backgroundColor: '#000000', color: 'white' };
-        default:
-          return { backgroundColor: '#f0f0f0', color: '#666' };
-      }
-    };
+    // Remove background styling - just show plain icons
+    const iconStyle = {};
+    const styleString = '';
     
-    const iconStyle = getIconStyle(social.platform);
-    const styleString = Object.entries(iconStyle).map(([key, value]) => 
-      `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`
-    ).join('; ');
+    // Use local social media icons with Cloudinary as optional enhancement
+    let iconContent;
+    try {
+      const cloudinaryUrl = getSocialIconFromCloudinary(social.platform);
+      if (cloudinaryUrl) {
+        // Use Cloudinary if configured and available
+        iconContent = `<img src="${cloudinaryUrl}" alt="${social.platform}" style="width: 24px; height: 24px; object-fit: contain;" />`;
+      } else {
+        // Use local social media icons from utils folder
+        const localIconUrl = getSocialIconUrl(social.platform);
+        if (localIconUrl) {
+          iconContent = `<img src="${localIconUrl}" alt="${social.platform}" style="width: 24px; height: 24px; object-fit: contain;" />`;
+        } else {
+          // Fallback to emoji icons if no local icon found
+          iconContent = `<span style="font-size: 20px;">${social.platform === 'facebook' ? '📘' :
+            social.platform === 'instagram' ? '📷' :
+            social.platform === 'linkedin' ? '💼' :
+            social.platform === 'x' ? '❌' : '?'}</span>`;
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to load ${social.platform} icon:`, error);
+      // Fallback to emoji icons
+      iconContent = `<span style="font-size: 20px;">${social.platform === 'facebook' ? '📘' :
+        social.platform === 'instagram' ? '📷' :
+        social.platform === 'linkedin' ? '💼' :
+        social.platform === 'x' ? '❌' : '?'}</span>`;
+    }
     
     return `
       <div class="social-icon" style="
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        font-size: 14px;
-        font-weight: bold;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        ${styleString};
+        margin: 0 4px;
       ">
-        ${social.platform === 'facebook' ? 'f' :
-          social.platform === 'instagram' ? '📷' :
-          social.platform === 'linkedin' ? 'in' :
-          social.platform === 'x' ? 'X' : '?'}
+        ${iconContent}
       </div>
     `;
   }).join('');
@@ -1169,7 +1192,7 @@ function createTimerPopupContent(config, deviceView = 'desktop') {
   return `
     <div class="custom-popup timer-popup" style="
       max-width: ${deviceView === 'mobile' ? '98vw' : '420px'};
-      width: 100%;
+      width: 114%;
       display: block;
       background: ${config.backgroundColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
       border-radius: 20px;
@@ -1177,7 +1200,7 @@ function createTimerPopupContent(config, deviceView = 'desktop') {
       overflow: hidden;
       position: relative;
       border: none;
-      ${deviceView === 'mobile' ? 'margin: 8px;' : ''}
+      ${deviceView === 'mobile' ? 'margin: -20px;' : ''}
     ">
       <div class="popup-content" style="
         display: block;
@@ -1191,7 +1214,7 @@ function createTimerPopupContent(config, deviceView = 'desktop') {
           position: relative;
         ">
           <div class="timer-popup-inner" style="
-            padding: ${deviceView === 'mobile' ? '25px 20px 20px' : '30px 25px 25px'};
+            padding: ${deviceView === 'mobile' ? '3px 11px 10px' : '30px 25px 25px'};
             text-align: center;
             position: relative;
           ">

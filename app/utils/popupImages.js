@@ -2,21 +2,54 @@
  * Utility functions for popup image management
  */
 
-// Map popup types to their corresponding image files
+import { getPopupImageFromCloudinary, getPopupThumbnailFromCloudinary } from './cloudinary.js';
+
+// Map popup types to their corresponding image files (fallback for local images)
 export const POPUP_IMAGES = {
   "email": "emailPopup.png",
-  "wheel-email": "wheelPopup.png", 
+  "wheel-email": "wheelPopup.png",
   "community": "communityPopup.png",
   "timer": "timerPopup.png",
   "scratch-card": "scratchPopup.png"
 };
 
 /**
- * Get the image path for a popup type
+ * Get the image path for a popup type (now uses Cloudinary CDN)
  * @param {string} popupType - The type of popup
- * @returns {string} The image path
+ * @returns {string} The Cloudinary CDN URL or fallback local path
  */
 export function getPopupImagePath(popupType) {
+  try {
+    // Use Cloudinary CDN for optimized images
+    const cloudinaryUrl = getPopupImageFromCloudinary(popupType);
+    if (cloudinaryUrl) {
+      return cloudinaryUrl;
+    }
+  } catch (error) {
+    console.warn('Failed to load from Cloudinary, using local fallback:', error);
+  }
+  
+  // Fallback to local images if Cloudinary fails or is not configured
+  const imageName = POPUP_IMAGES[popupType] || POPUP_IMAGES["email"];
+  return `/popup-images/${imageName}`;
+}
+
+/**
+ * Get optimized thumbnail image for popup type
+ * @param {string} popupType - The type of popup
+ * @returns {string} The Cloudinary CDN URL for thumbnail or fallback
+ */
+export function getPopupThumbnailPath(popupType) {
+  try {
+    const cloudinaryUrl = getPopupThumbnailFromCloudinary(popupType);
+    if (cloudinaryUrl) {
+      return cloudinaryUrl;
+    }
+  } catch (error) {
+    console.warn('Failed to load thumbnail from Cloudinary, using local fallback:', error);
+  }
+  
+  // Fallback to local images if Cloudinary fails or is not configured
   const imageName = POPUP_IMAGES[popupType] || POPUP_IMAGES["email"];
   return `/popup-images/${imageName}`;
 }
