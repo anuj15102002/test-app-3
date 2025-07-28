@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import db from "../db.server";
+import prisma from "../db.server";
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -37,6 +37,7 @@ export const action = async ({ request }) => {
     }
 
     const eventType = formData.get("eventType");
+    const popupId = formData.get("popupId");
     const email = formData.get("email");
     const discountCode = formData.get("discountCode");
     const prizeLabel = formData.get("prizeLabel");
@@ -60,9 +61,10 @@ export const action = async ({ request }) => {
     console.log(`Recording analytics event: ${eventType} for shop: ${shop}`);
 
     // Save analytics event to database
-    await db.popupAnalytics.create({
+    await prisma.popupAnalytics.create({
       data: {
         shop: shop,
+        popupId: popupId || null,
         eventType: eventType,
         email: email || null,
         discountCode: discountCode || null,

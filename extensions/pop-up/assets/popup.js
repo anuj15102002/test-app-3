@@ -38,6 +38,11 @@
       formData.append("eventType", eventType);
       formData.append("sessionId", sessionId);
 
+      // Add popup ID if available
+      if (popupConfig && popupConfig.id) {
+        formData.append("popupId", popupConfig.id);
+      }
+
       // Add optional data
       if (data.email) formData.append("email", data.email);
       if (data.discountCode) formData.append("discountCode", data.discountCode);

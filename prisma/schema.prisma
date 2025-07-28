@@ -100,6 +100,7 @@ model DiscountCode {
 model PopupAnalytics {
   id           String   @id @default(cuid())
   shop         String
+  popupId      String?
   eventType    String
   email        String?
   discountCode String?
@@ -114,4 +115,6 @@ model PopupAnalytics {
   @@index([eventType])
   @@index([timestamp])
   @@index([shop, eventType])
+  @@index([popupId])
+  @@index([shop, popupId])
 }

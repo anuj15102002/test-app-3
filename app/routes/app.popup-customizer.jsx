@@ -21,7 +21,7 @@ import {
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { EmailIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
-import db from "../db.server";
+import prisma from "../db.server";
 import PopupPreview from "../components/PopupPreview";
 
 export const loader = async ({ request }) => {
@@ -34,7 +34,7 @@ export const loader = async ({ request }) => {
     
     // If popupId is provided, load that specific popup
     if (popupId) {
-      existingConfig = await db.popupConfig.findFirst({
+      existingConfig = await prisma.popupConfig.findFirst({
         where: {
           id: popupId,
           shop: session.shop
@@ -110,7 +110,7 @@ export const action = async ({ request }) => {
         console.log("Shop:", session.shop);
       }
       
-      savedConfig = await db.popupConfig.update({
+      savedConfig = await prisma.popupConfig.update({
         where: {
           id: popupId,
           shop: session.shop
@@ -171,7 +171,7 @@ export const action = async ({ request }) => {
         console.log("=== CREATING NEW SCRATCH CARD ===");
       }
       
-      savedConfig = await db.popupConfig.create({
+      savedConfig = await prisma.popupConfig.create({
         data: {
           shop: session.shop,
           name: popupName,

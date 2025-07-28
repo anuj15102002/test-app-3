@@ -117,8 +117,8 @@ export default function PopupPreview({
           };
         case 'scratch-card':
           return {
-            ...mobileStyles,
-            maxWidth: '300px', // Smaller for mobile frame
+            // ...mobileStyles,
+            maxWidth: '300px', // Broader for mobile frame to match real popup
             ...style
           };
         default:
@@ -1561,7 +1561,7 @@ function createScratchCardPopupContent(config, deviceView = 'desktop') {
           position: relative;
         ">
           <div class="scratch-card-popup-inner" style="
-            padding: 30px;
+            padding: ${deviceView === 'mobile' ? '30px' : '30px'};
             position: relative;
           ">
             ${config.showCloseButton !== false ? `
@@ -1591,8 +1591,9 @@ function createScratchCardPopupContent(config, deviceView = 'desktop') {
               display: flex;
               justify-content: center;
               align-items: center;
-              margin-bottom: 20px;
-              padding: 0 20px;
+              margin-bottom: ${deviceView === 'mobile' ? '25px' : '20px'};
+              padding: ${deviceView === 'mobile' ? '0 10px' : '0 20px'};
+              ${deviceView === 'mobile' ? 'gap: 15px;' : ''}
             ">
               <div class="step-indicator active" style="
                 display: flex;
@@ -1688,10 +1689,10 @@ function createScratchCardPopupContent(config, deviceView = 'desktop') {
             
             <div class="scratch-card-layout" style="
               display: flex;
-              gap: ${deviceView === 'mobile' ? '20px' : '30px'};
+              gap: ${deviceView === 'mobile' ? '25px' : '30px'};
               align-items: center;
               justify-content: space-between;
-              ${deviceView === 'mobile' ? 'flex-direction: column; text-align: center;' : ''}
+              ${deviceView === 'mobile' ? 'flex-direction: column; text-align: center; padding: 0 10px;' : ''}
             ">
               <div class="scratch-card-left" style="
                 flex: 0 0 auto;
@@ -1707,6 +1708,7 @@ function createScratchCardPopupContent(config, deviceView = 'desktop') {
                   overflow: hidden;
                   background: rgba(255, 255, 255, 0.9);
                   backdrop-filter: blur(10px);
+                  ${deviceView === 'mobile' ? 'margin: 0 auto;' : ''}
                 ">
                   <!-- Canvas placeholder with scratch surface styling -->
                   <div style="
@@ -1776,7 +1778,8 @@ function createScratchCardPopupContent(config, deviceView = 'desktop') {
                   margin-top: 15px;
                   font-weight: 600;
                   color: #495057;
-                  font-size: 16px;
+                  font-size: ${deviceView === 'mobile' ? '14px' : '16px'};
+                  ${deviceView === 'mobile' ? 'line-height: 1.3; padding: 0 5px;' : ''}
                 ">Enter your email to start scratching!</p>
               </div>
               
@@ -1789,54 +1792,58 @@ function createScratchCardPopupContent(config, deviceView = 'desktop') {
                 ${deviceView === 'mobile' ? 'order: 2;' : ''}
               ">
                 <h2 class="scratch-card-title" style="
-                  font-size: 28px;
+                  font-size: ${deviceView === 'mobile' ? '24px' : '28px'};
                   font-weight: 700;
-                  margin-bottom: 15px;
+                  margin-bottom: ${deviceView === 'mobile' ? '15px' : '15px'};
                   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                   -webkit-background-clip: text;
                   -webkit-text-fill-color: transparent;
                   background-clip: text;
-                ">${config.title || "🎮 Scratch & Win!"}</h2>
+                  ${deviceView === 'mobile' ? 'text-align: center; line-height: 1.2; padding: 0 10px;' : ''}
+                ">${config.title || (deviceView === 'mobile' ? "Scratch & Win!" : "🎮 Scratch & Win!")}</h2>
                 <p class="scratch-card-description" style="
-                  font-size: 16px;
-                  line-height: 1.6;
+                  font-size: ${deviceView === 'mobile' ? '15px' : '16px'};
+                  line-height: ${deviceView === 'mobile' ? '1.5' : '1.6'};
                   color: #6c757d;
-                  margin-bottom: 25px;
-                ">${config.description || `Enter your email first, then scratch the card to reveal your ${selectedDiscount.value}% discount!`}</p>
+                  margin-bottom: ${deviceView === 'mobile' ? '25px' : '25px'};
+                  ${deviceView === 'mobile' ? 'text-align: center; padding: 0 15px; max-width: 280px; margin-left: auto; margin-right: auto;' : ''}
+                ">${config.description || (deviceView === 'mobile' ? `Scratch the card to reveal your exclusive discount and enter your email to claim it!` : `Enter your email first, then scratch the card to reveal your ${selectedDiscount.value}% discount!`)}</p>
                 
-                <div class="scratch-card-form">
+                <div class="scratch-card-form" style="${deviceView === 'mobile' ? 'padding: 0 15px; max-width: 280px; margin: 0 auto;' : ''}">
                   <input type="email" placeholder="${config.placeholder || "Enter your email"}" class="scratch-email-input" style="
                     width: 100%;
-                    padding: 14px 16px;
+                    padding: ${deviceView === 'mobile' ? '14px 16px' : '14px 16px'};
                     border: 2px solid #e9ecef;
-                    border-radius: 12px;
+                    border-radius: ${deviceView === 'mobile' ? '12px' : '12px'};
                     font-size: 16px;
-                    margin-bottom: 15px;
+                    margin-bottom: ${deviceView === 'mobile' ? '15px' : '15px'};
                     transition: all 0.3s ease;
-                    background: #f8f9fa;
+                    background: ${deviceView === 'mobile' ? '#ffffff' : '#f8f9fa'};
+                    box-sizing: border-box;
                   " readonly />
                   <label class="scratch-checkbox-container" style="
                     display: flex;
                     align-items: center;
-                    margin-bottom: 20px;
+                    margin-bottom: ${deviceView === 'mobile' ? '20px' : '20px'};
                     cursor: pointer;
-                    font-size: 14px;
+                    font-size: ${deviceView === 'mobile' ? '14px' : '14px'};
                     color: #6c757d;
+                    ${deviceView === 'mobile' ? 'justify-content: center; text-align: center;' : ''}
                   ">
                     <input type="checkbox" class="scratch-checkbox" style="
-                      margin-right: 12px;
-                      transform: scale(1.2);
+                      margin-right: ${deviceView === 'mobile' ? '10px' : '12px'};
+                      transform: scale(${deviceView === 'mobile' ? '1.2' : '1.2'});
                     " />
                     <span class="scratch-checkbox-text">I agree to receive promotional emails</span>
                   </label>
                   <button class="scratch-submit-btn" style="
                     width: 100%;
-                    padding: 16px;
+                    padding: ${deviceView === 'mobile' ? '16px 24px' : '16px'};
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     border: none;
-                    border-radius: 12px;
+                    border-radius: ${deviceView === 'mobile' ? '12px' : '12px'};
                     color: white;
-                    font-size: 16px;
+                    font-size: ${deviceView === 'mobile' ? '15px' : '16px'};
                     font-weight: 700;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -1844,8 +1851,9 @@ function createScratchCardPopupContent(config, deviceView = 'desktop') {
                     letter-spacing: 1px;
                     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
                     opacity: 0.6;
+                    box-sizing: border-box;
                   ">
-                    🎯 ${config.buttonText || "CLAIM DISCOUNT"}
+                    🎯 ${deviceView === 'mobile' ? 'ENABLE SCRATCHING' : (config.buttonText || "CLAIM DISCOUNT")}
                   </button>
                 </div>
               </div>

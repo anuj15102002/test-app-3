@@ -513,8 +513,7 @@ export default function PopupConfigurationModal({
     
     fetcher.submit(formData, { method: "POST", action: "/app/popup-customizer" });
     
-    // Close modal after save - this will trigger the parent to close both modals
-    onClose();
+    // Don't close modal immediately - wait for the response
   }, [popupType, emailConfig, wheelEmailConfig, communityConfig, timerConfig, scratchCardConfig, popupName, pageTargeting, initialConfig, fetcher, onClose, validatePopupName, shopify]);
 
   // Handle API response after form submission
@@ -522,15 +521,16 @@ export default function PopupConfigurationModal({
     if (fetcher.data) {
       if (fetcher.data.success) {
         shopify.toast.show("Popup configuration saved successfully!");
-        // Navigate to manage popup page to refresh the list
+        // Close modal and navigate after successful save
+        onClose();
         setTimeout(() => {
           navigate("/app/popups");
-        }, 1000); // Small delay to show the toast
+        }, 500); // Small delay to allow modal to close
       } else if (fetcher.data.error) {
         shopify.toast.show(`Error: ${fetcher.data.error}`, { isError: true });
       }
     }
-  }, [fetcher.data, shopify, navigate]);
+  }, [fetcher.data, shopify, navigate, onClose]);
 
   // ============================================================================
   // UTILITY FUNCTIONS AND HELPERS
@@ -3336,7 +3336,23 @@ export default function PopupConfigurationModal({
         {/* Header */}
         <div className="custom-modal-header">
           <h2>Popup Configuration</h2>
-          <button className="modal-close-btn" onClick={onClose}>×</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Button
+              variant="primary"
+              className="action-btn save-btn"
+              onClick={() => {
+                // Get the shop domain from the app bridge
+                const shopDomain = shopify.config.shop;
+                if (shopDomain) {
+                  // Open the store in a new tab
+                  window.open(`https://${shopDomain}`, '_blank');
+                }
+              }}
+            >
+              Live Preview
+            </Button>
+            {/* <Button variant="primary"  className="modal-close-btn" onClick={onClose}></Button> */}
+          </div>
         </div>
 
         {/* Body */}
@@ -3410,7 +3426,9 @@ export default function PopupConfigurationModal({
             >
               {fetcher.state === "submitting" ? "Saving..." : "Save Configuration"}
             </Button>
+            
           </div>
+          
         </div>
       </div>
     </div>

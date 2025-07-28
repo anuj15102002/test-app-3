@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import db from "../db.server";
+import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
   const url = new URL(request.url);
@@ -35,7 +35,7 @@ export const loader = async ({ request }) => {
   }
   
   try {
-    const popupConfig = await db.popupConfig.findFirst({
+    const popupConfig = await prisma.popupConfig.findFirst({
       where: {
         shop: shop,
         isActive: true

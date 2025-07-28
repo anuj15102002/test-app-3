@@ -23,7 +23,7 @@ import {
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { PlusIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
-import db from "../db.server";
+import prisma from "../db.server";
 import PopupTypeSelectionModal from "../components/PopupTypeSelectionModal";
 import PopupConfigurationModal from "../components/PopupConfigurationModal";
 import { getPopupThumbnailPath } from "../utils/popupImages";
@@ -33,18 +33,70 @@ export const loader = async ({ request }) => {
   
   try {
     // Load all popups for this shop
-    const popups = await db.popupConfig.findMany({
+    const popups = await prisma.popupConfig.findMany({
       where: { shop: session.shop },
       orderBy: { createdAt: 'desc' }
     });
+
+    // Get analytics for each popup (last 30 days)
+    const popupsWithAnalytics = await Promise.all(
+      popups.map(async (popup) => {
+        try {
+          const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+          
+          const events = await prisma.popupAnalytics.findMany({
+            where: {
+              shop: session.shop,
+              popupId: popup.id,
+              timestamp: {
+                gte: thirtyDaysAgo
+              }
+            }
+          });
+
+          const totalViews = events.filter(e => e.eventType === 'view').length;
+          const emailsEntered = events.filter(e => e.eventType === 'email_entered').length;
+          
+          // Get unique subscribers
+          const uniqueEmails = new Set();
+          events.forEach(event => {
+            if (event.email && event.eventType === 'email_entered') {
+              uniqueEmails.add(event.email);
+            }
+          });
+          const subscribers = uniqueEmails.size;
+
+          const conversionRate = totalViews > 0 ? ((emailsEntered / totalViews) * 100).toFixed(1) : 0;
+
+          return {
+            ...popup,
+            analytics: {
+              views: totalViews,
+              subscribers: subscribers,
+              conversionRate: parseFloat(conversionRate)
+            }
+          };
+        } catch (analyticsError) {
+          console.error(`Error fetching analytics for popup ${popup.id}:`, analyticsError);
+          return {
+            ...popup,
+            analytics: {
+              views: 0,
+              subscribers: 0,
+              conversionRate: 0
+            }
+          };
+        }
+      })
+    );
     
-    return { 
-      popups,
+    return {
+      popups: popupsWithAnalytics,
       shop: session.shop
     };
   } catch (error) {
     console.error("Error loading popups:", error);
-    return { 
+    return {
       popups: [],
       shop: session.shop
     };
@@ -61,7 +113,7 @@ export const action = async ({ request }) => {
     if (actionType === "toggleActive") {
       const isActive = formData.get("isActive") === "true";
       
-      await db.popupConfig.update({
+      await prisma.popupConfig.update({
         where: { id: popupId },
         data: { isActive: !isActive }
       });
@@ -73,7 +125,7 @@ export const action = async ({ request }) => {
     }
     
     if (actionType === "deletePopup") {
-      await db.popupConfig.delete({
+      await prisma.popupConfig.delete({
         where: { id: popupId }
       });
       
@@ -86,7 +138,7 @@ export const action = async ({ request }) => {
     if (actionType === "updateName") {
       const newName = formData.get("newName");
       
-      await db.popupConfig.update({
+      await prisma.popupConfig.update({
         where: { id: popupId },
         data: { name: newName }
       });
@@ -203,7 +255,7 @@ export default function PopupsPage() {
 
   return (
     <Page>
-      <TitleBar title="QuickPop" />
+      <TitleBar title="Manage Popups" />
       
       <BlockStack gap="500">
         {/* Header */}
@@ -275,15 +327,21 @@ export default function PopupsPage() {
             <InlineStack gap="600" align="center">
               <BlockStack gap="025" inlineAlign="center">
                 <Text variant="bodySm" tone="subdued">Popup views</Text>
-                <Text variant="bodyMd" fontWeight="semibold">-</Text>
+                <Text variant="bodyMd" fontWeight="semibold">
+                  {popup.analytics?.views?.toLocaleString() || '0'}
+                </Text>
               </BlockStack>
               <BlockStack gap="025" inlineAlign="center">
                 <Text variant="bodySm" tone="subdued">Subscribers</Text>
-                <Text variant="bodyMd" fontWeight="semibold">-</Text>
+                <Text variant="bodyMd" fontWeight="semibold">
+                  {popup.analytics?.subscribers?.toLocaleString() || '0'}
+                </Text>
               </BlockStack>
               <BlockStack gap="025" inlineAlign="center">
                 <Text variant="bodySm" tone="subdued">Conversion rate</Text>
-                <Text variant="bodyMd" fontWeight="semibold">0%</Text>
+                <Text variant="bodyMd" fontWeight="semibold">
+                  {popup.analytics?.conversionRate ? `${popup.analytics.conversionRate}%` : '0%'}
+                </Text>
               </BlockStack>
             </InlineStack>
 
