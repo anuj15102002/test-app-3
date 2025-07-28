@@ -1276,8 +1276,8 @@
   right: 0 !important;
   bottom: 0 !important;
   background: rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(1px) !important;
-  -webkit-backdrop-filter: blur(1px) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
   z-index: 1 !important;
   border-radius: 14px !important;
   transition: all 0.3s ease !important;
@@ -1316,7 +1316,7 @@
   background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
   color: white !important;
   z-index: 1 !important;
-  opacity: 0 !important;
+  opacity: 1 !important;
   transition: opacity 0.3s ease !important;
 }
 

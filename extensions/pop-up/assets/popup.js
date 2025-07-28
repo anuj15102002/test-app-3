@@ -893,27 +893,27 @@
   function applyCustomBackground(config) {
     const root = document.documentElement;
     
-    // Set custom background image if provided
-    if (config.backgroundImageUrl) {
-      root.style.setProperty('--custom-bg-image', `url('${config.backgroundImageUrl}')`);
-    } else {
-      // Use default gamified background
-      root.style.setProperty('--custom-bg-image', 'var(--gamified-bg-image)');
-    }
+    // // Set custom background image if provided
+    // if (config.backgroundImageUrl) {
+    //   root.style.setProperty('--custom-bg-image', `url('${config.backgroundImageUrl}')`);
+    // } else {
+    //   // Use default gamified background
+    //   root.style.setProperty('--custom-bg-image', 'var(--gamified-bg-image)');
+    // }
     
-    // Set background position if provided
-    if (config.backgroundImagePosition) {
-      root.style.setProperty('--custom-bg-position', config.backgroundImagePosition);
-    } else {
-      root.style.setProperty('--custom-bg-position', 'center');
-    }
+    // // Set background position if provided
+    // if (config.backgroundImagePosition) {
+    //   root.style.setProperty('--custom-bg-position', config.backgroundImagePosition);
+    // } else {
+    //   root.style.setProperty('--custom-bg-position', 'center');
+    // }
     
-    // Set background size if provided
-    if (config.backgroundImageSize) {
-      root.style.setProperty('--custom-bg-size', config.backgroundImageSize);
-    } else {
-      root.style.setProperty('--custom-bg-size', 'cover');
-    }
+    // // Set background size if provided
+    // if (config.backgroundImageSize) {
+    //   root.style.setProperty('--custom-bg-size', config.backgroundImageSize);
+    // } else {
+    //   root.style.setProperty('--custom-bg-size', 'cover');
+    // }
     
     // Apply overlay opacity for content legibility
     const overlayOpacity = config.overlayOpacity || 0.75;
@@ -1165,7 +1165,8 @@
     });
 
     // Show the pre-configured discount code with personalized message
-    const formSection = document.querySelector(".form-section");
+    // For email popup, we need to target the email-popup-content instead of form-section
+    const formSection = document.querySelector(".form-section") || document.querySelector(".email-popup-content");
 
     // Create personalized success messages
     let thankYouMessage = "Thank You!";
@@ -1193,67 +1194,36 @@
     }
 
     formSection.innerHTML = `
-      <button class="popup-close" onclick="closePopup()" style="color: ${popupConfig.textColor || "#000000"};">&times;</button>
-      <div style="text-align: center; padding: 20px;">
-        <div style="font-size: 24px; margin-bottom: 15px;">🎉</div>
-        <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 15px 0; color: ${popupConfig.textColor || "#000000"};">
-          ${thankYouMessage}
-        </h3>
-        <p style="margin-bottom: 20px; color: ${popupConfig.textColor || "#000000"};">
-          ${successMessage}
-        </p>
-        <div onclick="copyDiscountCode()" style="
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-          border: 2px dashed #28a745;
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 15px;
-          cursor: pointer;
-          transition: all 0.3s ease;
+      <h3 class="email-popup-title">${thankYouMessage}</h3>
+      <p class="email-popup-subtitle">${successMessage}</p>
+      <div onclick="copyDiscountCode()" style="
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed #28a745;
+        border-radius: 6px;
+        padding: 12px 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+      ">
+        <div id="discount-code" style="
+          font-size: 20px;
+          font-weight: bold;
+          color: #28a745;
+          margin-bottom: 5px;
+          letter-spacing: 1px;
+          font-family: 'Courier New', monospace;
         ">
-          <div id="discount-code" style="
-            font-size: 28px;
-            font-weight: bold;
-            color: #28a745;
-            margin-bottom: 8px;
-            letter-spacing: 2px;
-            font-family: 'Courier New', monospace;
-          ">
-            ${discountCode}
-          </div>
-          <div style="font-size: 14px; color: #6c757d; font-style: italic;">
-            Click to copy to clipboard
-          </div>
+          ${discountCode}
         </div>
-        <button id="copy-btn" onclick="copyDiscountCode()" style="
-          width: 100%;
-          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-          border: none;
-          color: white;
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-weight: 600;
-          cursor: pointer;
-          margin-bottom: 10px;
-          font-size: 14px;
-        ">
-          📋 Copy Code
-        </button>
-        <button onclick="window.closePopup()" style="
-          width: 100%;
-          background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-          border: none;
-          color: white;
-          padding: 10px 20px;
-          border-radius: 6px;
-          font-weight: 500;
-          cursor: pointer;
-          font-size: 14px;
-          margin-top: 10px;
-        ">
-          Close
-        </button>
+        <div style="font-size: 11px; color: #999; font-style: italic;">
+          Click to copy to clipboard
+        </div>
       </div>
+      <button id="copy-btn" onclick="copyDiscountCode()" class="email-popup-button" style="background-color: #28a745; margin-bottom: 8px;">
+        📋 Copy Code
+      </button>
+      <p class="email-popup-note" style="cursor: pointer;" onclick="window.closePopup()">Close and continue shopping</p>
     `;
   }//handleEmailSubmit ends 
 
@@ -2052,8 +2022,10 @@
           ">
             <canvas id="scratch-canvas" width="${canvasSize}" height="${canvasSize}" style="
               pointer-events: none;
-              opacity: 0.7;
-              position: relative;
+              opacity: 1.7;
+              position: absolute;
+              top: 0;
+              left: 0;
               z-index: 2;
             "></canvas>
             <div class="scratch-card-hidden-content" id="hidden-discount" style="
@@ -2068,10 +2040,10 @@
               justify-content: center;
               background: linear-gradient(135deg, ${selectedDiscount.color} 0%, ${selectedDiscount.color}dd 100%);
               color: white;
-              opacity: 0;
               border-radius: 16px;
               box-shadow: inset 0 0 30px rgba(255,255,255,0.3);
-              z-index: 1;
+              z-index: 5;
+              pointer-events: none;
             ">
               <div class="winner-emoji" style="font-size: 32px; margin-bottom: 8px; animation: bounce 1s infinite;">${selectedDiscount.emoji}</div>
               <div class="discount-percentage" style="font-size: ${discountFontSize}; font-weight: 900; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">${selectedDiscount.value}%</div>
@@ -2178,9 +2150,9 @@
       iconSize = "20px";
     }
 
-    // Create enhanced gamified scratch surface that matches the background
+    // Create simple scratch surface without background image
     const createScratchSurface = () => {
-      // Always use the gamified gradient as base (fallback)
+      // Use simple gradient without background image to avoid interference
       const gradient = scratchCtx.createLinearGradient(0, 0, canvasSize, canvasSize);
       gradient.addColorStop(0, "#667eea");
       gradient.addColorStop(0.3, "#764ba2");
@@ -2189,42 +2161,8 @@
       scratchCtx.fillStyle = gradient;
       scratchCtx.fillRect(0, 0, canvasSize, canvasSize);
       
-      // Try to get the background image from CSS custom property
-      const gamifiedBgUrl = getComputedStyle(document.documentElement).getPropertyValue('--gamified-bg-image');
-      
-      if (gamifiedBgUrl && gamifiedBgUrl.trim() !== '' && gamifiedBgUrl !== 'none') {
-        // Extract URL from CSS url() function
-        const urlMatch = gamifiedBgUrl.match(/url\(['"]?([^'"]+)['"]?\)/);
-        if (urlMatch && urlMatch[1]) {
-          const backgroundImage = new Image();
-          backgroundImage.crossOrigin = "anonymous";
-          
-          backgroundImage.onload = () => {
-            // Draw the background image over the gradient
-            scratchCtx.drawImage(backgroundImage, 0, 0, canvasSize, canvasSize);
-            
-            // Add subtle overlay to make it scratchable while keeping image visible
-            const overlayGradient = scratchCtx.createLinearGradient(0, 0, canvasSize, canvasSize);
-            overlayGradient.addColorStop(0, "rgba(102, 126, 234, 0.6)");
-            overlayGradient.addColorStop(0.5, "rgba(118, 75, 162, 0.7)");
-            overlayGradient.addColorStop(1, "rgba(102, 126, 234, 0.6)");
-            scratchCtx.fillStyle = overlayGradient;
-            scratchCtx.fillRect(0, 0, canvasSize, canvasSize);
-            
-            addScratchEffects();
-          };
-          
-          backgroundImage.onerror = () => {
-            console.log('Background image failed to load, using gradient only');
-            addScratchEffects();
-          };
-          
-          backgroundImage.src = urlMatch[1];
-          return; // Exit early if we're loading an image
-        }
-      }
-      
-      // If no image or image failed, just add effects to gradient
+      // Skip background image loading to avoid interference with discount visibility
+      console.log('Using simple gradient scratch surface for better discount visibility');
       addScratchEffects();
     };
 
@@ -2386,8 +2324,11 @@
     const totalPixels = scratchCanvas.width * scratchCanvas.height;
     const scratchedPercentage = (transparentPixels / totalPixels) * 100;
 
-    // If 30% or more is scratched, reveal the discount
-    if (scratchedPercentage > 30) {
+    console.log(`Scratch progress: ${scratchedPercentage.toFixed(2)}%`); // Debug log
+
+    // If 15% or more is scratched, reveal the discount (reduced threshold for easier testing)
+    if (scratchedPercentage > 15) {
+      console.log("Revealing discount..."); // Debug log
       revealDiscount();
     }
   }//checkScratchProgress ends
@@ -2395,22 +2336,44 @@
   function revealDiscount() {
     if (scratchRevealed) return;
 
+    console.log("revealDiscount() called"); // Debug log
     scratchRevealed = true;
 
     // Clear the entire canvas to reveal the hidden content
     scratchCtx.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
-
-    // Show hidden content with animation
+    
+    // Show hidden content with animation FIRST
     const hiddenContent = document.getElementById("hidden-discount");
+    console.log("Hidden content element:", hiddenContent); // Debug log
+    
     if (hiddenContent) {
-      hiddenContent.style.opacity = "1";
+      console.log("Setting opacity to 1"); // Debug log
+      hiddenContent.style.opacity = "1 !important";
       hiddenContent.style.transform = "scale(1.05)";
       hiddenContent.style.transition = "all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)";
+      hiddenContent.style.zIndex = "10"; // Ensure it's on top
+      hiddenContent.style.pointerEvents = "none"; // Don't block interactions
       
       // Reset scale after animation
       setTimeout(() => {
         hiddenContent.style.transform = "scale(1)";
       }, 500);
+    } else {
+      console.error("Hidden content element not found!"); // Debug log
+    }
+
+    // Then hide the canvas completely to ensure it doesn't block the hidden content
+    const canvas = document.getElementById("scratch-canvas");
+    if (canvas) {
+      canvas.style.opacity = "0";
+      canvas.style.pointerEvents = "none";
+      console.log("Canvas made transparent"); // Debug log
+      
+      // Completely hide canvas after a short delay to ensure smooth transition
+      setTimeout(() => {
+        canvas.style.display = "none";
+        console.log("Canvas hidden"); // Debug log
+      }, 100);
     }
 
     // Update step progress - Step 2 complete, Step 3 active
@@ -2432,8 +2395,9 @@
     // Update instruction text
     const instruction = document.getElementById("scratch-instruction");
     if (instruction) {
+      const discountValue = window.selectedScratchDiscount?.value || '15';
       instruction.innerHTML = `
-        <span style="color: #28a745; font-weight: 700;">🎉 Congratulations! You won ${selectedDiscount.value}% OFF! 🎉</span>
+        <span style="color: #28a745; font-weight: 700;">🎉 Congratulations! You won ${discountValue}% OFF! 🎉</span>
         <br>
         <small style="color: #6c757d; font-size: 14px;">Click the button below to claim your discount</small>
       `;
