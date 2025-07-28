@@ -26,7 +26,7 @@ export const loader = async ({ request }) => {
         error: "Failed to fetch themes",
         appEmbedEnabled: false,
         themeId: null,
-        enableUrl: `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/popup-display`
+        enableUrl: `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/QuickPop`
       });
     }
     
@@ -39,7 +39,7 @@ export const loader = async ({ request }) => {
         error: "No main theme found",
         appEmbedEnabled: false,
         themeId: null,
-        enableUrl: `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/popup-display`
+        enableUrl: `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/QuickPop`
       });
     }
     
@@ -55,7 +55,7 @@ export const loader = async ({ request }) => {
       appEmbedEnabled: true, // Assume enabled since app is installed and working
       themeId: themeId,
       themeName: mainTheme.name,
-      enableUrl: `https://${session.shop}/admin/themes/${themeId}/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/popup-display`
+      enableUrl: `https://${session.shop}/admin/themes/${themeId}/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/QuickPop`
     });
     
   } catch (error) {
@@ -65,7 +65,7 @@ export const loader = async ({ request }) => {
       error: error.message,
       appEmbedEnabled: false,
       themeId: null,
-      enableUrl: `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/popup-displays`   //here we have changed it from the popup-customizer to pupup-display
+      enableUrl: `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/QuickPop`   //here we have changed it from the popup-customizer to pupup-display
     });
   }
 };
@@ -89,7 +89,7 @@ export const action = async ({ request }) => {
           if (mainTheme) {
             // Extract numeric theme ID from GraphQL ID
             const themeId = mainTheme.id.split('/').pop();
-            const enableUrl = `https://${session.shop}/admin/themes/${themeId}/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/popup-display`;
+            const enableUrl = `https://${session.shop}/admin/themes/${themeId}/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/QuickPop`;
             
             return Response.json({
               success: true,
@@ -103,7 +103,7 @@ export const action = async ({ request }) => {
       }
       
       // Fallback: use current theme URL
-      const enableUrl = `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/popup-display`;
+      const enableUrl = `https://${session.shop}/admin/themes/current/editor?context=apps&template=index&activateAppId=${process.env.SHOPIFY_API_KEY}/QuickPop`;
       
       return Response.json({
         success: true,
